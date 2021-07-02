@@ -1,0 +1,29 @@
+apply plugin: 'java'
+apply plugin: 'idea'
+apply plugin: 'application'
+
+
+repositories {
+    mavenCentral()
+    mavenLocal()
+}
+
+def versions = [
+        ScalaBinary: "2.13"
+]
+
+dependencies {
+    implementation platform("com.typesafe.akka:akka-bom_${versions.ScalaBinary}:2.6.13")
+
+    implementation "com.typesafe.akka:akka-actor_${versions.ScalaBinary}"
+    testImplementation "com.typesafe.akka:akka-testkit_${versions.ScalaBinary}"
+}
+
+compileJava {
+    options.compilerArgs += ["-Xlint:deprecation"]
+}
+mainClassName = "it.unitn.ds1.TxnSystem"
+
+run {
+    standardInput = System.in
+}

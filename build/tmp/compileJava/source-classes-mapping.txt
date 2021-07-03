@@ -1,6 +1,7 @@
 it/unitn/ds1/TxnServer.java
  it.unitn.ds1.TxnServer
  it.unitn.ds1.TxnServer$FwdReadResultMsg
+ it.unitn.ds1.TxnServer$ServerDecisionMsg
 it/unitn/ds1/TxnClient.java
  it.unitn.ds1.TxnClient
  it.unitn.ds1.TxnClient$ReadMsg
@@ -15,6 +16,8 @@ it/unitn/ds1/TxnClient.java
  it.unitn.ds1.TxnClient$WriteMsg
 it/unitn/ds1/TxnCoordinator.java
  it.unitn.ds1.TxnCoordinator
+ it.unitn.ds1.TxnCoordinator$CanCommitMsg
+ it.unitn.ds1.TxnCoordinator$FinalDecisionMsg
  it.unitn.ds1.TxnCoordinator$FwdReadMsg
  it.unitn.ds1.TxnCoordinator$FwdWriteMsg
  it.unitn.ds1.TxnCoordinator$TxnId

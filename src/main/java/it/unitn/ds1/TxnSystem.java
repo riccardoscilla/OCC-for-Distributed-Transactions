@@ -11,7 +11,7 @@ import it.unitn.ds1.TxnCoordinator.WelcomeMsg2;
 public class TxnSystem {
   final static int N_CLIENTS = 1;
   final static int N_COORDINATORS = 1;
-  final static int N_SERVERS = 1;
+  final static int N_SERVERS = 2;
   final static int maxKey = N_SERVERS*10-1;
 
   public static void main(String[] args) {

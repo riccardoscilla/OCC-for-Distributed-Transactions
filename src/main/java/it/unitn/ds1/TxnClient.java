@@ -155,12 +155,13 @@ public class TxnClient extends AbstractActor {
             new TxnAcceptTimeoutMsg(), // message sent to myself
             getContext().system().dispatcher(), getSelf()
     );
-    System.out.println("[INFO] CLIENT " + clientId + " BEGIN");
+    System.out.println("CLIENT " + clientId + " BEGIN");
   }
 
   // end the current TXN sending TxnEndMsg to the coordinator
   void endTxn() {
-    boolean doCommit = r.nextDouble() < COMMIT_PROBABILITY;
+    // boolean doCommit = r.nextDouble() < COMMIT_PROBABILITY;
+    boolean doCommit = true;
     currentCoordinator.tell(new TxnEndMsg(clientId, doCommit), getSelf());
     firstValue = null;
     secondValue = null;
@@ -183,7 +184,7 @@ public class TxnClient extends AbstractActor {
     firstValue = null;
     secondValue = null;
 
-    System.out.println("[INFO] CLIENT " + clientId + " READ #"+ numOpDone + " (" + firstKey + "), (" + secondKey + ")");
+    System.out.println("CLIENT " + clientId + " READ #"+ numOpDone + " (" + firstKey + "), (" + secondKey + ")");
   }
 
   // WRITE two items (called with probability WRITE_PROBABILITY after readTwo() values are returned)
@@ -203,7 +204,7 @@ public class TxnClient extends AbstractActor {
   /*-- Message handlers ----------------------------------------------------- */
 
   private void onWelcomeMsg(WelcomeMsg msg) {
-    System.out.println("[INFO] CLIENT "+clientId+" Received Welcome");
+    System.out.println("CLIENT "+clientId+" Received Welcome");
     this.coordinators = msg.coordinators;
     this.maxKey = msg.maxKey;
     beginTxn();
@@ -214,7 +215,7 @@ public class TxnClient extends AbstractActor {
   }
 
   private void onTxnAcceptMsg(TxnAcceptMsg msg) {
-    System.out.println("[INFO] CLIENT " + clientId + " Received txnAccepted");
+    System.out.println("CLIENT " + clientId + " Received txnAccepted");
     acceptedTxn = true;
     acceptTimeout.cancel();
     readTwo();
@@ -235,19 +236,24 @@ public class TxnClient extends AbstractActor {
 
     // do we only read or also write?
     // double writeRandom = r.nextDouble();
-    // double writeRandom = 0;
-    // boolean doWrite = writeRandom < WRITE_PROBABILITY;
-    // if(doWrite && opDone) writeTwo();
+    double writeRandom = 0;
+    boolean doWrite = writeRandom < WRITE_PROBABILITY;
+    if(doWrite && opDone) writeTwo();
+
+    // try { Thread.sleep(5000); }
+    //     catch (InterruptedException e) { e.printStackTrace(); }
+
     
-    // // check if the transaction should end;
-    // // otherwise, read two again
-    // if(opDone) numOpDone++;
+    // check if the transaction should end;
+    // otherwise, read two again
+    if(opDone) numOpDone++;
     // if(numOpDone >= numOpTotal) {
-    //   endTxn();
-    // }
-    // else if(opDone) {
-    //   readTwo();
-    // }
+    if(numOpDone >= 1) {
+      endTxn();
+    }
+    else if(opDone) {
+      readTwo();
+    }
   }
 
   private void onTxnResultMsg(TxnResultMsg msg) throws InterruptedException {

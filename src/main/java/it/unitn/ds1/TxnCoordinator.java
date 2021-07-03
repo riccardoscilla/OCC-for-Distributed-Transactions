@@ -9,11 +9,17 @@ import scala.concurrent.duration.Duration;
 
 import it.unitn.ds1.TxnClient.TxnBeginMsg;
 import it.unitn.ds1.TxnClient.TxnAcceptMsg;
+
 import it.unitn.ds1.TxnClient.ReadMsg;
 import it.unitn.ds1.TxnClient.ReadResultMsg;
+
 import it.unitn.ds1.TxnClient.WriteMsg;
 
 import it.unitn.ds1.TxnServer.FwdReadResultMsg;
+
+import it.unitn.ds1.TxnClient.TxnEndMsg;
+
+import it.unitn.ds1.TxnServer.ServerDecisionMsg;
 
 public class TxnCoordinator extends AbstractActor {
   private final Integer coordinatorId;
@@ -21,7 +27,7 @@ public class TxnCoordinator extends AbstractActor {
   private List<ActorRef> servers;
   private int globID;
   private final Map<TxnId,Set<ActorRef>> OngoingTxn; // custom objects as key of Map
-
+  private final Map<TxnId,List<Boolean>> ServerDecisions;
 
   /*-- Actor constructor ---------------------------------------------------- */
   
@@ -29,6 +35,7 @@ public class TxnCoordinator extends AbstractActor {
     this.coordinatorId = coordinatorId;
     this.globID = 0;
     this.OngoingTxn = new HashMap<>(); 
+    this.ServerDecisions = new HashMap<>(); 
   }
 
   static public Props props(int coordinatorId) {
@@ -67,6 +74,23 @@ public class TxnCoordinator extends AbstractActor {
     }
   }
 
+  // COMMIT request from the coordinator to the server
+  public static class CanCommitMsg implements Serializable {
+    public final TxnId txn;
+    public CanCommitMsg(TxnId txn) {
+      this.txn = txn;
+    }
+  }
+
+  public static class FinalDecisionMsg implements Serializable {
+    public final Boolean decision;
+    public final TxnId txn;
+    public FinalDecisionMsg(Boolean decision, TxnId txn) {
+      this.decision = decision;
+      this.txn = txn;
+    }
+  }
+
   /*-- Actor methods -------------------------------------------------------- */
 
   public static class TxnId{
@@ -97,17 +121,54 @@ public class TxnCoordinator extends AbstractActor {
     return servers.get(key/10);
   }
 
+  private TxnId bindRequestOngoing(ActorRef sender){
+    TxnId candidateTxn = new TxnId(sender,0);
+    for(TxnId key : OngoingTxn.keySet()){
+      if(key.equals(candidateTxn)){
+        return key;
+      }
+    }
+    return null;
+  }
+
+  private String printOngoing(Set<ActorRef> s){
+    String res = "";
+    for(ActorRef i : s){
+      res = res + i.path().name() + " ";
+    }
+    return res;
+  }
+
+  private String printServerDecisions(List<Boolean> s){
+    String res = "";
+    for(Boolean i : s){
+      if(i) res = res + "True ";
+      else res = res + "False ";
+    }
+    return res;
+  }
+
+  private Boolean getfinalDecision(List<Boolean> decisions){
+    for(Boolean d : decisions){
+      if(!d) return false;
+    }
+    return true;
+  }
+
   /*-- Message handlers ----------------------------------------------------- */
 
   private void onWelcomeMsg2(WelcomeMsg2 msg) {
+    
     this.servers = msg.servers;
-    // System.out.println(servers);
+
   }
 
   private void onTxnBeginMsg(TxnBeginMsg msg) {
-    System.out.println("[INFO] COORDI " + coordinatorId + " Received txnBegin from " + getSender().path().name());
+    
+    System.out.println("\tCOORDI " + coordinatorId + " Received txnBegin from " + getSender().path().name());
     
     OngoingTxn.put(new TxnId(getSender(),globID),new HashSet<>()); // add new transaction in Ongoing
+    ServerDecisions.put(new TxnId(getSender(),globID),new ArrayList<>()); // add new transaction in ServerDecisions
     globID = globID + 1;
     
     getSender().tell(new TxnAcceptMsg(), getSelf()); // send accept txn to client
@@ -116,43 +177,87 @@ public class TxnCoordinator extends AbstractActor {
   /* --------------------------------------------------------------------*/
   // receive Read request from Client, forward to Server
   private void onReadMsg(ReadMsg msg) {
-    System.out.println("[INFO] COORDI " + coordinatorId + " Received Read from " + getSender().path().name());
-    
+   
     ActorRef server = getServerFromKey(msg.key);
-    System.out.println("[INFO] COORDI " + coordinatorId + " Server to ask " + server.path().name());
+    
+    System.out.println("\tCOORDI " + coordinatorId + " Received Read from " + getSender().path().name() 
+                      + " - Ask to " + server.path().name());
 
     // bind the current request to the OngoingTxn
-    TxnId candidateTxn = new TxnId(getSender(),0);
-    boolean ok = false;
-    for(TxnId key : OngoingTxn.keySet()){
-      if(key.equals(candidateTxn)){
-        server.tell(new FwdReadMsg(msg.key, key), getSelf()); // forward the read to the right server
-        ok = true;
-      }
-    }
-    if(!ok){
-      System.out.println("[INFO] NO TXN WITH THIS ID");
+    TxnId txn = bindRequestOngoing(getSender());
+    if(txn != null){
+      server.tell(new FwdReadMsg(msg.key, txn), getSelf()); // forward the read to the right server
+    } else{
+      System.out.println("\tNO TXN WITH THIS ID");
     }
     
   }
 
   // receive Read result from Server, forward to Client
   private void onFwdReadResultMsg(FwdReadResultMsg msg) {
-    System.out.println("[INFO] COORDI " + coordinatorId + " Received value from " + getSender().path().name());
+    
+    System.out.println("\tCOORDI " + coordinatorId + " Received value from " + getSender().path().name());
 
     msg.txn.client.tell(new ReadResultMsg(msg.key,msg.value), getSelf());
+  
   }
 
   /* --------------------------------------------------------------------*/
   // receive Write request from Client, forward to Server
-  // private void onWriteMsg(WriteMsg msg) {
-  //   System.out.println("[INFO] COORDI " + coordinatorId + " Received Write from " + getSender().path().name());
+  private void onWriteMsg(WriteMsg msg) {
+  
+    ActorRef server = getServerFromKey(msg.key);
 
-  //   ActorRef server = getServerFromKey(msg.key);
-  //   System.out.println("[INFO] COORDI " + coordinatorId + " Server to ask " + server.path().name());
+    System.out.println("\tCOORDI " + coordinatorId + " Received Write from " + getSender().path().name() 
+                      + " - Ask to " + server.path().name());
 
-  //   server.tell(new FwdWriteMsg(msg.key, msg.value, getSender()), getSelf());
-  // }
+    // bind the current request to the OngoingTxn
+    TxnId txn = bindRequestOngoing(getSender());
+    if(txn != null){
+      OngoingTxn.get(txn).add(server);
+      server.tell(new FwdWriteMsg(msg.key, msg.value, txn), getSelf()); // forward the write to the right server
+    } else{
+      System.out.println("\tNO TXN WITH THIS ID");
+    }
+
+  }
+
+  /* --------------------------------------------------------------------*/
+  private void onTxnEndMsg(TxnEndMsg msg) {
+    
+    System.out.println("\tCOORDI " + coordinatorId + " Received TxnEnd from " + getSender().path().name());
+    
+    // bind the current request to the OngoingTxn
+    TxnId txn = bindRequestOngoing(getSender());
+    if(txn != null){
+      // Set<ActorRef> serverToCommit = OngoingTxn.get(txn);
+      System.out.println("\tCOORDI "+ coordinatorId 
+                        + " - Validation with " + printOngoing(OngoingTxn.get(txn)));
+      for(ActorRef server : OngoingTxn.get(txn)){
+        server.tell(new CanCommitMsg(txn), getSelf()); // ask to commit
+      }
+    } else{
+      System.out.println("\tNO TXN WITH THIS ID");
+    }
+  }
+
+  private void onServerDecisionMsg(ServerDecisionMsg msg){
+    System.out.println("\tCOORDI " + coordinatorId + " Received Decision from " + getSender().path().name());
+    
+    ServerDecisions.get(msg.txn).add(msg.commit);
+
+    if( Integer.valueOf(ServerDecisions.get(msg.txn).size())
+        .equals(Integer.valueOf(OngoingTxn.get(msg.txn).size())) ){
+      System.out.println("\tCOORDI " + coordinatorId + " Decisions "+ printServerDecisions(ServerDecisions.get(msg.txn)));
+      
+      Boolean finalDecision = getfinalDecision(ServerDecisions.get(msg.txn));
+      for(ActorRef server : OngoingTxn.get(msg.txn)){
+        server.tell(new FinalDecisionMsg(finalDecision, msg.txn), getSelf()); // send final Decision
+      }
+    }
+    // TODO: remove TxnId and return commit to client
+    
+  }
 
   @Override
   public Receive createReceive() {
@@ -161,7 +266,9 @@ public class TxnCoordinator extends AbstractActor {
             .match(TxnBeginMsg.class,  this::onTxnBeginMsg)
             .match(ReadMsg.class,  this::onReadMsg)
             .match(FwdReadResultMsg.class,  this::onFwdReadResultMsg)
-            // .match(WriteMsg.class,  this::onWriteMsg)
+            .match(WriteMsg.class,  this::onWriteMsg)
+            .match(TxnEndMsg.class,  this::onTxnEndMsg)
+            .match(ServerDecisionMsg.class, this::onServerDecisionMsg)
             .build();
   }
 }

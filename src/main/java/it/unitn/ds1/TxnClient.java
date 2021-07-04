@@ -133,6 +133,7 @@ public class TxnClient extends AbstractActor {
   void beginTxn() {
 
     // some delay between transactions from the same client
+    // try { Thread.sleep(10); }
     try { Thread.sleep(10); }
     catch (InterruptedException e) { e.printStackTrace(); }
 
@@ -239,10 +240,6 @@ public class TxnClient extends AbstractActor {
     double writeRandom = 0;
     boolean doWrite = writeRandom < WRITE_PROBABILITY;
     if(doWrite && opDone) writeTwo();
-
-    // try { Thread.sleep(5000); }
-    //     catch (InterruptedException e) { e.printStackTrace(); }
-
     
     // check if the transaction should end;
     // otherwise, read two again
@@ -264,7 +261,7 @@ public class TxnClient extends AbstractActor {
     else {
       System.out.println("CLIENT " + clientId + " COMMIT FAIL ("+(numAttemptedTxn - numCommittedTxn)+"/"+numAttemptedTxn+")");
     }
-    beginTxn();
+    // beginTxn();
   }
 
   @Override

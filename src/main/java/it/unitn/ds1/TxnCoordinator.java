@@ -9,21 +9,17 @@ import scala.concurrent.duration.Duration;
 
 import it.unitn.ds1.TxnClient.TxnBeginMsg;
 import it.unitn.ds1.TxnClient.TxnAcceptMsg;
-
 import it.unitn.ds1.TxnClient.ReadMsg;
 import it.unitn.ds1.TxnClient.ReadResultMsg;
-
-import it.unitn.ds1.TxnClient.WriteMsg;
-
 import it.unitn.ds1.TxnServer.FwdReadResultMsg;
-
+import it.unitn.ds1.TxnClient.WriteMsg;
 import it.unitn.ds1.TxnClient.TxnEndMsg;
-
 import it.unitn.ds1.TxnServer.ServerDecisionMsg;
+import it.unitn.ds1.TxnClient.TxnResultMsg;
+
 
 public class TxnCoordinator extends AbstractActor {
   private final Integer coordinatorId;
-
   private List<ActorRef> servers;
   private int globID;
   private final Map<TxnId,Set<ActorRef>> OngoingTxn; // custom objects as key of Map
@@ -139,12 +135,19 @@ public class TxnCoordinator extends AbstractActor {
     return res;
   }
 
+  private void printFullOngoing(){
+    OngoingTxn.entrySet().forEach(entry -> {
+      System.out.println(entry.getKey() + " " );
+    });
+  }
+
   private String printServerDecisions(List<Boolean> s){
-    String res = "";
+    String res = "[";
     for(Boolean i : s){
       if(i) res = res + "True ";
       else res = res + "False ";
     }
+    res = res.substring(0,res.length()-1)+"]";
     return res;
   }
 
@@ -158,9 +161,7 @@ public class TxnCoordinator extends AbstractActor {
   /*-- Message handlers ----------------------------------------------------- */
 
   private void onWelcomeMsg2(WelcomeMsg2 msg) {
-    
     this.servers = msg.servers;
-
   }
 
   private void onTxnBeginMsg(TxnBeginMsg msg) {
@@ -170,6 +171,8 @@ public class TxnCoordinator extends AbstractActor {
     OngoingTxn.put(new TxnId(getSender(),globID),new HashSet<>()); // add new transaction in Ongoing
     ServerDecisions.put(new TxnId(getSender(),globID),new ArrayList<>()); // add new transaction in ServerDecisions
     globID = globID + 1;
+
+    // printFullOngoing();
     
     getSender().tell(new TxnAcceptMsg(), getSelf()); // send accept txn to client
   }
@@ -248,14 +251,21 @@ public class TxnCoordinator extends AbstractActor {
 
     if( Integer.valueOf(ServerDecisions.get(msg.txn).size())
         .equals(Integer.valueOf(OngoingTxn.get(msg.txn).size())) ){
-      System.out.println("\tCOORDI " + coordinatorId + " Decisions "+ printServerDecisions(ServerDecisions.get(msg.txn)));
+      System.out.println("\tCOORDI " + coordinatorId 
+                        + " Decisions "+ printServerDecisions(ServerDecisions.get(msg.txn)));
       
       Boolean finalDecision = getfinalDecision(ServerDecisions.get(msg.txn));
       for(ActorRef server : OngoingTxn.get(msg.txn)){
         server.tell(new FinalDecisionMsg(finalDecision, msg.txn), getSelf()); // send final Decision
       }
+
+      msg.txn.client.tell(new TxnResultMsg(msg.commit), getSelf()); // send final Decision 
+
+      // remove transaction
+      OngoingTxn.remove(msg.txn);
+      ServerDecisions.remove(msg.txn);
+
     }
-    // TODO: remove TxnId and return commit to client
     
   }
 

@@ -39,15 +39,8 @@ public class TxnServer extends AbstractActor {
 
   private void initDataStore(){
     for (int i=10*this.serverId; i<=10*this.serverId+9; i++) {
-      this.dataStore.put(i, new Integer[] {0,100});
-    }
-    
-    // if (this.serverId.equals(0)){
-    //     this.dataStore.entrySet().forEach(entry -> {
-    //     System.out.println(entry.getKey() + " " + Arrays.toString(entry.getValue()));
-    //   });
-    // }
-    
+      this.dataStore.put(i, new Integer[] {0,100,0});
+    }    
   }  
 
   /*-- Message classes ------------------------------------------------------ */
@@ -95,20 +88,38 @@ public class TxnServer extends AbstractActor {
 
   // loop in the workspace for that txn and compare the version
   // can change if all the versions are +1 
-  // TODO: lock objects so that other clients cannot commit in the meantime
+  // lock objects so that other clients cannot commit in the meantime
   private Boolean checkIfCanChange(Set<Integer[]> changes){
-    for(Integer[] c : changes){ // c = {key, version, value}
-      if( !dataStore.get(c[0])[0].equals(c[1]-1) ) return false;
+    for(Integer[] c : changes){ 
+      // c = {key, version, value}
+      // dataStore.get(c[0]) = {version, value, lock}
+      
+      // if the lock on the key is already acquired (set to 1)
+      // or the version of the change is not the next one
+      // return false; else acquire the lock on the key
+      if( dataStore.get(c[0])[2].equals(1) ||
+        !dataStore.get(c[0])[0].equals(c[1]-1) ){
+        FreeLocks(changes); // free the locks that may have been acquired
+        return false;
+      }
+      dataStore.get(c[0])[2] = 1;
     }
     return true;
   }
 
   private void ApplyChanges(Set<Integer[]> changes){
     for(Integer[] c : changes){ // c = {key, version, value}
-      dataStore.replace(c[0],new Integer[] {c[1],c[2]});
+      dataStore.replace(c[0],new Integer[] {c[1],c[2],0});
     }
   }
 
+  private void FreeLocks(Set<Integer[]> changes){
+    for(Integer[] c : changes){ // c = {key, version, value}
+      dataStore.get(c[0])[2] = 0;
+    }
+  }
+
+  // TODO: rewrite + check output
   private void printDataStore(){
     System.out.println(getSelf().path().name());
     dataStore.entrySet().forEach(entry -> {
@@ -156,10 +167,11 @@ public class TxnServer extends AbstractActor {
   private void onFinalDecisionMsg(FinalDecisionMsg msg){
     System.out.println("\t\tSERVER " + serverId + " Received Final Decision ");
 
-    if( msg.decision ) ApplyChanges(workSpace.get(msg.txn));      
+    if( msg.decision ) ApplyChanges(workSpace.get(msg.txn));   
+
     workSpace.remove(msg.txn);
 
-    printDataStore();
+    // printDataStore();
 
   }
 

@@ -99,11 +99,11 @@ public class TxnServer extends AbstractActor {
       // return false; else acquire the lock on the key
       if( dataStore.get(c[0])[2].equals(1) ||
         !dataStore.get(c[0])[0].equals(c[1]-1) ){
-        FreeLocks(changes); // free the locks that may have been acquired
         return false;
       }
       dataStore.get(c[0])[2] = 1;
     }
+    LockChanges(changes);
     return true;
   }
 
@@ -116,6 +116,12 @@ public class TxnServer extends AbstractActor {
   private void FreeLocks(Set<Integer[]> changes){
     for(Integer[] c : changes){ // c = {key, version, value}
       dataStore.get(c[0])[2] = 0;
+    }
+  }
+
+  private void LockChanges(Set<Integer[]> changes){
+    for(Integer[] c : changes){ // c = {key, version, value}
+      dataStore.get(c[0])[2] = 1;
     }
   }
 
@@ -167,7 +173,8 @@ public class TxnServer extends AbstractActor {
   private void onFinalDecisionMsg(FinalDecisionMsg msg){
     System.out.println("\t\tSERVER " + serverId + " Received Final Decision ");
 
-    if( msg.decision ) ApplyChanges(workSpace.get(msg.txn));   
+    if( msg.decision ) ApplyChanges(workSpace.get(msg.txn));
+    else FreeLocks(workSpace.get(msg.txn)); // free the locks that may have been acquired
 
     workSpace.remove(msg.txn);
 

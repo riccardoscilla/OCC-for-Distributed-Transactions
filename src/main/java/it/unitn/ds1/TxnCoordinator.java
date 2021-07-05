@@ -92,10 +92,18 @@ public class TxnCoordinator extends AbstractActor {
   public static class TxnId{
     public final ActorRef client;
     public int id;
+    public int coordinator;
 
-    public TxnId(ActorRef client, int id){
+    public TxnId(ActorRef client, int id, int coordinator){
       this.client = client;
       this.id = id;
+      this.coordinator = coordinator;
+    }
+
+    public boolean matches(Object obj){
+      if(obj == null || obj.getClass() != this.getClass()) return false;
+      TxnId txn = (TxnId) obj;
+      return( txn.client.equals(this.client) );
     }
 
     @Override
@@ -103,7 +111,7 @@ public class TxnCoordinator extends AbstractActor {
       if(this == obj) return true;
       if(obj == null || obj.getClass() != this.getClass()) return false;
       TxnId txn = (TxnId) obj;
-      return( txn.client.equals(this.client) );
+      return( txn.client.equals(this.client) && txn.coordinator == this.coordinator && txn.id == this.id );
     }
 
     @Override
@@ -118,9 +126,9 @@ public class TxnCoordinator extends AbstractActor {
   }
 
   private TxnId bindRequestOngoing(ActorRef sender){
-    TxnId candidateTxn = new TxnId(sender,0);
+    TxnId candidateTxn = new TxnId(sender,0,coordinatorId);
     for(TxnId key : OngoingTxn.keySet()){
-      if(key.equals(candidateTxn)){
+      if(key.matches(candidateTxn)){
         return key;
       }
     }
@@ -168,8 +176,8 @@ public class TxnCoordinator extends AbstractActor {
     
     System.out.println("\tCOORDI " + coordinatorId + " Received txnBegin from " + getSender().path().name());
     
-    OngoingTxn.put(new TxnId(getSender(),globID),new HashSet<>()); // add new transaction in Ongoing
-    ServerDecisions.put(new TxnId(getSender(),globID),new ArrayList<>()); // add new transaction in ServerDecisions
+    OngoingTxn.put(new TxnId(getSender(),globID,coordinatorId),new HashSet<>()); // add new transaction in Ongoing
+    ServerDecisions.put(new TxnId(getSender(),globID,coordinatorId),new ArrayList<>()); // add new transaction in ServerDecisions
     globID = globID + 1;
 
     // printFullOngoing();
@@ -245,12 +253,14 @@ public class TxnCoordinator extends AbstractActor {
   }
 
   private void onServerDecisionMsg(ServerDecisionMsg msg){
+    if(OngoingTxn.get(msg.txn) == null) return;   // decision to abort already taken
+
     System.out.println("\tCOORDI " + coordinatorId + " Received Decision from " + getSender().path().name());
-    
+
     ServerDecisions.get(msg.txn).add(msg.commit);
 
     if( Integer.valueOf(ServerDecisions.get(msg.txn).size())
-        .equals(Integer.valueOf(OngoingTxn.get(msg.txn).size())) ){
+        .equals(Integer.valueOf(OngoingTxn.get(msg.txn).size())) || !msg.commit){
       System.out.println("\tCOORDI " + coordinatorId 
                         + " Decisions "+ printServerDecisions(ServerDecisions.get(msg.txn)));
       

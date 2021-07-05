@@ -73,8 +73,10 @@ public class TxnCoordinator extends AbstractActor {
   // COMMIT request from the coordinator to the server
   public static class CanCommitMsg implements Serializable {
     public final TxnId txn;
-    public CanCommitMsg(TxnId txn) {
+    public final Set<ActorRef> partecipants;
+    public CanCommitMsg(TxnId txn, Set<ActorRef> partecipants) {
       this.txn = txn;
+      this.partecipants = partecipants;
     }
   }
 
@@ -245,7 +247,7 @@ public class TxnCoordinator extends AbstractActor {
       System.out.println("\tCOORDI "+ coordinatorId 
                         + " - Validation with " + printOngoing(OngoingTxn.get(txn)));
       for(ActorRef server : OngoingTxn.get(txn)){
-        server.tell(new CanCommitMsg(txn), getSelf()); // ask to commit
+        server.tell(new CanCommitMsg(txn, OngoingTxn.get(txn)), getSelf()); // ask to commit
       }
     } else{
       System.out.println("\tNO TXN WITH THIS ID");

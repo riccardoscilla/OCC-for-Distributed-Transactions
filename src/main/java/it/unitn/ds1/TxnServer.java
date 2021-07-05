@@ -20,9 +20,9 @@ public class TxnServer extends AbstractActor {
   private final Integer serverId;
   private final Map<Integer, Integer[]> dataStore;
   private final Map<TxnId, Set<Integer[]>> workSpace;
-  private final Map<TxnId, Set<ActorRef>> txnPartecipants;
-  private final Map<TxnId, Boolean> txnHistory;
-  private final Map<TxnId, Cancellable> decisionTimeout;
+  private final Map<TxnId, Set<ActorRef>> txnPartecipants;  // map transactions with all its partecipants
+  private final Map<TxnId, Boolean> txnHistory;             // save an history of all the past transactions
+  private final Map<TxnId, Cancellable> decisionTimeout;    // contain a timeout for every transaction waiting for a decision
 
   /*-- Actor constructor ---------------------------------------------------- */
   
@@ -135,6 +135,7 @@ public class TxnServer extends AbstractActor {
       }
       dataStore.get(c[0])[2] = 1;
     }
+    // lock only after being sure it can commit
     LockChanges(changes);
     return true;
   }
@@ -221,16 +222,16 @@ public class TxnServer extends AbstractActor {
 
     if(canChange){ 
       System.out.println("\t\tSERVER " + serverId + " Can Change");
-      setTimeout(msg.txn, 500);
-      txnPartecipants.put(msg.txn, msg.partecipants);
+      setTimeout(msg.txn, 500); // start a timeout waiting for a decision
+      txnPartecipants.put(msg.txn, msg.partecipants); // save the set of partecipants to the transaction (for termination protocol)
       }
-    else{ 
+    else{   // if the server send an abort vote it can immediatly abort (coordinator decision will be abort)
       System.out.println("\t\tSERVER " + serverId + " Can't Change");
-      workSpace.remove(msg.txn);
-      txnHistory.put(msg.txn, canChange);
+      workSpace.remove(msg.txn);    // clear the workspace
+      txnHistory.put(msg.txn, canChange); // save the decision in the history
       }
 
-    getSender().tell(new ServerDecisionMsg(canChange, msg.txn), getSelf());
+    getSender().tell(new ServerDecisionMsg(canChange, msg.txn), getSelf());   // send the vote
 
   }
 
@@ -242,33 +243,37 @@ public class TxnServer extends AbstractActor {
     if( msg.decision ) ApplyChanges(workSpace.get(msg.txn));
     else FreeLocks(workSpace.get(msg.txn)); // free the locks that may have been acquired
 
+    // clear workspace and other transaction info
     workSpace.remove(msg.txn);
-    txnHistory.put(msg.txn, msg.decision);
     txnPartecipants.remove(msg.txn);
     cancelTimeout(msg.txn);
+    txnHistory.put(msg.txn, msg.decision);  // add the decision to the history
 
     // printDataStore();
 
   }
 
   private void onTxnDecisionTimeoutMsg(TxnDecisionTimeoutMsg msg) throws InterruptedException {
-    if(txnHistory.get(msg.txn) == null) terminationProtocol(msg.txn);
+    if(txnHistory.get(msg.txn) == null) terminationProtocol(msg.txn);   // when the decision message timeouts the server start the termination protocol
   }
 
   private void onPartecipantsDecisionMsg(PartecipantsDecisionMsg msg) throws InterruptedException {
-    if(txnHistory.get(msg.txn) != null){
-      getSender().tell(new FwdPartecipantsDecisionMsg(txnHistory.get(msg.txn), msg.txn), getSelf());
+    if(txnHistory.get(msg.txn) != null){  // if the server knows the decision for a certain transaction
+      getSender().tell(new FwdPartecipantsDecisionMsg(txnHistory.get(msg.txn), msg.txn), getSelf());    // comunicate it to the asking server (termination protocol)
     }
   }
 
   private void onFwdPartecipantsDecisionMsg(FwdPartecipantsDecisionMsg msg) throws InterruptedException {
+    if(workSpace.get(msg.txn) == null) return;  // if already decided, do nothing
+    
     if( msg.decision ) ApplyChanges(workSpace.get(msg.txn));
     else FreeLocks(workSpace.get(msg.txn)); // free the locks that may have been acquired
 
+    // clear workspace and other transaction info
     workSpace.remove(msg.txn);
-    txnHistory.put(msg.txn, msg.decision);
     txnPartecipants.remove(msg.txn);
     cancelTimeout(msg.txn);
+    txnHistory.put(msg.txn, msg.decision);  // add the decision to the history
   }
 
 

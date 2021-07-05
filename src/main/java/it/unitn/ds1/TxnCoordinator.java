@@ -262,13 +262,13 @@ public class TxnCoordinator extends AbstractActor {
     ServerDecisions.get(msg.txn).add(msg.commit);
 
     if( Integer.valueOf(ServerDecisions.get(msg.txn).size())
-        .equals(Integer.valueOf(OngoingTxn.get(msg.txn).size())) || !msg.commit){
+        .equals(Integer.valueOf(OngoingTxn.get(msg.txn).size())) || !msg.commit){ // if arrives an abort OR all votes are commits then decide
       System.out.println("\tCOORDI " + coordinatorId 
                         + " Decisions "+ printServerDecisions(ServerDecisions.get(msg.txn)));
       
       Boolean finalDecision = getfinalDecision(ServerDecisions.get(msg.txn));
       for(ActorRef server : OngoingTxn.get(msg.txn)){
-        server.tell(new FinalDecisionMsg(finalDecision, msg.txn), getSelf()); // send final Decision
+        server.tell(new FinalDecisionMsg(finalDecision, msg.txn), getSelf()); // send final Decision to all servers
       }
 
       msg.txn.client.tell(new TxnResultMsg(msg.commit), getSelf()); // send final Decision 

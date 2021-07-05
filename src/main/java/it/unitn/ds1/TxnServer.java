@@ -254,17 +254,21 @@ public class TxnServer extends AbstractActor {
   }
 
   private void onTxnDecisionTimeoutMsg(TxnDecisionTimeoutMsg msg) throws InterruptedException {
+    System.out.println("\t\tSERVER " + serverId + " Timeout on Final Decision ");
     if(txnHistory.get(msg.txn) == null) terminationProtocol(msg.txn);   // when the decision message timeouts the server start the termination protocol
   }
 
   private void onPartecipantsDecisionMsg(PartecipantsDecisionMsg msg) throws InterruptedException {
     if(txnHistory.get(msg.txn) != null){  // if the server knows the decision for a certain transaction
+      System.out.println("\t\tSERVER " + serverId + " Forwardinf Final Decision (termination protocol) to server " + getSender().path().name());
       getSender().tell(new FwdPartecipantsDecisionMsg(txnHistory.get(msg.txn), msg.txn), getSelf());    // comunicate it to the asking server (termination protocol)
     }
   }
 
   private void onFwdPartecipantsDecisionMsg(FwdPartecipantsDecisionMsg msg) throws InterruptedException {
     if(workSpace.get(msg.txn) == null) return;  // if already decided, do nothing
+
+    System.out.println("\t\tSERVER " + serverId + " Received Final Decision (termination protocol)");
     
     if( msg.decision ) ApplyChanges(workSpace.get(msg.txn));
     else FreeLocks(workSpace.get(msg.txn)); // free the locks that may have been acquired

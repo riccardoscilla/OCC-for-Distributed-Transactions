@@ -24,6 +24,7 @@ public class TxnCoordinator extends AbstractActor {
   private int globID;
   private final Map<TxnId,Set<ActorRef>> OngoingTxn; // custom objects as key of Map
   private final Map<TxnId,List<Boolean>> ServerDecisions;
+  private final Map<TxnId, Cancellable> voteTimeout;    // contain a timeout for every transaction waiting for server votes
 
   /*-- Actor constructor ---------------------------------------------------- */
   
@@ -32,6 +33,7 @@ public class TxnCoordinator extends AbstractActor {
     this.globID = 0;
     this.OngoingTxn = new HashMap<>(); 
     this.ServerDecisions = new HashMap<>(); 
+    this.voteTimeout = new HashMap<>();
   }
 
   static public Props props(int coordinatorId) {
@@ -85,6 +87,14 @@ public class TxnCoordinator extends AbstractActor {
     public final TxnId txn;
     public FinalDecisionMsg(Boolean decision, TxnId txn) {
       this.decision = decision;
+      this.txn = txn;
+    }
+  }
+
+  // the coordinator may timeout waiting for the votes of the servers
+  public static class TxnVoteTimeoutMsg implements Serializable {
+    public final TxnId txn;
+    public TxnVoteTimeoutMsg(TxnId txn) {
       this.txn = txn;
     }
   }
@@ -168,6 +178,22 @@ public class TxnCoordinator extends AbstractActor {
     return true;
   }
 
+  //set a decision timeout with delay t
+  private void setTimeout(TxnId txn, int t){
+    Cancellable timeout = getContext().system().scheduler().scheduleOnce(
+            Duration.create(t, TimeUnit.MILLISECONDS),
+            getSelf(),
+            new TxnVoteTimeoutMsg(txn), // message sent to myself
+            getContext().system().dispatcher(), getSelf()
+    );
+    voteTimeout.put(txn, timeout);
+  }
+
+  //cancel a certain timeout
+  private void cancelTimeout(TxnId txn){
+    if(voteTimeout.get(txn) != null) voteTimeout.get(txn).cancel();
+  }
+
   /*-- Message handlers ----------------------------------------------------- */
 
   private void onWelcomeMsg2(WelcomeMsg2 msg) {
@@ -246,6 +272,7 @@ public class TxnCoordinator extends AbstractActor {
       // Set<ActorRef> serverToCommit = OngoingTxn.get(txn);
       System.out.println("\tCOORDI "+ coordinatorId 
                         + " - Validation with " + printOngoing(OngoingTxn.get(txn)));
+      setTimeout(txn, 500);    // set a timeout waiting for votes
       for(ActorRef server : OngoingTxn.get(txn)){
         server.tell(new CanCommitMsg(txn, OngoingTxn.get(txn)), getSelf()); // ask to commit
       }
@@ -271,14 +298,32 @@ public class TxnCoordinator extends AbstractActor {
         server.tell(new FinalDecisionMsg(finalDecision, msg.txn), getSelf()); // send final Decision to all servers
       }
 
-      msg.txn.client.tell(new TxnResultMsg(msg.commit), getSelf()); // send final Decision 
+      msg.txn.client.tell(new TxnResultMsg(finalDecision), getSelf()); // send final Decision 
 
       // remove transaction
       OngoingTxn.remove(msg.txn);
       ServerDecisions.remove(msg.txn);
+      cancelTimeout(msg.txn);
 
     }
     
+  }
+
+  private void onTxnVoteTimeoutMsg(TxnVoteTimeoutMsg msg) throws InterruptedException {
+    if(OngoingTxn.get(msg.txn) == null) return;   // decision to abort already taken
+
+    System.out.println("\tCOORDI " + coordinatorId + " Timeout while waiting for votes" );
+
+    Boolean finalDecision = false;
+    for(ActorRef server : OngoingTxn.get(msg.txn)){
+      server.tell(new FinalDecisionMsg(finalDecision, msg.txn), getSelf()); // send final Decision to all servers
+    }
+
+    msg.txn.client.tell(new TxnResultMsg(finalDecision), getSelf()); // send final Decision 
+
+    // remove transaction
+    OngoingTxn.remove(msg.txn);
+    ServerDecisions.remove(msg.txn);
   }
 
   @Override
@@ -291,6 +336,7 @@ public class TxnCoordinator extends AbstractActor {
             .match(WriteMsg.class,  this::onWriteMsg)
             .match(TxnEndMsg.class,  this::onTxnEndMsg)
             .match(ServerDecisionMsg.class, this::onServerDecisionMsg)
+            .match(TxnVoteTimeoutMsg.class,  this::onTxnVoteTimeoutMsg)
             .build();
   }
 }

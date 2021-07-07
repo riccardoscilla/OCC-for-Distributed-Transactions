@@ -9,8 +9,8 @@ import it.unitn.ds1.TxnClient.WelcomeMsg;
 import it.unitn.ds1.TxnCoordinator.WelcomeMsg2;
 
 public class TxnSystem {
-  final static int N_CLIENTS = 2;
-  final static int N_COORDINATORS = 1;
+  final static int N_CLIENTS = 5;
+  final static int N_COORDINATORS = 3;
   final static int N_SERVERS = 2;
   final static int maxKey = N_SERVERS*10-1;
 

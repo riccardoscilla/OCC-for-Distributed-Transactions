@@ -122,7 +122,7 @@ public class TxnServer extends AbstractActor {
   // can change if all the versions are +1 
   // lock objects so that other clients cannot commit in the meantime
   private Boolean checkIfCanChange(Set<Integer[]> changes){
-    for(Integer[] c : changes){ 
+    for(Integer[] c : changes){
       // c = {key, version, value}
       // dataStore.get(c[0]) = {version, value, lock}
       
@@ -133,7 +133,7 @@ public class TxnServer extends AbstractActor {
         !dataStore.get(c[0])[0].equals(c[1]-1) ){
         return false;
       }
-      dataStore.get(c[0])[2] = 1;
+      // dataStore.get(c[0])[2] = 1;
     }
     // lock only after being sure it can commit
     LockChanges(changes);
@@ -159,11 +159,15 @@ public class TxnServer extends AbstractActor {
   }
 
   // TODO: rewrite + check output
-  private void printDataStore(){
-    System.out.println(getSelf().path().name());
-    dataStore.entrySet().forEach(entry -> {
-      System.out.println(entry.getKey() + " " + Arrays.toString(entry.getValue()));
-    });
+  private void printDataStore(TxnId txnId){
+    String res = "[CHECK] ";
+    res = res + txnId.getName() + " " + getSelf().path().name() + " ";
+    Integer sum = 0;
+    for(Integer key : dataStore.keySet()){
+      sum = sum + dataStore.get(key)[1];
+    }
+    res = res + sum;
+    System.out.println( res );
   }
 
   // start the termination protocol asking all the partecifants 
@@ -249,7 +253,7 @@ public class TxnServer extends AbstractActor {
     cancelTimeout(msg.txn);
     txnHistory.put(msg.txn, msg.decision);  // add the decision to the history
 
-    // printDataStore();
+    printDataStore(msg.txn);
 
   }
 

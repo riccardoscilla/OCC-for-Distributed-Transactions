@@ -118,6 +118,10 @@ public class TxnCoordinator extends AbstractActor {
       return( txn.client.equals(this.client) );
     }
 
+    public String getName(){
+      return "TxnId@" + coordinator + "." + id;
+    }
+
     @Override
     public boolean equals(Object obj){
       if(this == obj) return true;
@@ -127,8 +131,14 @@ public class TxnCoordinator extends AbstractActor {
     }
 
     @Override
-    public int hashCode(){
-      return this.id;
+    public int hashCode(){ // map 2 int into a single one
+      int a = coordinator;
+      int b = id;
+      // Cantor pairing function
+      // return ((a+b) * (a + b + 1) / 2 + a);
+
+      // Szudzik's function
+      return (a >= b ? a * a + a + b : a + b * b);
     }
   }
 

@@ -13,9 +13,10 @@ public class Check {
       BufferedReader reader = new BufferedReader(new FileReader(fileName));
       
       while((line = reader.readLine()) != null) {
+        line = line.replace("\0", "");
         String[] l = line.split(" ");
-        if(l[0].equals(check)){
-          System.out.println(l[0]);
+        if(l[0].contains(check)){
+          System.out.println(line);
         }
         
       }

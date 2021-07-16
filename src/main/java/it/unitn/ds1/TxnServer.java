@@ -17,6 +17,8 @@ import it.unitn.ds1.TxnCoordinator.CanCommitMsg;
 import it.unitn.ds1.TxnCoordinator.FinalDecisionMsg;
 
 import it.unitn.ds1.TxnSystem;
+import it.unitn.ds1.TxnSystem.CrashMsg;
+import it.unitn.ds1.TxnSystem.RecoveryMsg;
 
 public class TxnServer extends AbstractActor {
   private final Integer serverId;
@@ -25,6 +27,7 @@ public class TxnServer extends AbstractActor {
   private final Map<TxnId, Set<ActorRef>> txnPartecipants;  // map transactions with all its partecipants
   private final Map<TxnId, Boolean> txnHistory;             // save an history of all the past transactions
   private final Map<TxnId, Cancellable> decisionTimeout;    // contain a timeout for every transaction waiting for a decision
+  private Cancellable crash;    //crash timeout
 
   /*-- Actor constructor ---------------------------------------------------- */
   
@@ -294,6 +297,27 @@ public class TxnServer extends AbstractActor {
     txnHistory.put(msg.txn, msg.decision);  // add the decision to the history
   }
 
+  private void onCrashMsg(CrashMsg msg) throws InterruptedException {
+    for(TxnId txn : decisionTimeout.keySet()){    //delete all pending timeouts
+      cancelTimeout(txn);
+    }
+    //set a time to wake up from crash
+    crash = getContext().system().scheduler().scheduleOnce(
+            Duration.create(TxnSystem.crashTime, TimeUnit.MILLISECONDS),
+            getSelf(),
+            new RecoveryMsg(), // message sent to myself
+            getContext().system().dispatcher(), getSelf()
+    );
+    getContext().become(crashed()); //ignore following messages
+  }
+
+  private void onRecoveryMsg(RecoveryMsg msg) throws InterruptedException{
+    getContext().become(createReceive());   //restart to handle messages
+
+    //Handle crash
+  }
+
+
 
 
   @Override
@@ -306,6 +330,16 @@ public class TxnServer extends AbstractActor {
             .match(TxnDecisionTimeoutMsg.class,  this::onTxnDecisionTimeoutMsg)
             .match(PartecipantsDecisionMsg.class,  this::onPartecipantsDecisionMsg)
             .match(FwdPartecipantsDecisionMsg.class,  this::onFwdPartecipantsDecisionMsg)
+            .match(CrashMsg.class,  this::onCrashMsg)
             .build();
   }
+
+  public Receive crashed(){   //The only message handled while in crash
+    return receiveBuilder()
+              .match(RecoveryMsg.class, this::onRecoveryMsg)
+              .matchAny(msg -> {})
+              .build();
+  }
 }
+
+  

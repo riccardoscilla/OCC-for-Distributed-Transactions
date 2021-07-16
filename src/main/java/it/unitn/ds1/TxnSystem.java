@@ -4,6 +4,7 @@ import akka.actor.ActorSystem;
 
 import java.util.*;
 import java.io.IOException;
+import java.io.Serializable;
 
 import it.unitn.ds1.TxnClient.WelcomeMsg;
 import it.unitn.ds1.TxnCoordinator.WelcomeMsg2;
@@ -15,6 +16,20 @@ public class TxnSystem {
   final static int maxKey = N_SERVERS*10-1;
   final static int maxDelay = 50;
   final static int minDelay = 10;
+  final static int crashTime = 1000;
+
+  //Start a crash simulation
+  public static class CrashMsg implements Serializable {
+    public CrashMsg(){
+      super();
+    }
+  }
+  //Recover from the simulated crash
+  public static class RecoveryMsg implements Serializable {
+    public RecoveryMsg(){
+      super();
+    }
+  }
 
   public static void main(String[] args) {
 

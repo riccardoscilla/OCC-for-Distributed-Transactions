@@ -11,12 +11,16 @@ import it.unitn.ds1.TxnClient.TxnBeginMsg;
 import it.unitn.ds1.TxnClient.TxnAcceptMsg;
 import it.unitn.ds1.TxnClient.ReadMsg;
 import it.unitn.ds1.TxnClient.ReadResultMsg;
-import it.unitn.ds1.TxnServer.FwdReadResultMsg;
 import it.unitn.ds1.TxnClient.WriteMsg;
 import it.unitn.ds1.TxnClient.TxnEndMsg;
-import it.unitn.ds1.TxnServer.ServerDecisionMsg;
 import it.unitn.ds1.TxnClient.TxnResultMsg;
+
+import it.unitn.ds1.TxnServer.FwdReadResultMsg;
+import it.unitn.ds1.TxnServer.ServerDecisionMsg;
+
 import it.unitn.ds1.TxnSystem;
+import it.unitn.ds1.TxnSystem.CrashMsg;
+import it.unitn.ds1.TxnSystem.RecoveryMsg;
 
 
 public class TxnCoordinator extends AbstractActor {
@@ -26,6 +30,7 @@ public class TxnCoordinator extends AbstractActor {
   private final Map<TxnId,Set<ActorRef>> OngoingTxn; // custom objects as key of Map
   private final Map<TxnId,List<Boolean>> ServerDecisions;
   private final Map<TxnId, Cancellable> voteTimeout;    // contain a timeout for every transaction waiting for server votes
+  private Cancellable crash;      //crash timeout
 
   /*-- Actor constructor ---------------------------------------------------- */
   
@@ -347,6 +352,28 @@ public class TxnCoordinator extends AbstractActor {
     ServerDecisions.remove(msg.txn);
   }
 
+  private void onCrashMsg(CrashMsg msg) throws InterruptedException {
+    for(TxnId txn : voteTimeout.keySet()){    //delete all pending timeouts
+      cancelTimeout(txn);
+    }
+    //set a time to wake up from crash
+    crash = getContext().system().scheduler().scheduleOnce(
+            Duration.create(TxnSystem.crashTime, TimeUnit.MILLISECONDS),
+            getSelf(),
+            new RecoveryMsg(), // message sent to myself
+            getContext().system().dispatcher(), getSelf()
+    );
+    getContext().become(crashed()); //ignore following messages
+  }
+
+  private void onRecoveryMsg(RecoveryMsg msg) throws InterruptedException{
+    getContext().become(createReceive());   //restart to handle messages
+
+    //Handle crash
+  }
+
+
+
   @Override
   public Receive createReceive() {
     return receiveBuilder()
@@ -358,6 +385,14 @@ public class TxnCoordinator extends AbstractActor {
             .match(TxnEndMsg.class,  this::onTxnEndMsg)
             .match(ServerDecisionMsg.class, this::onServerDecisionMsg)
             .match(TxnVoteTimeoutMsg.class,  this::onTxnVoteTimeoutMsg)
+            .match(CrashMsg.class,  this::onCrashMsg)
             .build();
+  }
+
+  public Receive crashed(){   //The only message handled while in crash
+    return receiveBuilder()
+              .match(RecoveryMsg.class, this::onRecoveryMsg)
+              .matchAny(msg -> {})
+              .build();
   }
 }

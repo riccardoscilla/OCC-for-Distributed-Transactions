@@ -220,6 +220,20 @@ public class TxnCoordinator extends AbstractActor {
     if(voteTimeout.get(txn) != null) voteTimeout.get(txn).cancel();
   }
 
+  private void crash(int time){
+    for(TxnId txn : voteTimeout.keySet()){    //delete all pending timeouts
+      cancelTimeout(txn);
+    }
+    //set a time to wake up from crash
+    crash = getContext().system().scheduler().scheduleOnce(
+            Duration.create(time, TimeUnit.MILLISECONDS),
+            getSelf(),
+            new RecoveryMsg(), // message sent to myself
+            getContext().system().dispatcher(), getSelf()
+    );
+    getContext().become(crashed()); //ignore following messages
+  }
+
   /*-- Message handlers ----------------------------------------------------- */
 
   private void onWelcomeMsg2(WelcomeMsg2 msg) {
@@ -353,17 +367,7 @@ public class TxnCoordinator extends AbstractActor {
   }
 
   private void onCrashMsg(CrashMsg msg) throws InterruptedException {
-    for(TxnId txn : voteTimeout.keySet()){    //delete all pending timeouts
-      cancelTimeout(txn);
-    }
-    //set a time to wake up from crash
-    crash = getContext().system().scheduler().scheduleOnce(
-            Duration.create(TxnSystem.crashTime, TimeUnit.MILLISECONDS),
-            getSelf(),
-            new RecoveryMsg(), // message sent to myself
-            getContext().system().dispatcher(), getSelf()
-    );
-    getContext().become(crashed()); //ignore following messages
+    crash(msg.time);
   }
 
   private void onRecoveryMsg(RecoveryMsg msg) throws InterruptedException{

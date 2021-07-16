@@ -16,12 +16,12 @@ public class TxnSystem {
   final static int maxKey = N_SERVERS*10-1;
   final static int maxDelay = 50;
   final static int minDelay = 10;
-  final static int crashTime = 1000;
 
   //Start a crash simulation
   public static class CrashMsg implements Serializable {
-    public CrashMsg(){
-      super();
+    public final int time;
+    public CrashMsg(int time){
+      this.time = time;
     }
   }
   //Recover from the simulated crash

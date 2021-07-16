@@ -1,10 +1,3 @@
-it/unitn/ds1/TxnServer.java
- it.unitn.ds1.TxnServer
- it.unitn.ds1.TxnServer$FwdPartecipantsDecisionMsg
- it.unitn.ds1.TxnServer$FwdReadResultMsg
- it.unitn.ds1.TxnServer$PartecipantsDecisionMsg
- it.unitn.ds1.TxnServer$ServerDecisionMsg
- it.unitn.ds1.TxnServer$TxnDecisionTimeoutMsg
 it/unitn/ds1/TxnClient.java
  it.unitn.ds1.TxnClient
  it.unitn.ds1.TxnClient$ReadMsg
@@ -17,6 +10,13 @@ it/unitn/ds1/TxnClient.java
  it.unitn.ds1.TxnClient$TxnResultMsg
  it.unitn.ds1.TxnClient$WelcomeMsg
  it.unitn.ds1.TxnClient$WriteMsg
+it/unitn/ds1/TxnServer.java
+ it.unitn.ds1.TxnServer
+ it.unitn.ds1.TxnServer$FwdPartecipantsDecisionMsg
+ it.unitn.ds1.TxnServer$FwdReadResultMsg
+ it.unitn.ds1.TxnServer$PartecipantsDecisionMsg
+ it.unitn.ds1.TxnServer$ServerDecisionMsg
+ it.unitn.ds1.TxnServer$TxnDecisionTimeoutMsg
 it/unitn/ds1/TxnCoordinator.java
  it.unitn.ds1.TxnCoordinator
  it.unitn.ds1.TxnCoordinator$CanCommitMsg
@@ -28,3 +28,5 @@ it/unitn/ds1/TxnCoordinator.java
  it.unitn.ds1.TxnCoordinator$WelcomeMsg2
 it/unitn/ds1/TxnSystem.java
  it.unitn.ds1.TxnSystem
+ it.unitn.ds1.TxnSystem$CrashMsg
+ it.unitn.ds1.TxnSystem$RecoveryMsg

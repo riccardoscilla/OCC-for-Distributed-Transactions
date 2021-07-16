@@ -23,6 +23,7 @@ import it.unitn.ds1.TxnSystem.RecoveryMsg;
 public class TxnServer extends AbstractActor {
   private final Integer serverId;
   private final Map<Integer, Integer[]> dataStore;
+  private String logMode = "Check";
   private final Map<TxnId, Set<Integer[]>> workSpace;
   private final Map<TxnId, Set<ActorRef>> txnPartecipants;  // map transactions with all its partecipants
   private final Map<TxnId, Boolean> txnHistory;             // save an history of all the past transactions
@@ -39,7 +40,6 @@ public class TxnServer extends AbstractActor {
     this.txnHistory = new HashMap<>();
     this.decisionTimeout = new HashMap<>();
     initDataStore();
-    // System.out.println("\t\tSERVER "+serverId+" DataStore Init");
   }
 
   static public Props props(int serverId) {
@@ -105,6 +105,21 @@ public class TxnServer extends AbstractActor {
   }
 
   /*-- Actor methods -------------------------------------------------------- */
+  // print log 
+  private void printLog(String logString, String mode){
+    Set<String> logModeAllowed = new HashSet<>();
+    if(logMode.equals("Verbose")){
+      logModeAllowed.add("Verbose"); logModeAllowed.add("Check"); 
+    }   
+    if(logMode.equals("Check")){
+      logModeAllowed.add("Check"); 
+    } 
+
+    if(logModeAllowed.contains(mode)){
+      System.out.println(logString);
+    }
+  }
+  
   private void sendReal(Object msg, ActorRef sender, ActorRef receiver){
     try{
       Thread.sleep((int)((Math.random())*(TxnSystem.maxDelay - TxnSystem.minDelay)) + TxnSystem.minDelay);
@@ -172,7 +187,7 @@ public class TxnServer extends AbstractActor {
   }
 
   // TODO: rewrite + check output
-  private void printDataStore(TxnId txnId){
+  private String printDataStore(TxnId txnId){
     String res = "[CHECK] ";
     res = res + txnId.getName() + " " + getSelf().path().name() + " ";
     Integer sum = 0;
@@ -180,7 +195,7 @@ public class TxnServer extends AbstractActor {
       sum = sum + dataStore.get(key)[1];
     }
     res = res + sum;
-    System.out.println( res );
+    return res;
   }
 
   // start the termination protocol asking all the partecifants 
@@ -225,7 +240,7 @@ public class TxnServer extends AbstractActor {
   /*-- Message handlers ----------------------------------------------------- */
 
   private void onFwdReadMsg(FwdReadMsg msg) {
-    System.out.println("\t\tSERVER " + serverId + " Received Read from " + getSender().path().name());
+    printLog("\t\tSERVER " + serverId + " Received Read from " + getSender().path().name(), "Verbose");
 
     workSpace.putIfAbsent(msg.txn, new HashSet<>());    
 
@@ -240,24 +255,24 @@ public class TxnServer extends AbstractActor {
     Integer[] writeResult = new Integer[] {msg.key,version+1,msg.value};
     workSpace.get(msg.txn).add(writeResult);
 
-    System.out.println("\t\tSERVER " + serverId + " Received Write from " + getSender().path().name()
-                      + " - WS "+ printWorkspace(workSpace.get(msg.txn)));
-  
+    printLog("\t\tSERVER " + serverId + " Received Write from " + getSender().path().name() 
+             + " - WS "+ printWorkspace(workSpace.get(msg.txn)), "Verbose");
+
   }
 
   private void onCanCommitMsg(CanCommitMsg msg){
-    System.out.println("\t\tSERVER " + serverId + " Received Commit Request "
-                      + " - WS "+printWorkspace(workSpace.get(msg.txn)));
+    printLog("\t\tSERVER " + serverId + " Received Commit Request "
+             + " - WS "+printWorkspace(workSpace.get(msg.txn)), "Verbose");
 
     Boolean canChange = checkIfCanChange(workSpace.get(msg.txn));
 
     if(canChange){ 
-      System.out.println("\t\tSERVER " + serverId + " Can Change");
+      printLog("\t\tSERVER " + serverId + " Can Change", "Verbose");
       setTimeout(msg.txn, 500); // start a timeout waiting for a decision
       txnPartecipants.put(msg.txn, msg.partecipants); // save the set of partecipants to the transaction (for termination protocol)
       }
     else{   // if the server send an abort vote it can immediatly abort (coordinator decision will be abort)
-      System.out.println("\t\tSERVER " + serverId + " Can't Change");
+      printLog("\t\tSERVER " + serverId + " Can't Change", "Verbose");
       workSpace.remove(msg.txn);    // clear the workspace
       txnHistory.put(msg.txn, canChange); // save the decision in the history
       }
@@ -269,7 +284,7 @@ public class TxnServer extends AbstractActor {
   private void onFinalDecisionMsg(FinalDecisionMsg msg){
     if(workSpace.get(msg.txn) == null) return;  // if already aborted do nothing
 
-    System.out.println("\t\tSERVER " + serverId + " Received Final Decision ");
+    printLog("\t\tSERVER " + serverId + " Received Final Decision ", "Verbose");
 
     if( msg.decision ) ApplyChanges(workSpace.get(msg.txn));
     else FreeLocks(workSpace.get(msg.txn)); // free the locks that may have been acquired
@@ -280,18 +295,18 @@ public class TxnServer extends AbstractActor {
     cancelTimeout(msg.txn);
     txnHistory.put(msg.txn, msg.decision);  // add the decision to the history
 
-    printDataStore(msg.txn);
+    printLog(printDataStore(msg.txn),"Check");
 
   }
 
   private void onTxnDecisionTimeoutMsg(TxnDecisionTimeoutMsg msg) throws InterruptedException {
-    System.out.println("\t\tSERVER " + serverId + " Timeout on Final Decision ");
+    printLog("\t\tSERVER " + serverId + " Timeout on Final Decision ", "Verbose");
     if(txnHistory.get(msg.txn) == null) terminationProtocol(msg.txn);   // when the decision message timeouts the server start the termination protocol
   }
 
   private void onPartecipantsDecisionMsg(PartecipantsDecisionMsg msg) throws InterruptedException {
     if(txnHistory.get(msg.txn) != null){  // if the server knows the decision for a certain transaction
-      System.out.println("\t\tSERVER " + serverId + " Forwardinf Final Decision (termination protocol) to server " + getSender().path().name());
+      printLog("\t\tSERVER " + serverId + " Forwardinf Final Decision (termination protocol) to server " + getSender().path().name(), "Verbose");
       sendReal(new FwdPartecipantsDecisionMsg(txnHistory.get(msg.txn), msg.txn), getSelf(), getSender());    // comunicate it to the asking server (termination protocol)
     }
   }
@@ -299,7 +314,7 @@ public class TxnServer extends AbstractActor {
   private void onFwdPartecipantsDecisionMsg(FwdPartecipantsDecisionMsg msg) throws InterruptedException {
     if(workSpace.get(msg.txn) == null) return;  // if already decided, do nothing
 
-    System.out.println("\t\tSERVER " + serverId + " Received Final Decision (termination protocol)");
+    printLog("\t\tSERVER " + serverId + " Received Final Decision (termination protocol)", "Verbose");
     
     if( msg.decision ) ApplyChanges(workSpace.get(msg.txn));
     else FreeLocks(workSpace.get(msg.txn)); // free the locks that may have been acquired

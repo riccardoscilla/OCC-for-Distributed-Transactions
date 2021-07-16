@@ -13,6 +13,8 @@ public class TxnSystem {
   final static int N_COORDINATORS = 3;
   final static int N_SERVERS = 2;
   final static int maxKey = N_SERVERS*10-1;
+  final static int maxDelay = 50;
+  final static int minDelay = 10;
 
   public static void main(String[] args) {
 

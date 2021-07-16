@@ -16,6 +16,8 @@ import it.unitn.ds1.TxnCoordinator.FwdWriteMsg;
 import it.unitn.ds1.TxnCoordinator.CanCommitMsg;
 import it.unitn.ds1.TxnCoordinator.FinalDecisionMsg;
 
+import it.unitn.ds1.TxnSystem;
+
 public class TxnServer extends AbstractActor {
   private final Integer serverId;
   private final Map<Integer, Integer[]> dataStore;
@@ -47,7 +49,7 @@ public class TxnServer extends AbstractActor {
     for (int i=10*this.serverId; i<=10*this.serverId+9; i++) {
       this.dataStore.put(i, new Integer[] {0,100,0});
     }    
-  }  
+  }
 
   /*-- Message classes ------------------------------------------------------ */
 
@@ -100,6 +102,14 @@ public class TxnServer extends AbstractActor {
   }
 
   /*-- Actor methods -------------------------------------------------------- */
+  private void sendReal(Object msg, ActorRef sender, ActorRef receiver){
+    try{
+      Thread.sleep((int)((Math.random())*(TxnSystem.maxDelay - TxnSystem.minDelay)) + TxnSystem.minDelay);
+    }catch (InterruptedException e){
+      System.err.println(e);
+    }
+    receiver.tell(msg, sender);
+  }
 
   // get value for a given key
   private Integer getValueFromKey(Integer key){
@@ -174,7 +184,7 @@ public class TxnServer extends AbstractActor {
   //if they have received a decision
   private void terminationProtocol(TxnId txn){
     for(ActorRef i : txnPartecipants.get(txn)){
-      i.tell(new PartecipantsDecisionMsg(txn), getSelf());
+      sendReal(new PartecipantsDecisionMsg(txn), getSelf(), i);
     }
     setTimeout(txn, 500);
   }
@@ -203,7 +213,7 @@ public class TxnServer extends AbstractActor {
     workSpace.putIfAbsent(msg.txn, new HashSet<>());    
 
     Integer value = getValueFromKey(msg.key);
-    getSender().tell(new FwdReadResultMsg(msg.key, value, msg.txn), getSelf());
+    sendReal(new FwdReadResultMsg(msg.key, value, msg.txn), getSelf(), getSender());
 
   }
 
@@ -235,7 +245,7 @@ public class TxnServer extends AbstractActor {
       txnHistory.put(msg.txn, canChange); // save the decision in the history
       }
 
-    getSender().tell(new ServerDecisionMsg(canChange, msg.txn), getSelf());   // send the vote
+      sendReal(new ServerDecisionMsg(canChange, msg.txn), getSelf(), getSender());   // send the vote
 
   }
 
@@ -265,7 +275,7 @@ public class TxnServer extends AbstractActor {
   private void onPartecipantsDecisionMsg(PartecipantsDecisionMsg msg) throws InterruptedException {
     if(txnHistory.get(msg.txn) != null){  // if the server knows the decision for a certain transaction
       System.out.println("\t\tSERVER " + serverId + " Forwardinf Final Decision (termination protocol) to server " + getSender().path().name());
-      getSender().tell(new FwdPartecipantsDecisionMsg(txnHistory.get(msg.txn), msg.txn), getSelf());    // comunicate it to the asking server (termination protocol)
+      sendReal(new FwdPartecipantsDecisionMsg(txnHistory.get(msg.txn), msg.txn), getSelf(), getSender());    // comunicate it to the asking server (termination protocol)
     }
   }
 

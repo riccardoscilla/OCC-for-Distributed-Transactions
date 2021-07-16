@@ -16,6 +16,7 @@ import it.unitn.ds1.TxnClient.WriteMsg;
 import it.unitn.ds1.TxnClient.TxnEndMsg;
 import it.unitn.ds1.TxnServer.ServerDecisionMsg;
 import it.unitn.ds1.TxnClient.TxnResultMsg;
+import it.unitn.ds1.TxnSystem;
 
 
 public class TxnCoordinator extends AbstractActor {
@@ -39,6 +40,7 @@ public class TxnCoordinator extends AbstractActor {
   static public Props props(int coordinatorId) {
     return Props.create(TxnCoordinator.class, () -> new TxnCoordinator(coordinatorId));
   }
+
 
   /*-- Message classes ------------------------------------------------------ */
 
@@ -100,6 +102,15 @@ public class TxnCoordinator extends AbstractActor {
   }
 
   /*-- Actor methods -------------------------------------------------------- */
+
+  private void sendReal(Object msg, ActorRef sender, ActorRef receiver){
+    try{
+      Thread.sleep((int)((Math.random())*(TxnSystem.maxDelay - TxnSystem.minDelay)) + TxnSystem.minDelay);
+    }catch (InterruptedException e){
+      System.err.println(e);
+    }
+    receiver.tell(msg, sender);
+  }
 
   public static class TxnId{
     public final ActorRef client;
@@ -220,7 +231,7 @@ public class TxnCoordinator extends AbstractActor {
 
     // printFullOngoing();
     
-    getSender().tell(new TxnAcceptMsg(), getSelf()); // send accept txn to client
+    sendReal(new TxnAcceptMsg(), getSelf(), getSender()); // send accept txn to client
   }
 
   /* --------------------------------------------------------------------*/
@@ -235,7 +246,7 @@ public class TxnCoordinator extends AbstractActor {
     // bind the current request to the OngoingTxn
     TxnId txn = bindRequestOngoing(getSender());
     if(txn != null){
-      server.tell(new FwdReadMsg(msg.key, txn), getSelf()); // forward the read to the right server
+      sendReal(new FwdReadMsg(msg.key, txn), getSelf(), server); // forward the read to the right server
     } else{
       System.out.println("\tNO TXN WITH THIS ID");
     }
@@ -247,7 +258,7 @@ public class TxnCoordinator extends AbstractActor {
     
     System.out.println("\tCOORDI " + coordinatorId + " Received value from " + getSender().path().name());
 
-    msg.txn.client.tell(new ReadResultMsg(msg.key,msg.value), getSelf());
+    sendReal(new ReadResultMsg(msg.key,msg.value), getSelf(), msg.txn.client);
   
   }
 
@@ -264,7 +275,7 @@ public class TxnCoordinator extends AbstractActor {
     TxnId txn = bindRequestOngoing(getSender());
     if(txn != null){
       OngoingTxn.get(txn).add(server);
-      server.tell(new FwdWriteMsg(msg.key, msg.value, txn), getSelf()); // forward the write to the right server
+      sendReal(new FwdWriteMsg(msg.key, msg.value, txn), getSelf(), server); // forward the write to the right server
     } else{
       System.out.println("\tNO TXN WITH THIS ID");
     }
@@ -284,7 +295,7 @@ public class TxnCoordinator extends AbstractActor {
                         + " - Validation with " + printOngoing(OngoingTxn.get(txn)));
       setTimeout(txn, 500);    // set a timeout waiting for votes
       for(ActorRef server : OngoingTxn.get(txn)){
-        server.tell(new CanCommitMsg(txn, OngoingTxn.get(txn)), getSelf()); // ask to commit
+        sendReal(new CanCommitMsg(txn, OngoingTxn.get(txn)), getSelf(), server); // ask to commit
       }
     } else{
       System.out.println("\tNO TXN WITH THIS ID");
@@ -305,10 +316,10 @@ public class TxnCoordinator extends AbstractActor {
       
       Boolean finalDecision = getfinalDecision(ServerDecisions.get(msg.txn));
       for(ActorRef server : OngoingTxn.get(msg.txn)){
-        server.tell(new FinalDecisionMsg(finalDecision, msg.txn), getSelf()); // send final Decision to all servers
+        sendReal(new FinalDecisionMsg(finalDecision, msg.txn), getSelf(), server); // send final Decision to all servers
       }
 
-      msg.txn.client.tell(new TxnResultMsg(finalDecision), getSelf()); // send final Decision 
+      sendReal(new TxnResultMsg(finalDecision), getSelf(), msg.txn.client); // send final Decision 
 
       // remove transaction
       OngoingTxn.remove(msg.txn);
@@ -326,10 +337,10 @@ public class TxnCoordinator extends AbstractActor {
 
     Boolean finalDecision = false;
     for(ActorRef server : OngoingTxn.get(msg.txn)){
-      server.tell(new FinalDecisionMsg(finalDecision, msg.txn), getSelf()); // send final Decision to all servers
+      sendReal(new FinalDecisionMsg(finalDecision, msg.txn), getSelf(), server); // send final Decision to all servers
     }
 
-    msg.txn.client.tell(new TxnResultMsg(finalDecision), getSelf()); // send final Decision 
+    sendReal(new TxnResultMsg(finalDecision), getSelf(), msg.txn.client); // send final Decision 
 
     // remove transaction
     OngoingTxn.remove(msg.txn);

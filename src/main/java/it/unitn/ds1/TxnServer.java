@@ -189,7 +189,7 @@ public class TxnServer extends AbstractActor {
   // TODO: rewrite + check output
   private String printDataStore(TxnId txnId){
     String res = "[CHECK] ";
-    res = res + txnId.getName() + " " + getSelf().path().name() + " ";
+    res = res + txnId.name + " " + getSelf().path().name() + " ";
     Integer sum = 0;
     for(Integer key : dataStore.keySet()){
       sum = sum + dataStore.get(key)[1];

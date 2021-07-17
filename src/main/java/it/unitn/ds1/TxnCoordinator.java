@@ -27,7 +27,7 @@ public class TxnCoordinator extends AbstractActor {
   private final Integer coordinatorId;
   private List<ActorRef> servers;
   private int globID;
-  private String logMode = "Check";
+  private String logMode = "Verbose";
   private final Map<TxnId,Set<ActorRef>> OngoingTxn; // custom objects as key of Map
   private final Map<TxnId,List<Boolean>> ServerDecisions;
   private final Map<TxnId, Cancellable> voteTimeout;    // contain a timeout for every transaction waiting for server votes
@@ -122,11 +122,13 @@ public class TxnCoordinator extends AbstractActor {
     public final ActorRef client;
     public int id;
     public int coordinator;
+    public String name;
 
     public TxnId(ActorRef client, int id, int coordinator){
       this.client = client;
       this.id = id;
       this.coordinator = coordinator;
+      this.name = "TxnId@" + coordinator + "." + id;
     }
 
     public boolean matches(Object obj){
@@ -135,9 +137,9 @@ public class TxnCoordinator extends AbstractActor {
       return( txn.client.equals(this.client) );
     }
 
-    public String getName(){
-      return "TxnId@" + coordinator + "." + id;
-    }
+    // public String getName(){
+    //   return "TxnId@" + coordinator + "." + id;
+    // }
 
     @Override
     public boolean equals(Object obj){

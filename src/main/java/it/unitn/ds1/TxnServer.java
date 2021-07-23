@@ -23,7 +23,7 @@ import it.unitn.ds1.TxnSystem.RecoveryMsg;
 public class TxnServer extends AbstractActor {
   private final Integer serverId;
   private final Map<Integer, Integer[]> dataStore;
-  private String logMode = "Check";
+  private String logMode = "Verbose";
   private final Map<TxnId, Set<Integer[]>> workSpace;
   private final Map<TxnId, Set<ActorRef>> txnPartecipants;  // map transactions with all its partecipants
   private final Map<TxnId, Boolean> txnHistory;             // save an history of all the past transactions
@@ -130,12 +130,38 @@ public class TxnServer extends AbstractActor {
   }
 
   // get value for a given key
-  private Integer getValueFromKey(Integer key){
-    return dataStore.get(key)[1];
+  // if the key has already been touched in this transaction,
+  // return the value from the workspace (otw there is inconsistency)
+  // else return the value from the datastore
+  private Integer getValueFromKey(Integer key, Set<Integer[]> changes){
+    for(Integer[] c : changes){ // c = {key, version, value}
+      if(c[0].equals(key)){
+        return c[2];
+      }
+    }
+    return dataStore.get(key)[1]; // dataStore.get(key) = {version, value, lock}
   }
 
   private Integer getVersionFromKey(Integer key){
     return dataStore.get(key)[0];
+  }
+ 
+  // update the workspace of a given transaction
+  // if the key has already been touched in this transaction,
+  // update only the value (same version)
+  // else add a new list
+  private void updateWorkspace(Integer key, Integer version, Integer value, Set<Integer[]> changes){
+    Boolean inWorkspace = false;
+    for(Integer[] c : changes){ // c = {key, version, value}
+      if(c[0].equals(key)){
+        c[2] = value;
+        inWorkspace = true;
+        break;
+      }
+    }
+    if(!inWorkspace){
+      changes.add(new Integer[] {key,version+1,value});
+    }
   }
 
   private String printWorkspace(Set<Integer[]> ws){
@@ -150,13 +176,13 @@ public class TxnServer extends AbstractActor {
   // can change if all the versions are +1 
   // lock objects so that other clients cannot commit in the meantime
   private Boolean checkIfCanChange(Set<Integer[]> changes){
-    for(Integer[] c : changes){
-      // c = {key, version, value}
+    for(Integer[] c : changes){ // c = {key, version, value}
+      
       // dataStore.get(c[0]) = {version, value, lock}
       
       // if the lock on the key is already acquired (set to 1)
       // or the version of the change is not the next one
-      // return false; else acquire the lock on the key
+      // return false; else pass
       if( dataStore.get(c[0])[2].equals(1) ||
         !dataStore.get(c[0])[0].equals(c[1]-1) ){
         return false;
@@ -186,8 +212,9 @@ public class TxnServer extends AbstractActor {
     }
   }
 
-  // TODO: rewrite + check output
-  private String printDataStore(TxnId txnId){
+  // print the sum of the values of the datastore
+  // used to check the correctness
+  private String printCheck(TxnId txnId){
     String res = "[CHECK] ";
     res = res + txnId.name + " " + getSelf().path().name() + " ";
     Integer sum = 0;
@@ -199,7 +226,7 @@ public class TxnServer extends AbstractActor {
   }
 
   // start the termination protocol asking all the partecifants 
-  //if they have received a decision
+  // if they have received a decision
   private void terminationProtocol(TxnId txn){
     for(ActorRef i : txnPartecipants.get(txn)){
       sendReal(new PartecipantsDecisionMsg(txn), getSelf(), i);
@@ -244,7 +271,7 @@ public class TxnServer extends AbstractActor {
 
     workSpace.putIfAbsent(msg.txn, new HashSet<>());    
 
-    Integer value = getValueFromKey(msg.key);
+    Integer value = getValueFromKey(msg.key, workSpace.get(msg.txn));
     sendReal(new FwdReadResultMsg(msg.key, value, msg.txn), getSelf(), getSender());
 
   }
@@ -252,8 +279,10 @@ public class TxnServer extends AbstractActor {
   private void onFwdWriteMsg(FwdWriteMsg msg) {
     
     Integer version = getVersionFromKey(msg.key);
-    Integer[] writeResult = new Integer[] {msg.key,version+1,msg.value};
-    workSpace.get(msg.txn).add(writeResult);
+    updateWorkspace(msg.key, version, msg.value, workSpace.get(msg.txn));
+
+    // Integer[] writeResult = new Integer[] {msg.key,version+1,msg.value};
+    // workSpace.get(msg.txn).add(writeResult);
 
     printLog("\t\tSERVER " + serverId + " Received Write from " + getSender().path().name() 
              + " - WS "+ printWorkspace(workSpace.get(msg.txn)), "Verbose");
@@ -295,7 +324,7 @@ public class TxnServer extends AbstractActor {
     cancelTimeout(msg.txn);
     txnHistory.put(msg.txn, msg.decision);  // add the decision to the history
 
-    printLog(printDataStore(msg.txn),"Check");
+    printLog(printCheck(msg.txn),"Check");
 
   }
 

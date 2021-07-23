@@ -128,7 +128,8 @@ public class TxnCoordinator extends AbstractActor {
       this.client = client;
       this.id = id;
       this.coordinator = coordinator;
-      this.name = "TxnId@" + coordinator + "." + id;
+      this.name = "TxnId@" + coordinator + "." + id + "/"
+                + client.path().name().substring(9)  ;
     }
 
     public boolean matches(Object obj){
@@ -273,12 +274,12 @@ public class TxnCoordinator extends AbstractActor {
   private void onReadMsg(ReadMsg msg) {
    
     ActorRef server = getServerFromKey(msg.key);
-    
-    printLog("\tCOORDI " + coordinatorId + " Received Read from " + getSender().path().name() 
-             + " - Ask to " + server.path().name(), "Verbose");
-
     // bind the current request to the OngoingTxn
     TxnId txn = bindRequestOngoing(getSender());
+    
+    printLog("\t" + txn.name + " COORDI " + coordinatorId + " Received Read from " + getSender().path().name() 
+             + " - Ask to " + server.path().name(), "Verbose");
+
     if(txn != null){
       sendReal(new FwdReadMsg(msg.key, txn), getSelf(), server); // forward the read to the right server
     } else{
@@ -290,7 +291,7 @@ public class TxnCoordinator extends AbstractActor {
   // receive Read result from Server, forward to Client
   private void onFwdReadResultMsg(FwdReadResultMsg msg) {
     
-    printLog("\tCOORDI " + coordinatorId + " Received value from " + getSender().path().name(), "Verbose");
+    printLog("\t" + msg.txn.name + " COORDI " + coordinatorId + " Received value from " + getSender().path().name(), "Verbose");
 
     sendReal(new ReadResultMsg(msg.key,msg.value), getSelf(), msg.txn.client);
   
@@ -302,11 +303,13 @@ public class TxnCoordinator extends AbstractActor {
   
     ActorRef server = getServerFromKey(msg.key);
 
-    printLog("\tCOORDI " + coordinatorId + " Received Write from " + getSender().path().name() 
-             + " - Ask to " + server.path().name(), "Verbose");
-
     // bind the current request to the OngoingTxn
     TxnId txn = bindRequestOngoing(getSender());
+
+    printLog("\t" + txn.name + " COORDI " + coordinatorId + " Received Write from " + getSender().path().name() 
+             + " - Ask to " + server.path().name(), "Verbose");
+
+    
     if(txn != null){
       OngoingTxn.get(txn).add(server);
       sendReal(new FwdWriteMsg(msg.key, msg.value, txn), getSelf(), server); // forward the write to the right server
@@ -318,14 +321,14 @@ public class TxnCoordinator extends AbstractActor {
 
   /* --------------------------------------------------------------------*/
   private void onTxnEndMsg(TxnEndMsg msg) {
-    
-    printLog("\tCOORDI " + coordinatorId + " Received TxnEnd from " + getSender().path().name(), "Verbose");
-    
     // bind the current request to the OngoingTxn
     TxnId txn = bindRequestOngoing(getSender());
+  
+    printLog("\t" + txn.name + " COORDI " + coordinatorId + " Received TxnEnd from " + getSender().path().name(), "Verbose");
+    
     if(txn != null){
       // Set<ActorRef> serverToCommit = OngoingTxn.get(txn);
-      printLog("\tCOORDI "+ coordinatorId + " - Validation with " + printOngoing(OngoingTxn.get(txn)), "Verbose");
+      printLog("\t" + txn.name + " COORDI "+ coordinatorId + " - Validation with " + printOngoing(OngoingTxn.get(txn)), "Verbose");
 
       setTimeout(txn, 500);    // set a timeout waiting for votes
       for(ActorRef server : OngoingTxn.get(txn)){
@@ -339,14 +342,14 @@ public class TxnCoordinator extends AbstractActor {
   private void onServerDecisionMsg(ServerDecisionMsg msg){
     if(OngoingTxn.get(msg.txn) == null) return;   // decision to abort already taken
 
-    printLog("\tCOORDI " + coordinatorId + " Received Decision from " + getSender().path().name(), "Verbose");
+    printLog("\t" + msg.txn.name + " COORDI " + coordinatorId + " Received Decision from " + getSender().path().name(), "Verbose");
 
     ServerDecisions.get(msg.txn).add(msg.commit);
 
     if( Integer.valueOf(ServerDecisions.get(msg.txn).size())
         .equals(Integer.valueOf(OngoingTxn.get(msg.txn).size())) || !msg.commit){ // if arrives an abort OR all votes are commits then decide
       
-      printLog("\tCOORDI " + coordinatorId + " Decisions "+ printServerDecisions(ServerDecisions.get(msg.txn)), "Verbose");
+      printLog("\t" + msg.txn.name + " COORDI " + coordinatorId + " Decisions "+ printServerDecisions(ServerDecisions.get(msg.txn)), "Verbose");
       
       Boolean finalDecision = getfinalDecision(ServerDecisions.get(msg.txn));
       for(ActorRef server : OngoingTxn.get(msg.txn)){
@@ -367,7 +370,7 @@ public class TxnCoordinator extends AbstractActor {
   private void onTxnVoteTimeoutMsg(TxnVoteTimeoutMsg msg) throws InterruptedException {
     if(OngoingTxn.get(msg.txn) == null) return;   // decision to abort already taken
 
-    printLog("\tCOORDI " + coordinatorId + " Timeout while waiting for votes", "Verbose");
+    printLog("\t" + msg.txn.name + " COORDI " + coordinatorId + " Timeout while waiting for votes", "Verbose");
 
     Boolean finalDecision = false;
     for(ActorRef server : OngoingTxn.get(msg.txn)){

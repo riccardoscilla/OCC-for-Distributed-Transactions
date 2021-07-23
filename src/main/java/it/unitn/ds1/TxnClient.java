@@ -172,10 +172,12 @@ public class TxnClient extends AbstractActor {
   // READ two items (will move some amount from the value of the first to the second)
   void readTwo() {
 
-    // read two different keys
-    firstKey = r.nextInt(maxKey + 1);
-    int randKeyOffset = 1 + r.nextInt(maxKey - 1);
-    secondKey = (firstKey + randKeyOffset) % (maxKey + 1);
+    // read two different keys \\TODO: real code
+    // firstKey = r.nextInt(maxKey + 1);
+    // int randKeyOffset = 1 + r.nextInt(maxKey - 1);
+    // secondKey = (firstKey + randKeyOffset) % (maxKey + 1);
+    firstKey = 1;
+    secondKey = r.nextInt(maxKey + 1);
 
     // READ requests
     currentCoordinator.tell(new ReadMsg(clientId, firstKey), getSelf());
@@ -236,7 +238,7 @@ public class TxnClient extends AbstractActor {
     boolean opDone = (firstValue != null && secondValue != null);
 
     // do we only read or also write?
-    // double writeRandom = r.nextDouble();
+    // double writeRandom = r.nextDouble(); TODO: real code
     double writeRandom = 0;
     boolean doWrite = writeRandom < WRITE_PROBABILITY;
     if(doWrite && opDone) writeTwo();
@@ -244,8 +246,8 @@ public class TxnClient extends AbstractActor {
     // check if the transaction should end;
     // otherwise, read two again
     if(opDone) numOpDone++;
-    // if(numOpDone >= numOpTotal) {
-    if(numOpDone >= 1) {
+    // if(numOpDone >= numOpTotal) { TODO: real code
+    if(numOpDone >= 3) {
       endTxn();
     }
     else if(opDone) {
@@ -261,7 +263,7 @@ public class TxnClient extends AbstractActor {
     else {
       System.out.println("CLIENT " + clientId + " COMMIT FAIL ("+(numAttemptedTxn - numCommittedTxn)+"/"+numAttemptedTxn+")");
     }
-    // beginTxn();
+    // beginTxn(); TODO: real code
   }
 
   @Override

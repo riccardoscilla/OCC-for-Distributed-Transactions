@@ -10,12 +10,13 @@ import it.unitn.ds1.TxnClient.WelcomeMsg;
 import it.unitn.ds1.TxnCoordinator.WelcomeMsg2;
 
 public class TxnSystem {
-  final static int N_CLIENTS = 1;
-  final static int N_COORDINATORS = 1;
-  final static int N_SERVERS = 1;
+  final static int N_CLIENTS = 5;
+  final static int N_COORDINATORS = 2;
+  final static int N_SERVERS = 3;
   final static int maxKey = N_SERVERS*10-1;
   final static int maxDelay = 50;
   final static int minDelay = 10;
+  static int seed = 0;
 
   //Start a crash simulation
   public static class CrashMsg implements Serializable {
@@ -32,6 +33,11 @@ public class TxnSystem {
   }
 
   public static void main(String[] args) {
+    Random r = new Random();
+    if (seed == 0){
+      int max = Math.max(N_CLIENTS,Math.max(N_COORDINATORS,N_SERVERS));
+      seed = r.nextInt(Integer.MAX_VALUE/max);
+    }
 
     // Create the actor system
     final ActorSystem system = ActorSystem.create("txnSystem");

@@ -7,6 +7,8 @@ import java.util.concurrent.TimeUnit;
 import akka.actor.*;
 import scala.concurrent.duration.Duration;
 
+import it.unitn.ds1.TxnSystem;
+
 public class TxnClient extends AbstractActor {
   private static final double COMMIT_PROBABILITY = 0.8;
   private static final double WRITE_PROBABILITY = 0.5;
@@ -36,11 +38,13 @@ public class TxnClient extends AbstractActor {
 
   /*-- Actor constructor ---------------------------------------------------- */
 
-  public TxnClient(int clientId) {
+  public TxnClient(Integer clientId) {
     this.clientId = clientId;
     this.numAttemptedTxn = 0;
     this.numCommittedTxn = 0;
     this.r = new Random();
+    this.r.setSeed(TxnSystem.seed*(clientId+1));
+    if(clientId.equals(0)) System.out.println("Seed: " + TxnSystem.seed*(clientId+1));
   }
 
   static public Props props(int clientId) {
@@ -133,8 +137,8 @@ public class TxnClient extends AbstractActor {
   void beginTxn() {
 
     // some delay between transactions from the same client
-    // try { Thread.sleep(10); }
-    try { Thread.sleep(10); }
+    try { Thread.sleep(10); } //TODO: real code
+    // try { Thread.sleep(r.nextInt(20)); }
     catch (InterruptedException e) { e.printStackTrace(); }
 
     acceptedTxn = false;
@@ -161,7 +165,7 @@ public class TxnClient extends AbstractActor {
 
   // end the current TXN sending TxnEndMsg to the coordinator
   void endTxn() {
-    // boolean doCommit = r.nextDouble() < COMMIT_PROBABILITY;
+    // boolean doCommit = r.nextDouble() < COMMIT_PROBABILITY; //TODO: real code
     boolean doCommit = true;
     currentCoordinator.tell(new TxnEndMsg(clientId, doCommit), getSelf());
     firstValue = null;
@@ -173,11 +177,9 @@ public class TxnClient extends AbstractActor {
   void readTwo() {
 
     // read two different keys \\TODO: real code
-    // firstKey = r.nextInt(maxKey + 1);
-    // int randKeyOffset = 1 + r.nextInt(maxKey - 1);
-    // secondKey = (firstKey + randKeyOffset) % (maxKey + 1);
-    firstKey = 1;
-    secondKey = r.nextInt(maxKey + 1);
+    firstKey = r.nextInt(maxKey + 1);
+    int randKeyOffset = 1 + r.nextInt(maxKey - 1);
+    secondKey = (firstKey + randKeyOffset) % (maxKey + 1);
 
     // READ requests
     currentCoordinator.tell(new ReadMsg(clientId, firstKey), getSelf());
@@ -247,7 +249,7 @@ public class TxnClient extends AbstractActor {
     // otherwise, read two again
     if(opDone) numOpDone++;
     // if(numOpDone >= numOpTotal) { TODO: real code
-    if(numOpDone >= 3) {
+    if(numOpDone >= 2) {
       endTxn();
     }
     else if(opDone) {
@@ -263,7 +265,8 @@ public class TxnClient extends AbstractActor {
     else {
       System.out.println("CLIENT " + clientId + " COMMIT FAIL ("+(numAttemptedTxn - numCommittedTxn)+"/"+numAttemptedTxn+")");
     }
-    // beginTxn(); TODO: real code
+    // beginTxn(); //TODO: real code
+
   }
 
   @Override

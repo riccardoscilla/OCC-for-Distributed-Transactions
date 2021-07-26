@@ -32,6 +32,7 @@ public class TxnCoordinator extends AbstractActor {
   private final Map<TxnId,List<Boolean>> ServerDecisions;
   private final Map<TxnId, Cancellable> voteTimeout;    // contain a timeout for every transaction waiting for server votes
   private Cancellable crash;      //crash timeout
+  private final Random r;
 
   /*-- Actor constructor ---------------------------------------------------- */
   
@@ -41,6 +42,8 @@ public class TxnCoordinator extends AbstractActor {
     this.OngoingTxn = new HashMap<>(); 
     this.ServerDecisions = new HashMap<>(); 
     this.voteTimeout = new HashMap<>();
+    this.r = new Random();
+    this.r.setSeed(TxnSystem.seed*(coordinatorId+1));
   }
 
   static public Props props(int coordinatorId) {
@@ -111,7 +114,7 @@ public class TxnCoordinator extends AbstractActor {
 
   private void sendReal(Object msg, ActorRef sender, ActorRef receiver){
     try{
-      Thread.sleep((int)((Math.random())*(TxnSystem.maxDelay - TxnSystem.minDelay)) + TxnSystem.minDelay);
+      Thread.sleep((int)((r.nextDouble())*(TxnSystem.maxDelay - TxnSystem.minDelay)) + TxnSystem.minDelay);
     }catch (InterruptedException e){
       System.err.println(e);
     }
@@ -137,10 +140,6 @@ public class TxnCoordinator extends AbstractActor {
       TxnId txn = (TxnId) obj;
       return( txn.client.equals(this.client) );
     }
-
-    // public String getName(){
-    //   return "TxnId@" + coordinator + "." + id;
-    // }
 
     @Override
     public boolean equals(Object obj){
@@ -320,7 +319,7 @@ public class TxnCoordinator extends AbstractActor {
   }
 
   /* --------------------------------------------------------------------*/
-  private void onTxnEndMsg(TxnEndMsg msg) {
+  private void onTxnEndMsg(TxnEndMsg msg) { //TODO: if receive ABORT from client
     // bind the current request to the OngoingTxn
     TxnId txn = bindRequestOngoing(getSender());
   

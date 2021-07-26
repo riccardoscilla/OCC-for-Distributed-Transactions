@@ -29,6 +29,7 @@ public class TxnServer extends AbstractActor {
   private final Map<TxnId, Boolean> txnHistory;             // save an history of all the past transactions
   private final Map<TxnId, Cancellable> decisionTimeout;    // contain a timeout for every transaction waiting for a decision
   private Cancellable crash;    //crash timeout
+  private final Random r;
 
   /*-- Actor constructor ---------------------------------------------------- */
   
@@ -39,6 +40,8 @@ public class TxnServer extends AbstractActor {
     this.txnPartecipants = new HashMap<>();
     this.txnHistory = new HashMap<>();
     this.decisionTimeout = new HashMap<>();
+    this.r = new Random();
+    this.r.setSeed(TxnSystem.seed*(serverId+1));
     initDataStore();
   }
 
@@ -120,9 +123,10 @@ public class TxnServer extends AbstractActor {
     }
   }
   
+  // send messages with simulated network delays
   private void sendReal(Object msg, ActorRef sender, ActorRef receiver){
     try{
-      Thread.sleep((int)((Math.random())*(TxnSystem.maxDelay - TxnSystem.minDelay)) + TxnSystem.minDelay);
+      Thread.sleep((int)((r.nextDouble())*(TxnSystem.maxDelay - TxnSystem.minDelay)) + TxnSystem.minDelay);
     }catch (InterruptedException e){
       System.err.println(e);
     }
@@ -134,7 +138,7 @@ public class TxnServer extends AbstractActor {
   // return the value from the workspace (otw there is inconsistency)
   // else return the value from the datastore
   private Integer getValueFromKey(Integer key, Set<Integer[]> changes){
-    for(Integer[] c : changes){ // c = {key, version, value}
+    for(Integer[] c : changes){ // c = {key, version, value, r/w}
       if(c[0].equals(key)){
         return c[2];
       }
@@ -142,28 +146,47 @@ public class TxnServer extends AbstractActor {
     return dataStore.get(key)[1]; // dataStore.get(key) = {version, value, lock}
   }
 
+  // get version for a given key (datastore only)
   private Integer getVersionFromKey(Integer key){
     return dataStore.get(key)[0];
   }
- 
-  // update the workspace of a given transaction
-  // if the key has already been touched in this transaction,
-  // update only the value (same version)
-  // else add a new list
-  private void updateWorkspace(Integer key, Integer version, Integer value, Set<Integer[]> changes){
+  
+  // add a new read operation in the txn workspace
+  // if the key is not already in the txn workspace
+  // put a read operation (last value = 0) with the current version found
+  // else do nothing
+  private void addWorkspace(Integer key, Integer version, Integer value, Set<Integer[]> changes){
     Boolean inWorkspace = false;
-    for(Integer[] c : changes){ // c = {key, version, value}
+    for(Integer[] c : changes){
       if(c[0].equals(key)){
-        c[2] = value;
         inWorkspace = true;
         break;
       }
     }
-    if(!inWorkspace){
-      changes.add(new Integer[] {key,version+1,value});
+    if(!inWorkspace){ 
+      changes.add(new Integer[] {key, version, value, 0});
+    }    
+  }
+
+  // update the workspace of a given transaction
+  // search for the read operation put before
+  // change the version (only in the first change from read/write), 
+  //        the value 
+  //        set write
+  private void updateWorkspace(Integer key, Integer value, Set<Integer[]> changes){
+    for(Integer[] c : changes){ // c = {key, version, value, r/w}
+      if(c[0].equals(key)){
+        if(c[3] == 0){
+          c[1] = c[1] + 1;
+        }
+        c[2] = value;
+        c[3] = 1;
+        break;
+      }
     }
   }
 
+  // print workspace for debugging
   private String printWorkspace(Set<Integer[]> ws){
     String res = "";
     for(Integer[] i : ws){
@@ -176,38 +199,40 @@ public class TxnServer extends AbstractActor {
   // can change if all the versions are +1 
   // lock objects so that other clients cannot commit in the meantime
   private Boolean checkIfCanChange(Set<Integer[]> changes){
-    for(Integer[] c : changes){ // c = {key, version, value}
-      
-      // dataStore.get(c[0]) = {version, value, lock}
+    for(Integer[] c : changes){ // c = {key, version, value, r/w}
+                                // dataStore.get(c[0]) = {version, value, lock}
       
       // if the lock on the key is already acquired (set to 1)
       // or the version of the change is not the next one
-      // return false; else pass
+      // return false; else continue
       if( dataStore.get(c[0])[2].equals(1) ||
         !dataStore.get(c[0])[0].equals(c[1]-1) ){
         return false;
       }
-      // dataStore.get(c[0])[2] = 1;
+
     }
     // lock only after being sure it can commit
     LockChanges(changes);
     return true;
   }
 
+  // apply changes in the workspace only for writes operations
   private void ApplyChanges(Set<Integer[]> changes){
-    for(Integer[] c : changes){ // c = {key, version, value}
-      dataStore.replace(c[0],new Integer[] {c[1],c[2],0});
+    for(Integer[] c : changes){ // c = {key, version, value, r/w}
+      if(c[3] == 1){ 
+        dataStore.replace(c[0],new Integer[] {c[1],c[2],0});
+      }
     }
   }
 
   private void FreeLocks(Set<Integer[]> changes){
-    for(Integer[] c : changes){ // c = {key, version, value}
+    for(Integer[] c : changes){ // c = {key, version, value, r/w}
       dataStore.get(c[0])[2] = 0;
     }
   }
 
   private void LockChanges(Set<Integer[]> changes){
-    for(Integer[] c : changes){ // c = {key, version, value}
+    for(Integer[] c : changes){ // c = {key, version, value, r/w}
       dataStore.get(c[0])[2] = 1;
     }
   }
@@ -234,7 +259,7 @@ public class TxnServer extends AbstractActor {
     setTimeout(txn, 500);
   }
 
-  //set a decision timeout with delay t
+  // set a decision timeout with delay t
   private void setTimeout(TxnId txn, int t){
     Cancellable timeout = getContext().system().scheduler().scheduleOnce(
             Duration.create(t, TimeUnit.MILLISECONDS),
@@ -245,7 +270,7 @@ public class TxnServer extends AbstractActor {
     decisionTimeout.put(txn, timeout);
   }
 
-  //cancel a certain timeout
+  // cancel a certain timeout
   private void cancelTimeout(TxnId txn){
     if(decisionTimeout.get(txn) != null) decisionTimeout.get(txn).cancel();
   }
@@ -267,53 +292,57 @@ public class TxnServer extends AbstractActor {
   /*-- Message handlers ----------------------------------------------------- */
 
   private void onFwdReadMsg(FwdReadMsg msg) {
-    printLog("\t\tSERVER " + serverId + " Received Read from " + getSender().path().name(), "Verbose");
 
-    workSpace.putIfAbsent(msg.txn, new HashSet<>());    
-
+    workSpace.putIfAbsent(msg.txn, new HashSet<>());
     Integer value = getValueFromKey(msg.key, workSpace.get(msg.txn));
+    Integer version = getVersionFromKey(msg.key);
+
+    addWorkspace(msg.key, version, value, workSpace.get(msg.txn));   
+
+    printLog("\t\t" + msg.txn.name + " SERVER " + serverId + " Received Read from " + getSender().path().name()
+             + " - WS "+ printWorkspace(workSpace.get(msg.txn)), "Verbose");
+
     sendReal(new FwdReadResultMsg(msg.key, value, msg.txn), getSelf(), getSender());
 
   }
 
   private void onFwdWriteMsg(FwdWriteMsg msg) {
-    
-    Integer version = getVersionFromKey(msg.key);
-    updateWorkspace(msg.key, version, msg.value, workSpace.get(msg.txn));
 
-    // Integer[] writeResult = new Integer[] {msg.key,version+1,msg.value};
-    // workSpace.get(msg.txn).add(writeResult);
+    updateWorkspace(msg.key, msg.value, workSpace.get(msg.txn));
 
-    printLog("\t\tSERVER " + serverId + " Received Write from " + getSender().path().name() 
+    printLog("\t\t" + msg.txn.name + " SERVER " + serverId + " Received Write from " + getSender().path().name() 
              + " - WS "+ printWorkspace(workSpace.get(msg.txn)), "Verbose");
 
   }
 
   private void onCanCommitMsg(CanCommitMsg msg){
-    printLog("\t\tSERVER " + serverId + " Received Commit Request "
+    printLog("\t\t" + msg.txn.name + " SERVER " + serverId + " Received Commit Request "
              + " - WS "+printWorkspace(workSpace.get(msg.txn)), "Verbose");
 
     Boolean canChange = checkIfCanChange(workSpace.get(msg.txn));
 
     if(canChange){ 
-      printLog("\t\tSERVER " + serverId + " Can Change", "Verbose");
+      printLog("\t\t" + msg.txn.name + " SERVER " + serverId + " Can Change", "Verbose");
       setTimeout(msg.txn, 500); // start a timeout waiting for a decision
       txnPartecipants.put(msg.txn, msg.partecipants); // save the set of partecipants to the transaction (for termination protocol)
-      }
+    } 
     else{   // if the server send an abort vote it can immediatly abort (coordinator decision will be abort)
-      printLog("\t\tSERVER " + serverId + " Can't Change", "Verbose");
+      printLog("\t\t" + msg.txn.name + " SERVER " + serverId + " Can't Change", "Verbose");
       workSpace.remove(msg.txn);    // clear the workspace
       txnHistory.put(msg.txn, canChange); // save the decision in the history
-      }
+    }
 
-      sendReal(new ServerDecisionMsg(canChange, msg.txn), getSelf(), getSender());   // send the vote
+    sendReal(new ServerDecisionMsg(canChange, msg.txn), getSelf(), getSender());   // send the vote
 
   }
 
   private void onFinalDecisionMsg(FinalDecisionMsg msg){
-    if(workSpace.get(msg.txn) == null) return;  // if already aborted do nothing
-
-    printLog("\t\tSERVER " + serverId + " Received Final Decision ", "Verbose");
+    if(workSpace.get(msg.txn) == null) { // if already aborted do nothing
+      printLog(printCheck(msg.txn),"Check");
+      return; 
+    } 
+    
+    printLog("\t\t" + msg.txn.name + " SERVER " + serverId + " Received Final Decision ", "Verbose");
 
     if( msg.decision ) ApplyChanges(workSpace.get(msg.txn));
     else FreeLocks(workSpace.get(msg.txn)); // free the locks that may have been acquired
@@ -325,17 +354,16 @@ public class TxnServer extends AbstractActor {
     txnHistory.put(msg.txn, msg.decision);  // add the decision to the history
 
     printLog(printCheck(msg.txn),"Check");
-
   }
 
   private void onTxnDecisionTimeoutMsg(TxnDecisionTimeoutMsg msg) throws InterruptedException {
-    printLog("\t\tSERVER " + serverId + " Timeout on Final Decision ", "Verbose");
+    printLog("\t\t" + msg.txn.name + " SERVER " + serverId + " Timeout on Final Decision ", "Verbose");
     if(txnHistory.get(msg.txn) == null) terminationProtocol(msg.txn);   // when the decision message timeouts the server start the termination protocol
   }
 
   private void onPartecipantsDecisionMsg(PartecipantsDecisionMsg msg) throws InterruptedException {
     if(txnHistory.get(msg.txn) != null){  // if the server knows the decision for a certain transaction
-      printLog("\t\tSERVER " + serverId + " Forwardinf Final Decision (termination protocol) to server " + getSender().path().name(), "Verbose");
+      printLog("\t\t" + msg.txn.name + " SERVER " + serverId + " Forwardinf Final Decision (termination protocol) to server " + getSender().path().name(), "Verbose");
       sendReal(new FwdPartecipantsDecisionMsg(txnHistory.get(msg.txn), msg.txn), getSelf(), getSender());    // comunicate it to the asking server (termination protocol)
     }
   }
@@ -343,7 +371,7 @@ public class TxnServer extends AbstractActor {
   private void onFwdPartecipantsDecisionMsg(FwdPartecipantsDecisionMsg msg) throws InterruptedException {
     if(workSpace.get(msg.txn) == null) return;  // if already decided, do nothing
 
-    printLog("\t\tSERVER " + serverId + " Received Final Decision (termination protocol)", "Verbose");
+    printLog("\t\t" + msg.txn.name + " SERVER " + serverId + " Received Final Decision (termination protocol)", "Verbose");
     
     if( msg.decision ) ApplyChanges(workSpace.get(msg.txn));
     else FreeLocks(workSpace.get(msg.txn)); // free the locks that may have been acquired

@@ -93,6 +93,16 @@ public class TxnCoordinator extends AbstractActor {
     }
   }
 
+  // ABORT from the coordinator to the server
+  public static class AbortMsg implements Serializable {
+    public final TxnId txn;
+    public final Set<ActorRef> partecipants;
+    public AbortMsg(TxnId txn, Set<ActorRef> partecipants) {
+      this.txn = txn;
+      this.partecipants = partecipants;
+    }
+  }
+
   public static class FinalDecisionMsg implements Serializable {
     public final Boolean decision;
     public final TxnId txn;
@@ -320,18 +330,32 @@ public class TxnCoordinator extends AbstractActor {
 
   /* --------------------------------------------------------------------*/
   private void onTxnEndMsg(TxnEndMsg msg) { //TODO: if receive ABORT from client
+    
     // bind the current request to the OngoingTxn
-    TxnId txn = bindRequestOngoing(getSender());
+    TxnId txn = bindRequestOngoing(getSender()); 
   
-    printLog("\t" + txn.name + " COORDI " + coordinatorId + " Received TxnEnd from " + getSender().path().name(), "Verbose");
+    if(msg.commit) printLog("\t" + txn.name + " COORDI " + coordinatorId + " Received TxnEnd COMMIT from " + getSender().path().name(), "Verbose");
+    else printLog("\t" + txn.name + " COORDI " + coordinatorId + " Received TxnEnd ABORT from " + getSender().path().name(), "Verbose");
     
     if(txn != null){
-      // Set<ActorRef> serverToCommit = OngoingTxn.get(txn);
-      printLog("\t" + txn.name + " COORDI "+ coordinatorId + " - Validation with " + printOngoing(OngoingTxn.get(txn)), "Verbose");
+      if(msg.commit){ // if received commit, do validation procedure
+        printLog("\t" + txn.name + " COORDI "+ coordinatorId + " - Validation with " + printOngoing(OngoingTxn.get(txn)), "Verbose");
 
-      setTimeout(txn, 500);    // set a timeout waiting for votes
-      for(ActorRef server : OngoingTxn.get(txn)){
-        sendReal(new CanCommitMsg(txn, OngoingTxn.get(txn)), getSelf(), server); // ask to commit
+        setTimeout(txn, 500); // set a timeout waiting for votes
+        for(ActorRef server : OngoingTxn.get(txn)){
+          sendReal(new CanCommitMsg(txn, OngoingTxn.get(txn)), getSelf(), server); // ask to commit
+        }
+      } else{ // if received abort, send abort to clients
+        printLog("\t" + txn.name + " COORDI "+ coordinatorId + " - Abort to " + printOngoing(OngoingTxn.get(txn)), "Verbose");
+        
+        for(ActorRef server : OngoingTxn.get(txn)){
+          sendReal(new AbortMsg(txn, OngoingTxn.get(txn)), getSelf(), server); // tell to abort
+        }
+
+        // remove transaction (do not expect a response back to servers)
+        OngoingTxn.remove(txn);
+        ServerDecisions.remove(txn);
+        cancelTimeout(txn);
       }
     } else{
       printLog("\tNO TXN WITH THIS ID", "Verbose");

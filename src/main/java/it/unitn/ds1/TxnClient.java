@@ -170,7 +170,9 @@ public class TxnClient extends AbstractActor {
     currentCoordinator.tell(new TxnEndMsg(clientId, doCommit), getSelf());
     firstValue = null;
     secondValue = null;
-    System.out.println("CLIENT " + clientId + " END");
+    
+    if(doCommit) System.out.println("CLIENT " + clientId + " END COMMIT");
+    else System.out.println("CLIENT " + clientId + " END ABORT");
   }
 
   // READ two items (will move some amount from the value of the first to the second)

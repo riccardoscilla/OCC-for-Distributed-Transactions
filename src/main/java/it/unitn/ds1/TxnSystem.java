@@ -10,13 +10,13 @@ import it.unitn.ds1.TxnClient.WelcomeMsg;
 import it.unitn.ds1.TxnCoordinator.WelcomeMsg2;
 
 public class TxnSystem {
-  final static int N_CLIENTS = 5;
+  final static int N_CLIENTS = 4;
   final static int N_COORDINATORS = 2;
   final static int N_SERVERS = 3;
   final static int maxKey = N_SERVERS*10-1;
   final static int maxDelay = 50;
   final static int minDelay = 10;
-  static int seed = 0;
+  static int seed = 54154073;
 
   //Start a crash simulation
   public static class CrashMsg implements Serializable {

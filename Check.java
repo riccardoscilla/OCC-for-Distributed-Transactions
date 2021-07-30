@@ -4,7 +4,9 @@ import java.util.*;
 public class Check{
   static String fileName;
   static ArrayList<String> order = new ArrayList<String>();
+  static Map<String, ArrayList<Integer>> changes = new LinkedHashMap<>();
   static Map<String, Map<String, Integer>> results = new LinkedHashMap<>();
+  static Map<String, Integer> diffs = new LinkedHashMap<>();
   static String lastTxnId;
   
   /*---------------------------------------------------------- */
@@ -49,8 +51,24 @@ public class Check{
           String serverId = l[2];
           int dataStoreValue = Integer.parseInt(l[3]);
 
+          if(changes.containsKey(serverId)){
+            changes.get(serverId).add(dataStoreValue);
+          }else{
+            changes.put(serverId ,new ArrayList<>());
+            changes.get(serverId).add(1000);
+            changes.get(serverId).add(dataStoreValue);
+          }
+
+
           if(txnId.substring((txnId.length() - 1)).equals(o) && toMatch.equals("")){
             
+            if(!diffs.containsKey(txnId)){
+              diffs.put(txnId, 0);
+            }
+            int d = diffs.get(txnId) + changes.get(serverId).get(changes.get(serverId).size()-1) - dataStoreValue;
+            diffs.put(txnId, d);
+
+
             if(!results.containsKey(txnId)){
               toMatch = txnId;
               if(results.isEmpty()){
@@ -101,15 +119,23 @@ public class Check{
     });
     System.out.println();
 
-    for(String key : results.keySet()){
-      int sum = results.get(key).values().stream().mapToInt(Integer::intValue).sum();
-      if(sum % 1000 == 0){
-        System.out.println(key + " " + sum + " OK");
+    for(String key : diffs.keySet()){
+      if(diffs.get(key) == 0){
+        System.out.println(key + " " + diffs.get(key) + " OK");
       }else{
-        System.out.println(key + " " + sum + " WRONG");
+        System.out.println(key + " " + diffs.get(key) + " WRONG");
       }
-      
     }
+    System.out.println();
 
+    int finalSum = 0;
+    for(String key : changes.keySet()){
+      finalSum = finalSum + changes.get(key).get(changes.get(key).size()-1);
+    }
+    if(finalSum % 1000 == 0){
+      System.out.println("Final sum = " + finalSum + " OK");
+    }else{
+      System.out.println("Final sum = " + finalSum + " WRONG");
+    }
   }
 }

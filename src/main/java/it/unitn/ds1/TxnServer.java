@@ -358,7 +358,7 @@ public class TxnServer extends AbstractActor {
       return; 
     } 
     
-    printLog("\t\t" + msg.txn.name + " SERVER " + serverId + " Received Final Decision ", "Verbose");
+    printLog("\t\t" + msg.txn.name + " SERVER " + serverId + " Received Final Decision " + msg.decision, "Verbose");
 
     if( msg.decision ) ApplyChanges(workSpace.get(msg.txn));
     else FreeLocks(workSpace.get(msg.txn)); // free the locks that may have been acquired

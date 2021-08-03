@@ -24,7 +24,6 @@ import it.unitn.ds1.TxnSystem.RecoveryMsg;
 public class TxnServer extends AbstractActor {
   private final Integer serverId;
   private final Map<Integer, Integer[]> dataStore;
-  private String logMode = "Verbose";
   private final Map<TxnId, Set<Integer[]>> workSpace;
   private final Map<TxnId, Set<ActorRef>> txnPartecipants;  // map transactions with all its partecipants
   private final Map<TxnId, Boolean> txnHistory;             // save an history of all the past transactions
@@ -112,10 +111,10 @@ public class TxnServer extends AbstractActor {
   // print log 
   private void printLog(String logString, String mode){
     Set<String> logModeAllowed = new HashSet<>();
-    if(logMode.equals("Verbose")){
+    if(TxnSystem.logMode.equals("Verbose")){
       logModeAllowed.add("Verbose"); logModeAllowed.add("Check"); 
     }   
-    if(logMode.equals("Check")){
+    if(TxnSystem.logMode.equals("Check")){
       logModeAllowed.add("Check"); 
     } 
 
@@ -203,12 +202,14 @@ public class TxnServer extends AbstractActor {
     for(Integer[] c : changes){ // c = {key, version, value, r/w}
                                 // dataStore.get(c[0]) = {version, value, lock}
       
-      // if the lock on the key is already acquired (set to 1)
-      // or the version of the change is not the next one
-      // return false; else continue
-      if( dataStore.get(c[0])[2].equals(1) ||
-        !dataStore.get(c[0])[0].equals(c[1]-1) ){
-        return false;
+      if(c[3].equals(1)){
+        // if the lock on the key is already acquired (set to 1)
+        // or the version of the change is not the next one
+        // return false; else continue
+        if( dataStore.get(c[0])[2].equals(1) ||
+          !dataStore.get(c[0])[0].equals(c[1]-1) ){
+          return false;
+        }
       }
 
     }
@@ -221,21 +222,26 @@ public class TxnServer extends AbstractActor {
   private void ApplyChanges(Set<Integer[]> changes){
     for(Integer[] c : changes){ // c = {key, version, value, r/w}
       if(c[3].equals(1)){ 
-        // dataStore.replace(c[0],new Integer[] {c[1],c[2],0});
-        dataStore.put(c[0],new Integer[] {c[1],c[2],0});
+        dataStore.replace(c[0],new Integer[] {c[1],c[2],0});
       }
     }
   }
 
+  // free lock of all writes operations in workspace
   private void FreeLocks(Set<Integer[]> changes){
     for(Integer[] c : changes){ // c = {key, version, value, r/w}
-      dataStore.get(c[0])[2] = 0;
+      if(c[3].equals(1)){ 
+        dataStore.get(c[0])[2] = 0;
+      }
     }
   }
 
+  // lock all writes operations in workspace
   private void LockChanges(Set<Integer[]> changes){
     for(Integer[] c : changes){ // c = {key, version, value, r/w}
-      dataStore.get(c[0])[2] = 1;
+      if(c[3].equals(1)){ 
+        dataStore.get(c[0])[2] = 1;
+      }
     }
   }
 
@@ -339,7 +345,7 @@ public class TxnServer extends AbstractActor {
   }
 
   private void onAbortMsg(AbortMsg msg){
-    printLog("\t\t" + msg.txn.name + " SERVER " + serverId + " Received ABORT", "Verbose");
+    printLog("\t\t" + msg.txn.name + " SERVER " + serverId + " Received abort", "Verbose");
 
     FreeLocks(workSpace.get(msg.txn)); // free the locks that may have been acquired
     
@@ -379,7 +385,7 @@ public class TxnServer extends AbstractActor {
 
   private void onPartecipantsDecisionMsg(PartecipantsDecisionMsg msg) throws InterruptedException {
     if(txnHistory.get(msg.txn) != null){  // if the server knows the decision for a certain transaction
-      printLog("\t\t" + msg.txn.name + " SERVER " + serverId + " Forwardinf Final Decision (termination protocol) to server " + getSender().path().name(), "Verbose");
+      printLog("\t\t" + msg.txn.name + " SERVER " + serverId + " Forwarding Final Decision (termination protocol) to server " + getSender().path().name(), "Verbose");
       sendReal(new FwdPartecipantsDecisionMsg(txnHistory.get(msg.txn), msg.txn), getSelf(), getSender());    // comunicate it to the asking server (termination protocol)
     }
   }

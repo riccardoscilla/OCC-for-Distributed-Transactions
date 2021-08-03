@@ -16,7 +16,9 @@ public class TxnSystem {
   final static int maxKey = N_SERVERS*10-1;
   final static int maxDelay = 50;
   final static int minDelay = 10;
-  static int seed = 54154073;
+  static final String logMode = "Check";
+  static int seed = 0;
+  // 54154073
 
   //Start a crash simulation
   public static class CrashMsg implements Serializable {

@@ -27,7 +27,6 @@ public class TxnCoordinator extends AbstractActor {
   private final Integer coordinatorId;
   private List<ActorRef> servers;
   private int globID;
-  private String logMode = "Verbose";
   private final Map<TxnId,Set<ActorRef>> OngoingTxn; // custom objects as key of Map
   private final Map<TxnId,List<Boolean>> ServerDecisions;
   private final Map<TxnId, Cancellable> voteTimeout;    // contain a timeout for every transaction waiting for server votes
@@ -174,7 +173,7 @@ public class TxnCoordinator extends AbstractActor {
   // print log 
   private void printLog(String logString, String mode){
     Set<String> logModeAllowed = new HashSet<>();
-    if(logMode.equals("Verbose")){
+    if(TxnSystem.logMode.equals("Verbose")){
       logModeAllowed.add("Verbose"); logModeAllowed.add("Check"); 
     }    
 

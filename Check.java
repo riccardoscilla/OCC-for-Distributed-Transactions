@@ -35,6 +35,29 @@ public class Check{
   }
 
   /*---------------------------------------------------------- */
+  public static void printKeyword(String keyword){
+    String line;
+    try {
+
+      BufferedReader reader = new BufferedReader(new FileReader(fileName));
+
+      while((line = reader.readLine()) != null) {
+        line = line.replace("\0", "");
+        String[] l = line.split(" ");
+  
+        if(Arrays.stream(l).anyMatch(keyword::equals)){
+          System.out.println(line);
+        }
+      }
+
+      reader.close();
+
+    } catch(Exception ex) {
+      ex.printStackTrace();
+    }
+  }
+
+  /*---------------------------------------------------------- */
   public static void matchOrder(String o){
     String line;
     String toMatch = "";
@@ -75,7 +98,6 @@ public class Check{
                 results.put(txnId, new HashMap<>());
                 lastTxnId = txnId;
               }else{
-                // String lastTxnId = results.lastKey();
                 Map<String, Integer> copy = new HashMap<>();
                 copy.putAll(results.get(lastTxnId));
                 results.put(txnId, copy);
@@ -108,6 +130,14 @@ public class Check{
 
     getOrder();  
     System.out.println("Client Order "+order);
+    System.out.println();
+
+    printKeyword("ABORT");
+    printKeyword("OK");
+    printKeyword("FAIL");
+    System.out.println();
+
+    printKeyword("[CHECK]");
     System.out.println();
 
     for(String o : order){

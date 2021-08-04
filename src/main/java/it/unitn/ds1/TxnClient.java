@@ -267,7 +267,7 @@ public class TxnClient extends AbstractActor {
     else {
       System.out.println("CLIENT " + clientId + " COMMIT FAIL ("+(numAttemptedTxn - numCommittedTxn)+"/"+numAttemptedTxn+")");
     }
-    // beginTxn(); //TODO: real code
+    beginTxn(); //TODO: real code
 
   }
 

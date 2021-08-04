@@ -1,5 +1,6 @@
 it/unitn/ds1/TxnServer.java
  it.unitn.ds1.TxnServer
+ it.unitn.ds1.TxnServer$CrashType
  it.unitn.ds1.TxnServer$FwdPartecipantsDecisionMsg
  it.unitn.ds1.TxnServer$FwdReadResultMsg
  it.unitn.ds1.TxnServer$PartecipantsDecisionMsg

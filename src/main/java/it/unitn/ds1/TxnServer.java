@@ -28,8 +28,19 @@ public class TxnServer extends AbstractActor {
   private final Map<TxnId, Set<ActorRef>> txnPartecipants;  // map transactions with all its partecipants
   private final Map<TxnId, Boolean> txnHistory;             // save an history of all the past transactions
   private final Map<TxnId, Cancellable> decisionTimeout;    // contain a timeout for every transaction waiting for a decision
-  private Cancellable crash;    //crash timeout
+  private final Map<TxnId, String> txnState;                // follow the steps of a transaction (not voted, voted, decided)
+
   private final Random r;
+
+  private Cancellable crash;    //crash timeout
+  enum CrashType {  // type of the next simulated crash
+    NONE,
+    BeforeVote,
+    AfterVote,
+    AfterDecide
+  }
+  private CrashType nextCrash;
+  private int timeCrashed;
 
   /*-- Actor constructor ---------------------------------------------------- */
   
@@ -40,8 +51,10 @@ public class TxnServer extends AbstractActor {
     this.txnPartecipants = new HashMap<>();
     this.txnHistory = new HashMap<>();
     this.decisionTimeout = new HashMap<>();
+    this.txnState = new HashMap<>();
     this.r = new Random();
     this.r.setSeed(TxnSystem.seed*(serverId+1));
+    this.nextCrash = CrashType.NONE;
     initDataStore();
   }
 
@@ -112,8 +125,11 @@ public class TxnServer extends AbstractActor {
   private void printLog(String logString, String mode){
     Set<String> logModeAllowed = new HashSet<>();
     if(TxnSystem.logMode.equals("Verbose")){
-      logModeAllowed.add("Verbose"); logModeAllowed.add("Check"); 
+      logModeAllowed.add("Verbose"); logModeAllowed.add("Termination"); logModeAllowed.add("Check"); 
     }   
+    if(TxnSystem.logMode.equals("Termination")){
+      logModeAllowed.add("Termination"); logModeAllowed.add("Check"); 
+    }    
     if(TxnSystem.logMode.equals("Check")){
       logModeAllowed.add("Check"); 
     } 
@@ -258,11 +274,13 @@ public class TxnServer extends AbstractActor {
     return res;
   }
 
-  // start the termination protocol asking all the partecifants 
+  // start the termination protocol asking all the partecipants
   // if they have received a decision
   private void terminationProtocol(TxnId txn){
     for(ActorRef i : txnPartecipants.get(txn)){
-      sendReal(new PartecipantsDecisionMsg(txn), getSelf(), i);
+      if(!i.equals(getSelf())){
+        sendReal(new PartecipantsDecisionMsg(txn), getSelf(), i);
+      }
     }
     setTimeout(txn, 500);
   }
@@ -283,13 +301,13 @@ public class TxnServer extends AbstractActor {
     if(decisionTimeout.get(txn) != null) decisionTimeout.get(txn).cancel();
   }
 
-  private void crash(int time){
+  private void crash(){
     for(TxnId txn : decisionTimeout.keySet()){    //delete all pending timeouts
       cancelTimeout(txn);
     }
     //set a time to wake up from crash
     crash = getContext().system().scheduler().scheduleOnce(
-            Duration.create(time, TimeUnit.MILLISECONDS),
+            Duration.create(timeCrashed, TimeUnit.MILLISECONDS),
             getSelf(),
             new RecoveryMsg(), // message sent to myself
             getContext().system().dispatcher(), getSelf()
@@ -302,6 +320,8 @@ public class TxnServer extends AbstractActor {
   private void onFwdReadMsg(FwdReadMsg msg) {
 
     workSpace.putIfAbsent(msg.txn, new HashSet<>());
+    // txnHistory.putIfAbsent(msg.txn, null);
+
     Integer value = getValueFromKey(msg.key, workSpace.get(msg.txn));
     Integer version = getVersionFromKey(msg.key);
 
@@ -327,6 +347,14 @@ public class TxnServer extends AbstractActor {
     printLog("\t\t" + msg.txn.name + " SERVER " + serverId + " Received Commit Request "
              + " - WS "+printWorkspace(workSpace.get(msg.txn)), "Verbose");
 
+    txnState.put(msg.txn,CrashType.BeforeVote.name());
+    // check if server should crash (before sending vote)
+    if(nextCrash.name().equals(txnState.get(msg.txn))) {
+      printLog("\t\t" + "SERVER " + serverId + " Crashing - " + nextCrash.name(), "Termination");
+      crash();
+      return;
+    }
+
     Boolean canChange = checkIfCanChange(workSpace.get(msg.txn));
 
     if(canChange){ 
@@ -341,6 +369,14 @@ public class TxnServer extends AbstractActor {
     }
 
     sendReal(new ServerDecisionMsg(canChange, msg.txn), getSelf(), getSender());   // send the vote
+
+    txnState.put(msg.txn,CrashType.AfterVote.name());
+    // check if server should crash (after sending vote)
+    if(nextCrash.name().equals(txnState.get(msg.txn))) {
+      printLog("\t\t" + "SERVER " + serverId + " Crashing - " + nextCrash.name(), "Termination");
+      crash();
+      return;
+    }
 
   }
 
@@ -379,13 +415,13 @@ public class TxnServer extends AbstractActor {
   }
 
   private void onTxnDecisionTimeoutMsg(TxnDecisionTimeoutMsg msg) throws InterruptedException {
-    printLog("\t\t" + msg.txn.name + " SERVER " + serverId + " Timeout on Final Decision ", "Verbose");
+    printLog("\t\t" + msg.txn.name + " SERVER " + serverId + " Timeout on Final Decision ", "Termination");
     if(txnHistory.get(msg.txn) == null) terminationProtocol(msg.txn);   // when the decision message timeouts the server start the termination protocol
   }
 
   private void onPartecipantsDecisionMsg(PartecipantsDecisionMsg msg) throws InterruptedException {
     if(txnHistory.get(msg.txn) != null){  // if the server knows the decision for a certain transaction
-      printLog("\t\t" + msg.txn.name + " SERVER " + serverId + " Forwarding Final Decision (termination protocol) to server " + getSender().path().name(), "Verbose");
+      printLog("\t\t" + msg.txn.name + " SERVER " + serverId + " Forwarding Final Decision (termination protocol) to server " + getSender().path().name(), "Termination");
       sendReal(new FwdPartecipantsDecisionMsg(txnHistory.get(msg.txn), msg.txn), getSelf(), getSender());    // comunicate it to the asking server (termination protocol)
     }
   }
@@ -393,7 +429,7 @@ public class TxnServer extends AbstractActor {
   private void onFwdPartecipantsDecisionMsg(FwdPartecipantsDecisionMsg msg) throws InterruptedException {
     if(workSpace.get(msg.txn) == null) return;  // if already decided, do nothing
 
-    printLog("\t\t" + msg.txn.name + " SERVER " + serverId + " Received Final Decision (termination protocol)", "Verbose");
+    printLog("\t\t" + msg.txn.name + " SERVER " + serverId + " Received Final Decision (termination protocol)", "Termination");
     
     if( msg.decision ) ApplyChanges(workSpace.get(msg.txn));
     else FreeLocks(workSpace.get(msg.txn)); // free the locks that may have been acquired
@@ -403,19 +439,43 @@ public class TxnServer extends AbstractActor {
     txnPartecipants.remove(msg.txn);
     cancelTimeout(msg.txn);
     txnHistory.put(msg.txn, msg.decision);  // add the decision to the history
+  
+    printLog(printCheck(msg.txn),"Check");
   }
 
   private void onCrashMsg(CrashMsg msg) throws InterruptedException {
-    crash(msg.time);
+    printLog("\t\t" + "SERVER " + serverId + " Received crash msg", "Termination");
+    nextCrash = msg.nextCrash;
+    timeCrashed = msg.timeCrashed;
+    // crash(msg.time);
   }
 
   private void onRecoveryMsg(RecoveryMsg msg) throws InterruptedException{
-    getContext().become(createReceive());   //restart to handle messages
+    printLog("\t\t" + "SERVER " + serverId + " Recovered after crash", "Termination");
 
-    //Handle crash
+    getContext().become(createReceive());
+    nextCrash = CrashType.NONE;
+
+    // Handle crash
+    // Depending on the state that the server was in each transaction,
+    // do the steps of 2PC cohort recorvery
+    for(TxnId txn : workSpace.keySet()){
+
+      if(txnState.get(txn).equals(CrashType.BeforeVote.name())){
+        printLog("\t\t" + txn.name + " SERVER " + serverId + " Sending abort after recovery", "Termination");
+        workSpace.remove(txn);        // clear the workspace
+        txnHistory.put(txn, false);   // save the abort decision in the history
+        sendReal(new ServerDecisionMsg(false, txn), getSelf(), txn.coordinator);   // send the vote
+      }
+
+      if(txnState.get(txn).equals(CrashType.AfterVote.name())){
+        printLog("\t\t" + txn.name + " SERVER " + serverId + " Ask to the others after recovery", "Termination");
+        terminationProtocol(txn);
+      }
+      
+    }
+
   }
-
-
 
 
   @Override

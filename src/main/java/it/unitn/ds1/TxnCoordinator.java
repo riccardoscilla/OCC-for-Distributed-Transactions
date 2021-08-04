@@ -132,15 +132,17 @@ public class TxnCoordinator extends AbstractActor {
 
   public static class TxnId{
     public final ActorRef client;
+    public final ActorRef coordinator;
     public int id;
-    public int coordinator;
+    public int coordId;
     public String name;
 
-    public TxnId(ActorRef client, int id, int coordinator){
+    public TxnId(ActorRef client, ActorRef coordinator, int id, int coordId){
       this.client = client;
-      this.id = id;
       this.coordinator = coordinator;
-      this.name = "TxnId@" + coordinator + "." + id + "/"
+      this.id = id;
+      this.coordId = coordId;
+      this.name = "TxnId@" + coordId + "." + id + "/"
                 + client.path().name().substring(9)  ;
     }
 
@@ -155,12 +157,12 @@ public class TxnCoordinator extends AbstractActor {
       if(this == obj) return true;
       if(obj == null || obj.getClass() != this.getClass()) return false;
       TxnId txn = (TxnId) obj;
-      return( txn.client.equals(this.client) && txn.coordinator == this.coordinator && txn.id == this.id );
+      return( txn.client.equals(this.client) && txn.coordId == this.coordId && txn.id == this.id );
     }
 
     @Override
     public int hashCode(){ // map 2 int into a single one
-      int a = coordinator;
+      int a = coordId;
       int b = id;
       // Cantor pairing function
       // return ((a+b) * (a + b + 1) / 2 + a);
@@ -188,7 +190,7 @@ public class TxnCoordinator extends AbstractActor {
   }
 
   private TxnId bindRequestOngoing(ActorRef sender){
-    TxnId candidateTxn = new TxnId(sender,0,coordinatorId);
+    TxnId candidateTxn = new TxnId(sender,getSelf(),0,coordinatorId);
     for(TxnId key : OngoingTxn.keySet()){
       if(key.matches(candidateTxn)){
         return key;
@@ -268,8 +270,8 @@ public class TxnCoordinator extends AbstractActor {
     
     printLog("\tCOORDI " + coordinatorId + " Received txnBegin from " + getSender().path().name(), "Verbose");
     
-    OngoingTxn.put(new TxnId(getSender(),globID,coordinatorId),new HashSet<>()); // add new transaction in Ongoing
-    ServerDecisions.put(new TxnId(getSender(),globID,coordinatorId),new ArrayList<>()); // add new transaction in ServerDecisions
+    OngoingTxn.put(new TxnId(getSender(),getSelf(),globID,coordinatorId),new HashSet<>()); // add new transaction in Ongoing
+    ServerDecisions.put(new TxnId(getSender(),getSelf(),globID,coordinatorId),new ArrayList<>()); // add new transaction in ServerDecisions
     globID = globID + 1;
 
     // printFullOngoing();
@@ -328,7 +330,7 @@ public class TxnCoordinator extends AbstractActor {
   }
 
   /* --------------------------------------------------------------------*/
-  private void onTxnEndMsg(TxnEndMsg msg) { //TODO: if receive ABORT from client
+  private void onTxnEndMsg(TxnEndMsg msg) { 
     
     // bind the current request to the OngoingTxn
     TxnId txn = bindRequestOngoing(getSender()); 
@@ -407,7 +409,7 @@ public class TxnCoordinator extends AbstractActor {
   }
 
   private void onCrashMsg(CrashMsg msg) throws InterruptedException {
-    crash(msg.time);
+    // crash(msg.time);
   }
 
   private void onRecoveryMsg(RecoveryMsg msg) throws InterruptedException{

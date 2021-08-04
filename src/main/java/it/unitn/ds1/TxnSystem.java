@@ -6,27 +6,37 @@ import java.util.*;
 import java.io.IOException;
 import java.io.Serializable;
 
+import java.time.Duration;
+import akka.actor.*;
+
 import it.unitn.ds1.TxnClient.WelcomeMsg;
 import it.unitn.ds1.TxnCoordinator.WelcomeMsg2;
 
+import it.unitn.ds1.TxnServer.CrashType;
+
 public class TxnSystem {
-  final static int N_CLIENTS = 4;
-  final static int N_COORDINATORS = 2;
+  final static int N_CLIENTS = 1;
+  final static int N_COORDINATORS = 1;
   final static int N_SERVERS = 3;
   final static int maxKey = N_SERVERS*10-1;
   final static int maxDelay = 50;
   final static int minDelay = 10;
-  static final String logMode = "Check";
+  static final String logMode = "Verbose";
   static int seed = 0;
   // 54154073
 
+  static Cancellable serverCrash;
+
   //Start a crash simulation
   public static class CrashMsg implements Serializable {
-    public final int time;
-    public CrashMsg(int time){
-      this.time = time;
+    public final CrashType nextCrash;
+    public final int timeCrashed;
+    public CrashMsg(CrashType nextCrash, int timeCrashed){
+      this.nextCrash = nextCrash;
+      this.timeCrashed = timeCrashed;
     }
   }
+
   //Recover from the simulated crash
   public static class RecoveryMsg implements Serializable {
     public RecoveryMsg(){
@@ -73,13 +83,31 @@ public class TxnSystem {
     for (ActorRef client: coordinators) {
       client.tell(welcomeCoordi, ActorRef.noSender());
     }
-    
-    // Terminate
-    try {
-      System.out.println(">>> Press ENTER to exit <<<\n");
-      System.in.read();
-    } 
-    catch (IOException ioe) {}
-    system.terminate();
+
+
+    inputContinue();
+    servers.get(r.nextInt(servers.size())).tell(new CrashMsg(CrashType.AfterVote, 600), ActorRef.noSender());
+    inputContinue();
+
+    inputTerminate(system);
   }
+
+  public static void inputContinue() {
+    try {
+      System.out.println(">>> Press ENTER to continue <<<");
+      System.in.read();
+    }
+    catch (IOException ioe) {}
+  }
+
+  public static void inputTerminate(ActorSystem system) {
+    try {
+      System.out.println(">>> Press ENTER to exit <<<");
+      System.in.read();
+      system.terminate();
+    }
+    catch (IOException ioe) {}
+    
+  }
+
 }

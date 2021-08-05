@@ -22,7 +22,7 @@ public class TxnSystem {
   final static int maxDelay = 50;
   final static int minDelay = 10;
   static final String logMode = "Verbose";
-  static int seed = 0;
+  static int seed = 405556085;
   // 54154073
 
   static Cancellable serverCrash;
@@ -86,7 +86,7 @@ public class TxnSystem {
 
 
     inputContinue();
-    servers.get(r.nextInt(servers.size())).tell(new CrashMsg(CrashType.AfterVote, 600), ActorRef.noSender());
+    servers.get(r.nextInt(servers.size())).tell(new CrashMsg(CrashType.BeforeVote, 600), ActorRef.noSender());
     inputContinue();
 
     inputTerminate(system);

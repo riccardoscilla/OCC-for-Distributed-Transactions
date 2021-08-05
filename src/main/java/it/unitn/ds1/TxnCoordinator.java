@@ -29,7 +29,8 @@ public class TxnCoordinator extends AbstractActor {
   private int globID;
   private final Map<TxnId,Set<ActorRef>> OngoingTxn; // custom objects as key of Map
   private final Map<TxnId,List<Boolean>> ServerDecisions;
-  private final Map<TxnId, Cancellable> voteTimeout;    // contain a timeout for every transaction waiting for server votes
+  private final Map<TxnId,Map<ActorRef,Cancellable>> readTimeout;    // contain a timeout for every transaction waiting for reads
+  private final Map<TxnId,Cancellable> voteTimeout;    // contain a timeout for every transaction waiting for server votes
   private Cancellable crash;      //crash timeout
   private final Random r;
 
@@ -40,6 +41,7 @@ public class TxnCoordinator extends AbstractActor {
     this.globID = 0;
     this.OngoingTxn = new HashMap<>(); 
     this.ServerDecisions = new HashMap<>(); 
+    this.readTimeout = new HashMap<>();
     this.voteTimeout = new HashMap<>();
     this.r = new Random();
     this.r.setSeed(TxnSystem.seed*(coordinatorId+1));
@@ -108,6 +110,16 @@ public class TxnCoordinator extends AbstractActor {
     public FinalDecisionMsg(Boolean decision, TxnId txn) {
       this.decision = decision;
       this.txn = txn;
+    }
+  }
+
+  // the coordinator may timeout waiting for the reads of the servers
+  public static class TxnReadTimeoutMsg implements Serializable {
+    public final TxnId txn;
+    public final ActorRef server;
+    public TxnReadTimeoutMsg(TxnId txn, ActorRef server) {
+      this.txn = txn;
+      this.server = server;
     }
   }
 
@@ -230,8 +242,23 @@ public class TxnCoordinator extends AbstractActor {
     return true;
   }
 
-  //set a decision timeout with delay t
-  private void setTimeout(TxnId txn, int t){
+  //set a decision timeout with delay t for reads 
+  private void setReadTimeout(TxnId txn, ActorRef server, int t){
+    Cancellable timeout = getContext().system().scheduler().scheduleOnce(
+            Duration.create(t, TimeUnit.MILLISECONDS),
+            getSelf(),
+            new TxnReadTimeoutMsg(txn,server), // message sent to myself
+            getContext().system().dispatcher(), getSelf()
+    );
+    readTimeout.putIfAbsent(txn, new HashMap<>());
+    readTimeout.get(txn).put(server,timeout);
+
+    printLog("\t"+txn.name+" COORDI " + coordinatorId + " insert timeout " +server.path().name(), "Verbose");
+
+  }
+
+  //set a decision timeout with delay t for votes
+  private void setVoteTimeout(TxnId txn, int t){
     Cancellable timeout = getContext().system().scheduler().scheduleOnce(
             Duration.create(t, TimeUnit.MILLISECONDS),
             getSelf(),
@@ -242,13 +269,29 @@ public class TxnCoordinator extends AbstractActor {
   }
 
   //cancel a certain timeout
-  private void cancelTimeout(TxnId txn){
+  private void cancelReadTimeout(TxnId txn, ActorRef server){
+    if(readTimeout.get(txn).get(server) != null){
+      
+
+      if(!readTimeout.get(txn).get(server).isCancelled()){
+        readTimeout.get(txn).get(server).cancel();
+        printLog("\t"+txn.name+" COORDI " + coordinatorId + " cancel timeout of " +server.path().name(), "Verbose");
+      }
+
+    }
+    else{
+      printLog("\t"+txn.name+" COORDI " + coordinatorId +" "+server.path().name() +" Not present ", "Verbose");
+    }
+  }
+
+  private void cancelVoteTimeout(TxnId txn){
     if(voteTimeout.get(txn) != null) voteTimeout.get(txn).cancel();
   }
 
   private void crash(int time){
     for(TxnId txn : voteTimeout.keySet()){    //delete all pending timeouts
-      cancelTimeout(txn);
+      // cancelReadTimeout(txn);
+      cancelVoteTimeout(txn);
     }
     //set a time to wake up from crash
     crash = getContext().system().scheduler().scheduleOnce(
@@ -290,7 +333,9 @@ public class TxnCoordinator extends AbstractActor {
     printLog("\t" + txn.name + " COORDI " + coordinatorId + " Received Read from " + getSender().path().name() 
              + " - Ask to " + server.path().name(), "Verbose");
 
+    setReadTimeout(txn,server,500);
     if(txn != null){
+      OngoingTxn.get(txn).add(server);
       sendReal(new FwdReadMsg(msg.key, txn), getSelf(), server); // forward the read to the right server
     } else{
       printLog("\tNO TXN WITH THIS ID", "Verbose");
@@ -303,6 +348,7 @@ public class TxnCoordinator extends AbstractActor {
     
     printLog("\t" + msg.txn.name + " COORDI " + coordinatorId + " Received value from " + getSender().path().name(), "Verbose");
 
+    cancelReadTimeout(msg.txn,getSender());
     sendReal(new ReadResultMsg(msg.key,msg.value), getSelf(), msg.txn.client);
   
   }
@@ -321,7 +367,6 @@ public class TxnCoordinator extends AbstractActor {
 
     
     if(txn != null){
-      OngoingTxn.get(txn).add(server);
       sendReal(new FwdWriteMsg(msg.key, msg.value, txn), getSelf(), server); // forward the write to the right server
     } else{
       printLog("\tNO TXN WITH THIS ID", "Verbose");
@@ -342,11 +387,11 @@ public class TxnCoordinator extends AbstractActor {
       if(msg.commit){ // if received commit, do validation procedure
         printLog("\t" + txn.name + " COORDI "+ coordinatorId + " - Validation with " + printOngoing(OngoingTxn.get(txn)), "Verbose");
 
-        setTimeout(txn, 500); // set a timeout waiting for votes
+        setVoteTimeout(txn, 500); // set a timeout waiting for votes
         for(ActorRef server : OngoingTxn.get(txn)){
           sendReal(new CanCommitMsg(txn, OngoingTxn.get(txn)), getSelf(), server); // ask to commit
         }
-      } else{ // if received abort, send abort to clients
+      } else{ // if received abort, send abort to servers
         printLog("\t" + txn.name + " COORDI "+ coordinatorId + " - Abort to " + printOngoing(OngoingTxn.get(txn)), "Verbose");
         
         for(ActorRef server : OngoingTxn.get(txn)){
@@ -356,7 +401,7 @@ public class TxnCoordinator extends AbstractActor {
         // remove transaction (do not expect a response back to servers)
         OngoingTxn.remove(txn);
         ServerDecisions.remove(txn);
-        cancelTimeout(txn);
+        cancelVoteTimeout(txn);
       }
     } else{
       printLog("\tNO TXN WITH THIS ID", "Verbose");
@@ -385,12 +430,31 @@ public class TxnCoordinator extends AbstractActor {
       // remove transaction
       OngoingTxn.remove(msg.txn);
       ServerDecisions.remove(msg.txn);
-      cancelTimeout(msg.txn);
+      cancelVoteTimeout(msg.txn);
 
     }
     
   }
 
+  /* --------------------------------------------------------------------*/
+  private void onTxnReadTimeoutMsg(TxnReadTimeoutMsg msg) throws InterruptedException {
+    if(OngoingTxn.get(msg.txn) == null) return;   // decision to abort already taken
+
+    printLog("\t" + msg.txn.name + " COORDI " + coordinatorId + " Timeout while waiting for read result from " + msg.server.path().name(), "Verbose");
+
+    Boolean finalDecision = false;
+    for(ActorRef server : OngoingTxn.get(msg.txn)){
+      sendReal(new FinalDecisionMsg(finalDecision, msg.txn), getSelf(), server); // send final Decision to all servers
+    }
+
+    sendReal(new TxnResultMsg(finalDecision), getSelf(), msg.txn.client); // send final Decision 
+
+    // remove transaction
+    OngoingTxn.remove(msg.txn);
+    ServerDecisions.remove(msg.txn);
+  }
+
+  /* --------------------------------------------------------------------*/
   private void onTxnVoteTimeoutMsg(TxnVoteTimeoutMsg msg) throws InterruptedException {
     if(OngoingTxn.get(msg.txn) == null) return;   // decision to abort already taken
 
@@ -408,6 +472,7 @@ public class TxnCoordinator extends AbstractActor {
     ServerDecisions.remove(msg.txn);
   }
 
+  /* --------------------------------------------------------------------*/
   private void onCrashMsg(CrashMsg msg) throws InterruptedException {
     // crash(msg.time);
   }
@@ -430,6 +495,7 @@ public class TxnCoordinator extends AbstractActor {
             .match(WriteMsg.class,  this::onWriteMsg)
             .match(TxnEndMsg.class,  this::onTxnEndMsg)
             .match(ServerDecisionMsg.class, this::onServerDecisionMsg)
+            .match(TxnReadTimeoutMsg.class,  this::onTxnReadTimeoutMsg)
             .match(TxnVoteTimeoutMsg.class,  this::onTxnVoteTimeoutMsg)
             .match(CrashMsg.class,  this::onCrashMsg)
             .build();

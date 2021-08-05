@@ -343,6 +343,7 @@ public class TxnServer extends AbstractActor {
 
   }
 
+  /*------------------------------------------------------- */
   private void onCanCommitMsg(CanCommitMsg msg){
     printLog("\t\t" + msg.txn.name + " SERVER " + serverId + " Received Commit Request "
              + " - WS "+printWorkspace(workSpace.get(msg.txn)), "Verbose");
@@ -380,6 +381,7 @@ public class TxnServer extends AbstractActor {
 
   }
 
+  /*------------------------------------------------------- */
   private void onAbortMsg(AbortMsg msg){
     printLog("\t\t" + msg.txn.name + " SERVER " + serverId + " Received abort", "Verbose");
 
@@ -458,7 +460,7 @@ public class TxnServer extends AbstractActor {
 
     // Handle crash
     // Depending on the state that the server was in each transaction,
-    // do the steps of 2PC cohort recorvery
+    // do the steps of 2PC cohort recovery
     for(TxnId txn : workSpace.keySet()){
 
       if(txnState.get(txn).equals(CrashType.BeforeVote.name())){
@@ -466,6 +468,7 @@ public class TxnServer extends AbstractActor {
         workSpace.remove(txn);        // clear the workspace
         txnHistory.put(txn, false);   // save the abort decision in the history
         sendReal(new ServerDecisionMsg(false, txn), getSelf(), txn.coordinator);   // send the vote
+        printLog(printCheck(txn),"Check");
       }
 
       if(txnState.get(txn).equals(CrashType.AfterVote.name())){

@@ -84,10 +84,26 @@ public class TxnSystem {
       client.tell(welcomeCoordi, ActorRef.noSender());
     }
 
+    // automated crash simulator
+    Cancellable cancellable = system.scheduler().scheduleWithFixedDelay(
+            Duration.ofMillis(2000),
+            Duration.ofMillis(2000),
+            new Runnable() {
+              @Override
+              public void run() {
+                ActorRef serverToCrash = servers.get(r.nextInt(servers.size()));
+                CrashType nextCrash = CrashType.values()[r.nextInt(CrashType.values().length)];
+                int timeToCrash = r.nextInt(800);
+                serverToCrash.tell(new CrashMsg(nextCrash, timeToCrash), ActorRef.noSender());
+              }
+            },
+            system.dispatcher()
+    );
 
-    inputContinue();
-    servers.get(r.nextInt(servers.size())).tell(new CrashMsg(CrashType.BeforeVote, 600), ActorRef.noSender());
-    inputContinue();
+    // manual crash simulator
+    // inputContinue();
+    // servers.get(r.nextInt(servers.size())).tell(new CrashMsg(CrashType.BeforeVote, 600), ActorRef.noSender());
+    // inputContinue();
 
     inputTerminate(system);
   }
@@ -109,5 +125,6 @@ public class TxnSystem {
     catch (IOException ioe) {}
     
   }
+
 
 }

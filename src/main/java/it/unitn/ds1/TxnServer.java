@@ -446,7 +446,7 @@ public class TxnServer extends AbstractActor {
   }
 
   private void onCrashMsg(CrashMsg msg) throws InterruptedException {
-    printLog("\t\t" + "SERVER " + serverId + " Received crash msg", "Termination");
+    printLog("\t\t" + "SERVER " + serverId + " Received crash msg "+msg.nextCrash.name(), "Termination");
     nextCrash = msg.nextCrash;
     timeCrashed = msg.timeCrashed;
     // crash(msg.time);

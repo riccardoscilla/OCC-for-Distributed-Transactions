@@ -17,6 +17,8 @@ import it.unitn.ds1.TxnClient.TxnResultMsg;
 
 import it.unitn.ds1.TxnServer.FwdReadResultMsg;
 import it.unitn.ds1.TxnServer.ServerDecisionMsg;
+import it.unitn.ds1.TxnServer.FwdPartecipantsDecisionMsg;
+import it.unitn.ds1.TxnServer.PartecipantsDecisionMsg;
 
 import it.unitn.ds1.TxnSystem;
 import it.unitn.ds1.TxnSystem.CrashMsg;
@@ -29,7 +31,8 @@ public class TxnCoordinator extends AbstractActor {
   private int globID;
   private final Map<TxnId,Set<ActorRef>> OngoingTxn; // custom objects as key of Map
   private final Map<TxnId,List<Boolean>> ServerDecisions;
-  private final Map<TxnId,Map<ActorRef,Cancellable>> readTimeout;    // contain a timeout for every transaction waiting for reads
+  private final Map<TxnId,Boolean> txnHistory;
+  private final Map<TxnId,Map<Integer,Cancellable>> readTimeout;    // contain a timeout for every transaction waiting for reads
   private final Map<TxnId,Cancellable> voteTimeout;    // contain a timeout for every transaction waiting for server votes
   private Cancellable crash;      //crash timeout
   private final Random r;
@@ -40,7 +43,8 @@ public class TxnCoordinator extends AbstractActor {
     this.coordinatorId = coordinatorId;
     this.globID = 0;
     this.OngoingTxn = new HashMap<>(); 
-    this.ServerDecisions = new HashMap<>(); 
+    this.ServerDecisions = new HashMap<>();
+    this.txnHistory = new HashMap<>();
     this.readTimeout = new HashMap<>();
     this.voteTimeout = new HashMap<>();
     this.r = new Random();
@@ -134,12 +138,13 @@ public class TxnCoordinator extends AbstractActor {
   /*-- Actor methods -------------------------------------------------------- */
 
   private void sendReal(Object msg, ActorRef sender, ActorRef receiver){
-    try{
-      Thread.sleep((int)((r.nextDouble())*(TxnSystem.maxDelay - TxnSystem.minDelay)) + TxnSystem.minDelay);
-    }catch (InterruptedException e){
-      System.err.println(e);
-    }
-    receiver.tell(msg, sender);
+    getContext().system().scheduler().scheduleOnce(
+            Duration.create((int)((r.nextDouble())*(TxnSystem.maxDelay - TxnSystem.minDelay)) + TxnSystem.minDelay, TimeUnit.MILLISECONDS),
+            receiver,
+            msg, // message sent to myself
+            getContext().system().dispatcher(),
+            sender
+    );
   }
 
   public static class TxnId{
@@ -243,7 +248,7 @@ public class TxnCoordinator extends AbstractActor {
   }
 
   //set a decision timeout with delay t for reads 
-  private void setReadTimeout(TxnId txn, ActorRef server, int t){
+  private void setReadTimeout(TxnId txn, ActorRef server, Integer key, int t){
     Cancellable timeout = getContext().system().scheduler().scheduleOnce(
             Duration.create(t, TimeUnit.MILLISECONDS),
             getSelf(),
@@ -251,7 +256,12 @@ public class TxnCoordinator extends AbstractActor {
             getContext().system().dispatcher(), getSelf()
     );
     readTimeout.putIfAbsent(txn, new HashMap<>());
-    readTimeout.get(txn).put(server,timeout);
+    /*if(readTimeout.get(txn).get(key) != null){
+      if(!readTimeout.get(txn).get(key).isCancelled()){
+        readTimeout.get(txn).get(key).cancel();
+      }
+    }*/
+    readTimeout.get(txn).put(key,timeout);
 
     printLog("\t"+txn.name+" COORDI " + coordinatorId + " insert timeout " +server.path().name(), "Verbose");
 
@@ -269,12 +279,12 @@ public class TxnCoordinator extends AbstractActor {
   }
 
   //cancel a certain timeout
-  private void cancelReadTimeout(TxnId txn, ActorRef server){
-    if(readTimeout.get(txn).get(server) != null){
+  private void cancelReadTimeout(TxnId txn, ActorRef server, Integer key){
+    if(readTimeout.get(txn).get(key) != null){
       
 
-      if(!readTimeout.get(txn).get(server).isCancelled()){
-        readTimeout.get(txn).get(server).cancel();
+      if(!readTimeout.get(txn).get(key).isCancelled()){
+        readTimeout.get(txn).get(key).cancel();
         printLog("\t"+txn.name+" COORDI " + coordinatorId + " cancel timeout of " +server.path().name(), "Verbose");
       }
 
@@ -333,7 +343,7 @@ public class TxnCoordinator extends AbstractActor {
     printLog("\t" + txn.name + " COORDI " + coordinatorId + " Received Read from " + getSender().path().name() 
              + " - Ask to " + server.path().name(), "Verbose");
 
-    setReadTimeout(txn,server,500);
+    setReadTimeout(txn,server,msg.key,500);
     if(txn != null){
       OngoingTxn.get(txn).add(server);
       sendReal(new FwdReadMsg(msg.key, txn), getSelf(), server); // forward the read to the right server
@@ -348,7 +358,7 @@ public class TxnCoordinator extends AbstractActor {
     
     printLog("\t" + msg.txn.name + " COORDI " + coordinatorId + " Received value from " + getSender().path().name(), "Verbose");
 
-    cancelReadTimeout(msg.txn,getSender());
+    cancelReadTimeout(msg.txn,getSender(),msg.key);
     sendReal(new ReadResultMsg(msg.key,msg.value), getSelf(), msg.txn.client);
   
   }
@@ -384,18 +394,21 @@ public class TxnCoordinator extends AbstractActor {
     else printLog("\t" + txn.name + " COORDI " + coordinatorId + " Received TxnEnd ABORT from " + getSender().path().name(), "Verbose");
     
     if(txn != null){
+      Set<ActorRef> partecipants = new HashSet<ActorRef>(OngoingTxn.get(txn));
+      partecipants.add(getSelf());
+
       if(msg.commit){ // if received commit, do validation procedure
         printLog("\t" + txn.name + " COORDI "+ coordinatorId + " - Validation with " + printOngoing(OngoingTxn.get(txn)), "Verbose");
 
         setVoteTimeout(txn, 500); // set a timeout waiting for votes
         for(ActorRef server : OngoingTxn.get(txn)){
-          sendReal(new CanCommitMsg(txn, OngoingTxn.get(txn)), getSelf(), server); // ask to commit
+          sendReal(new CanCommitMsg(txn, partecipants), getSelf(), server); // ask to commit
         }
       } else{ // if received abort, send abort to servers
         printLog("\t" + txn.name + " COORDI "+ coordinatorId + " - Abort to " + printOngoing(OngoingTxn.get(txn)), "Verbose");
         
         for(ActorRef server : OngoingTxn.get(txn)){
-          sendReal(new AbortMsg(txn, OngoingTxn.get(txn)), getSelf(), server); // tell to abort
+          sendReal(new AbortMsg(txn, partecipants), getSelf(), server); // tell to abort
         }
 
         // remove transaction (do not expect a response back to servers)
@@ -421,6 +434,7 @@ public class TxnCoordinator extends AbstractActor {
       printLog("\t" + msg.txn.name + " COORDI " + coordinatorId + " Decisions "+ printServerDecisions(ServerDecisions.get(msg.txn)), "Verbose");
       
       Boolean finalDecision = getfinalDecision(ServerDecisions.get(msg.txn));
+      txnHistory.put(msg.txn, finalDecision);
       for(ActorRef server : OngoingTxn.get(msg.txn)){
         sendReal(new FinalDecisionMsg(finalDecision, msg.txn), getSelf(), server); // send final Decision to all servers
       }
@@ -443,6 +457,7 @@ public class TxnCoordinator extends AbstractActor {
     printLog("\t" + msg.txn.name + " COORDI " + coordinatorId + " Timeout while waiting for read result from " + msg.server.path().name(), "Verbose");
 
     Boolean finalDecision = false;
+    txnHistory.put(msg.txn, finalDecision);
     for(ActorRef server : OngoingTxn.get(msg.txn)){
       sendReal(new FinalDecisionMsg(finalDecision, msg.txn), getSelf(), server); // send final Decision to all servers
     }
@@ -461,6 +476,7 @@ public class TxnCoordinator extends AbstractActor {
     printLog("\t" + msg.txn.name + " COORDI " + coordinatorId + " Timeout while waiting for votes", "Verbose");
 
     Boolean finalDecision = false;
+    txnHistory.put(msg.txn, finalDecision);
     for(ActorRef server : OngoingTxn.get(msg.txn)){
       sendReal(new FinalDecisionMsg(finalDecision, msg.txn), getSelf(), server); // send final Decision to all servers
     }
@@ -483,6 +499,17 @@ public class TxnCoordinator extends AbstractActor {
     //Handle crash
   }
 
+  private void onPartecipantsDecisionMsg(PartecipantsDecisionMsg msg) throws InterruptedException {
+    if(txnHistory.get(msg.txn) != null){  // if the server knows the decision for a certain transaction
+      printLog("\t\t" + msg.txn.name + " COORD " + coordinatorId + " Forwarding Final Decision (termination protocol) to server " + getSender().path().name(), "Termination");
+      sendReal(new FwdPartecipantsDecisionMsg(txnHistory.get(msg.txn), msg.txn), getSelf(), getSender());    // comunicate it to the asking server (termination protocol)
+    }
+  }
+
+  private void onFwdPartecipantsDecisionMsg(FwdPartecipantsDecisionMsg msg) throws InterruptedException {
+    
+  }
+
 
 
   @Override
@@ -498,6 +525,8 @@ public class TxnCoordinator extends AbstractActor {
             .match(TxnReadTimeoutMsg.class,  this::onTxnReadTimeoutMsg)
             .match(TxnVoteTimeoutMsg.class,  this::onTxnVoteTimeoutMsg)
             .match(CrashMsg.class,  this::onCrashMsg)
+            .match(PartecipantsDecisionMsg.class,  this::onPartecipantsDecisionMsg)
+            //.match(FwdPartecipantsDecisionMsg.class,  this::onFwdPartecipantsDecisionMsg)
             .build();
   }
 

@@ -141,12 +141,13 @@ public class TxnServer extends AbstractActor {
   
   // send messages with simulated network delays
   private void sendReal(Object msg, ActorRef sender, ActorRef receiver){
-    try{
-      Thread.sleep((int)((r.nextDouble())*(TxnSystem.maxDelay - TxnSystem.minDelay)) + TxnSystem.minDelay);
-    }catch (InterruptedException e){
-      System.err.println(e);
-    }
-    receiver.tell(msg, sender);
+    getContext().system().scheduler().scheduleOnce(
+            Duration.create((int)((r.nextDouble())*(TxnSystem.maxDelay - TxnSystem.minDelay)) + TxnSystem.minDelay, TimeUnit.MILLISECONDS),
+            receiver,
+            msg, // message sent to myself
+            getContext().system().dispatcher(),
+            sender
+    );
   }
 
   // get value for a given key

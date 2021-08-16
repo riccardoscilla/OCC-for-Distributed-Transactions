@@ -18,7 +18,7 @@ import it.unitn.ds1.TxnCoordinator.AbortMsg;
 import it.unitn.ds1.TxnCoordinator.FinalDecisionMsg;
 
 import it.unitn.ds1.TxnSystem;
-import it.unitn.ds1.TxnSystem.CrashMsg;
+import it.unitn.ds1.TxnSystem.CrashServerMsg;
 import it.unitn.ds1.TxnSystem.RecoveryMsg;
 
 public class TxnServer extends AbstractActor {
@@ -28,18 +28,17 @@ public class TxnServer extends AbstractActor {
   private final Map<TxnId, Set<ActorRef>> txnPartecipants;  // map transactions with all its partecipants
   private final Map<TxnId, Boolean> txnHistory;             // save an history of all the past transactions
   private final Map<TxnId, Cancellable> decisionTimeout;    // contain a timeout for every transaction waiting for a decision
-  private final Map<TxnId, String> txnState;                // follow the steps of a transaction (not voted, voted, decided)
+  private final Map<TxnId, String> txnState;                // follow the steps of a transaction (not voted, voted)
 
   private final Random r;
 
-  private Cancellable crash;    //crash timeout
-  enum CrashType {  // type of the next simulated crash
+  private Cancellable crash;    // crash timeout
+  enum CrashServerType {  // type of the next simulated crash
     NONE,
     BeforeVote,
-    AfterVote,
-    AfterDecide
+    AfterVote
   }
-  private CrashType nextCrash;
+  private CrashServerType nextCrash;
   private int timeCrashed;
 
   /*-- Actor constructor ---------------------------------------------------- */
@@ -54,7 +53,7 @@ public class TxnServer extends AbstractActor {
     this.txnState = new HashMap<>();
     this.r = new Random();
     this.r.setSeed(TxnSystem.seed*(serverId+1));
-    this.nextCrash = CrashType.NONE;
+    this.nextCrash = CrashServerType.NONE;
     initDataStore();
   }
 
@@ -125,7 +124,7 @@ public class TxnServer extends AbstractActor {
   private void printLog(String logString, String mode){
     Set<String> logModeAllowed = new HashSet<>();
     if(TxnSystem.logMode.equals("Verbose")){
-      logModeAllowed.add("Verbose"); logModeAllowed.add("Termination"); logModeAllowed.add("Check"); 
+      logModeAllowed.add("Verbose"); logModeAllowed.add("Termination"); logModeAllowed.add("Crash"); logModeAllowed.add("Check"); 
     }   
     if(TxnSystem.logMode.equals("Termination")){
       logModeAllowed.add("Termination"); logModeAllowed.add("Check"); 
@@ -141,13 +140,20 @@ public class TxnServer extends AbstractActor {
   
   // send messages with simulated network delays
   private void sendReal(Object msg, ActorRef sender, ActorRef receiver){
-    getContext().system().scheduler().scheduleOnce(
-            Duration.create((int)((r.nextDouble())*(TxnSystem.maxDelay - TxnSystem.minDelay)) + TxnSystem.minDelay, TimeUnit.MILLISECONDS),
-            receiver,
-            msg, // message sent to myself
-            getContext().system().dispatcher(),
-            sender
-    );
+    // getContext().system().scheduler().scheduleOnce(
+    //         Duration.create((int)((r.nextDouble())*(TxnSystem.maxDelay - TxnSystem.minDelay)) + TxnSystem.minDelay, TimeUnit.MILLISECONDS),
+    //         receiver,
+    //         msg, // message sent to myself
+    //         getContext().system().dispatcher(),
+    //         sender
+    // );
+
+    try{
+      Thread.sleep((int)((r.nextDouble())*(TxnSystem.maxDelay - TxnSystem.minDelay)) + TxnSystem.minDelay);
+    }catch (InterruptedException e){
+      System.err.println(e);
+    }
+    receiver.tell(msg, sender);
   }
 
   // get value for a given key
@@ -283,7 +289,7 @@ public class TxnServer extends AbstractActor {
         sendReal(new PartecipantsDecisionMsg(txn), getSelf(), i);
       }
     }
-    setTimeout(txn, 500);
+    setTimeout(txn, 500); //TODO: good to loop or just once?
   }
 
   // set a decision timeout with delay t
@@ -349,10 +355,10 @@ public class TxnServer extends AbstractActor {
     printLog("\t\t" + msg.txn.name + " SERVER " + serverId + " Received Commit Request "
              + " - WS "+printWorkspace(workSpace.get(msg.txn)), "Verbose");
 
-    txnState.put(msg.txn,CrashType.BeforeVote.name());
+    txnState.put(msg.txn,CrashServerType.BeforeVote.name());
     // check if server should crash (before sending vote)
     if(nextCrash.name().equals(txnState.get(msg.txn))) {
-      printLog("\t\t" + "SERVER " + serverId + " Crashing - " + nextCrash.name(), "Termination");
+      printLog("\t\t" + "SERVER " + serverId + " Crashing - " + nextCrash.name(), "Crash");
       crash();
       return;
     }
@@ -372,10 +378,10 @@ public class TxnServer extends AbstractActor {
 
     sendReal(new ServerDecisionMsg(canChange, msg.txn), getSelf(), getSender());   // send the vote
 
-    txnState.put(msg.txn,CrashType.AfterVote.name());
+    txnState.put(msg.txn,CrashServerType.AfterVote.name());
     // check if server should crash (after sending vote)
     if(nextCrash.name().equals(txnState.get(msg.txn))) {
-      printLog("\t\t" + "SERVER " + serverId + " Crashing - " + nextCrash.name(), "Termination");
+      printLog("\t\t" + "SERVER " + serverId + " Crashing - " + nextCrash.name(), "Crash");
       crash();
       return;
     }
@@ -446,41 +452,39 @@ public class TxnServer extends AbstractActor {
     printLog(printCheck(msg.txn),"Check");
   }
 
-  private void onCrashMsg(CrashMsg msg) throws InterruptedException {
-    printLog("\t\t" + "SERVER " + serverId + " Received crash msg "+msg.nextCrash.name(), "Termination");
+  private void onCrashServerMsg(CrashServerMsg msg) throws InterruptedException {
+    printLog("\t\t" + "SERVER " + serverId + " Received crash msg "+msg.nextCrash.name()+" "+msg.timeCrashed, "Crash");
     nextCrash = msg.nextCrash;
     timeCrashed = msg.timeCrashed;
     // crash(msg.time);
   }
 
   private void onRecoveryMsg(RecoveryMsg msg) throws InterruptedException{
-    printLog("\t\t" + "SERVER " + serverId + " Recovered after crash", "Termination");
-
+    printLog("\t\t" + "SERVER " + serverId + " Recovered after crash", "Crash");
     getContext().become(createReceive());
-    nextCrash = CrashType.NONE;
+    nextCrash = CrashServerType.NONE;
 
     // Handle crash
     // Depending on the state that the server was in each transaction,
     // do the steps of 2PC cohort recovery
     for(TxnId txn : workSpace.keySet()){
 
-      if(txnState.get(txn).equals(CrashType.BeforeVote.name())){
-        printLog("\t\t" + txn.name + " SERVER " + serverId + " Sending abort after recovery", "Termination");
+      if(txnState.get(txn).equals(CrashServerType.BeforeVote.name())){
+        printLog("\t\t" + txn.name + " SERVER " + serverId + " Sending abort after recovery", "Crash");
         workSpace.remove(txn);        // clear the workspace
         txnHistory.put(txn, false);   // save the abort decision in the history
         sendReal(new ServerDecisionMsg(false, txn), getSelf(), txn.coordinator);   // send the vote
         printLog(printCheck(txn),"Check");
       }
 
-      if(txnState.get(txn).equals(CrashType.AfterVote.name())){
-        printLog("\t\t" + txn.name + " SERVER " + serverId + " Ask to the others after recovery", "Termination");
+      if(txnState.get(txn).equals(CrashServerType.AfterVote.name())){
+        printLog("\t\t" + txn.name + " SERVER " + serverId + " Ask to the others after recovery", "Crash");
         terminationProtocol(txn);
       }
       
     }
 
   }
-
 
   @Override
   public Receive createReceive() {
@@ -493,7 +497,7 @@ public class TxnServer extends AbstractActor {
             .match(TxnDecisionTimeoutMsg.class,  this::onTxnDecisionTimeoutMsg)
             .match(PartecipantsDecisionMsg.class,  this::onPartecipantsDecisionMsg)
             .match(FwdPartecipantsDecisionMsg.class,  this::onFwdPartecipantsDecisionMsg)
-            .match(CrashMsg.class,  this::onCrashMsg)
+            .match(CrashServerMsg.class,  this::onCrashServerMsg)
             .build();
   }
 

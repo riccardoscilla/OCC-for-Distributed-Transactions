@@ -44,7 +44,6 @@ public class TxnClient extends AbstractActor {
     this.numCommittedTxn = 0;
     this.r = new Random();
     this.r.setSeed(TxnSystem.seed*(clientId+1));
-    if(clientId.equals(0)) System.out.println("Seed: " + TxnSystem.seed*(clientId+1));
   }
 
   static public Props props(int clientId) {
@@ -54,10 +53,10 @@ public class TxnClient extends AbstractActor {
   /*-- Message classes ------------------------------------------------------ */
 
   // send this message to the client at startup to inform it about the coordinators and the keys
-  public static class WelcomeMsg implements  Serializable {
+  public static class WelcomeClientMsg implements  Serializable {
     public final Integer maxKey;
     public final List<ActorRef> coordinators;
-    public WelcomeMsg(int maxKey, List<ActorRef> coordinators) {
+    public WelcomeClientMsg(int maxKey, List<ActorRef> coordinators) {
       this.maxKey = maxKey;
       this.coordinators = Collections.unmodifiableList(new ArrayList<>(coordinators));
     }
@@ -210,7 +209,7 @@ public class TxnClient extends AbstractActor {
 
   /*-- Message handlers ----------------------------------------------------- */
 
-  private void onWelcomeMsg(WelcomeMsg msg) {
+  private void onWelcomeClientMsg(WelcomeClientMsg msg) {
     System.out.println("CLIENT "+clientId+" Received Welcome");
     this.coordinators = msg.coordinators;
     this.maxKey = msg.maxKey;
@@ -274,7 +273,7 @@ public class TxnClient extends AbstractActor {
   @Override
   public Receive createReceive() {
     return receiveBuilder()
-            .match(WelcomeMsg.class,  this::onWelcomeMsg)
+            .match(WelcomeClientMsg.class,  this::onWelcomeClientMsg)
             .match(TxnAcceptMsg.class,  this::onTxnAcceptMsg)
             .match(TxnAcceptTimeoutMsg.class,  this::onTxnAcceptTimeoutMsg)
             .match(ReadResultMsg.class,  this::onReadResultMsg)

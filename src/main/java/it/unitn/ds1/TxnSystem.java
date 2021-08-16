@@ -1,4 +1,6 @@
 package it.unitn.ds1;
+import com.typesafe.config.Config;
+import com.typesafe.config.ConfigFactory;
 import akka.actor.ActorRef;
 import akka.actor.ActorSystem;
 
@@ -9,29 +11,47 @@ import java.io.Serializable;
 import java.time.Duration;
 import akka.actor.*;
 
-import it.unitn.ds1.TxnClient.WelcomeMsg;
-import it.unitn.ds1.TxnCoordinator.WelcomeMsg2;
+import it.unitn.ds1.TxnClient.StopMsg;
 
-import it.unitn.ds1.TxnServer.CrashType;
+import it.unitn.ds1.TxnClient.WelcomeClientMsg;
+import it.unitn.ds1.TxnCoordinator.WelcomeCoordMsg;
+
+import it.unitn.ds1.TxnServer.CrashServerType;
+import it.unitn.ds1.TxnCoordinator.CrashCoordType;
 
 public class TxnSystem {
   final static int N_CLIENTS = 1;
   final static int N_COORDINATORS = 1;
   final static int N_SERVERS = 3;
   final static int maxKey = N_SERVERS*10-1;
+
   final static int maxDelay = 50;
   final static int minDelay = 10;
+
+  final static int maxCrash = 800;
+  final static int minCrash = 300;
+
   static final String logMode = "Verbose";
   static int seed = 405556085;
   // 54154073
 
   static Cancellable serverCrash;
 
+
   //Start a crash simulation
-  public static class CrashMsg implements Serializable {
-    public final CrashType nextCrash;
+  public static class CrashServerMsg implements Serializable {
+    public final CrashServerType nextCrash;
     public final int timeCrashed;
-    public CrashMsg(CrashType nextCrash, int timeCrashed){
+    public CrashServerMsg(CrashServerType nextCrash, int timeCrashed){
+      this.nextCrash = nextCrash;
+      this.timeCrashed = timeCrashed;
+    }
+  }
+
+  public static class CrashCoordMsg implements Serializable {
+    public final CrashCoordType nextCrash;
+    public final int timeCrashed;
+    public CrashCoordMsg(CrashCoordType nextCrash, int timeCrashed){
       this.nextCrash = nextCrash;
       this.timeCrashed = timeCrashed;
     }
@@ -48,11 +68,14 @@ public class TxnSystem {
     Random r = new Random();
     if (seed == 0){
       int max = Math.max(N_CLIENTS,Math.max(N_COORDINATORS,N_SERVERS));
-      seed = r.nextInt(Integer.MAX_VALUE/max);
+      seed = r.nextInt(Integer.MAX_VALUE/max); 
     }
+    System.out.println("Seed: " + seed);
+
+    Config myConfig = ConfigFactory.parseString("akka.log-dead-letters = off");
 
     // Create the actor system
-    final ActorSystem system = ActorSystem.create("txnSystem");
+    final ActorSystem system = ActorSystem.create("txnSystem", myConfig.withFallback(ConfigFactory.load()));
 
     // Create client nodes and put them to a list
     List<ActorRef> clients = new ArrayList<>();
@@ -73,39 +96,51 @@ public class TxnSystem {
     }
 
     // Send Welcome message to all Clients to make known the Coordinators
-    WelcomeMsg welcomeClient = new WelcomeMsg(maxKey,coordinators);
+    WelcomeClientMsg welcomeClient = new WelcomeClientMsg(maxKey,coordinators);
     for (ActorRef client: clients) {
       client.tell(welcomeClient, ActorRef.noSender());
     }
 
     // Send Welcome message to all Coordinators to make known the Servers
-    WelcomeMsg2 welcomeCoordi = new WelcomeMsg2(servers);
+    WelcomeCoordMsg welcomeCoord = new WelcomeCoordMsg(servers);
     for (ActorRef client: coordinators) {
-      client.tell(welcomeCoordi, ActorRef.noSender());
+      client.tell(welcomeCoord, ActorRef.noSender());
     }
-
+    
+    
     // automated crash simulator
-    Cancellable cancellable = system.scheduler().scheduleWithFixedDelay(
-            Duration.ofMillis(2000),
-            Duration.ofMillis(2000),
-            new Runnable() {
-              @Override
-              public void run() {
-                ActorRef serverToCrash = servers.get(r.nextInt(servers.size()));
-                CrashType nextCrash = CrashType.values()[r.nextInt(CrashType.values().length)];
-                int timeToCrash = r.nextInt(800);
-                serverToCrash.tell(new CrashMsg(nextCrash, timeToCrash), ActorRef.noSender());
-              }
-            },
-            system.dispatcher()
-    );
+    // Cancellable cancellable = system.scheduler().scheduleWithFixedDelay(
+    //         Duration.ofMillis(1000), // initial wait 
+    //         Duration.ofMillis(1000), // fixed delay
+    //         new Runnable() {
+    //           @Override
+    //           public void run() {
+    //             if (r.nextDouble() < 0){
+    //               ActorRef serverToCrash = servers.get(r.nextInt(servers.size()));
+    //               // CrashServerType nextCrash = CrashServerType.values()[r.nextInt(CrashServerType.values().length)];
+    //               int timeToCrash = (int)(((r.nextDouble())*(maxCrash - minCrash)) + minCrash);
+    //               serverToCrash.tell(new CrashServerMsg(CrashServerType.BeforeVote, timeToCrash), ActorRef.noSender());
+    //             }
+    //             else{
+    //               ActorRef coordToCrash = coordinators.get(r.nextInt(coordinators.size()));
+    //               // CrashCoordType nextCrash = ...
+    //               int timeToCrash = (int)(((r.nextDouble())*(maxCrash - minCrash)) + minCrash);
+    //               coordToCrash.tell(new CrashCoordMsg(CrashCoordType.BeforeDecide, timeToCrash), ActorRef.noSender());
+    //             }
+                
+    //           }
+    //         },
+    //         system.dispatcher()
+    // );
 
     // manual crash simulator
-    // inputContinue();
-    // servers.get(r.nextInt(servers.size())).tell(new CrashMsg(CrashType.BeforeVote, 600), ActorRef.noSender());
-    // inputContinue();
+    inputContinue();
+    ActorRef coordToCrash = coordinators.get(r.nextInt(coordinators.size()));
+    int timeToCrash = 5000;
+    coordToCrash.tell(new CrashCoordMsg(CrashCoordType.BeforeDecide, timeToCrash), ActorRef.noSender());
+    inputContinue();
 
-    inputTerminate(system);
+    inputTerminate(system, clients);
   }
 
   public static void inputContinue() {
@@ -116,13 +151,27 @@ public class TxnSystem {
     catch (IOException ioe) {}
   }
 
-  public static void inputTerminate(ActorSystem system) {
+  public static void inputTerminate(ActorSystem system, List<ActorRef> clients) {
     try {
       System.out.println(">>> Press ENTER to exit <<<");
-      System.in.read();
-      system.terminate();
+      System.in.read();      
     }
     catch (IOException ioe) {}
+
+    for (ActorRef client: clients) {
+      client.tell(new StopMsg(), ActorRef.noSender());
+    }
+
+    system.scheduler().scheduleOnce(
+            Duration.ofMillis(2000),
+            new Runnable() {
+              @Override
+              public void run() {
+                system.terminate();
+              }
+            },
+            system.dispatcher()
+    );
     
   }
 

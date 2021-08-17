@@ -147,6 +147,51 @@ public class TxnCoordinator extends AbstractActor {
     }
   }
 
+  /*-- TxnId class -------------------------------------------------------- */
+
+  public static class TxnId{
+    public final ActorRef client;
+    public final ActorRef coordinator;
+    public int id;
+    public int clientId;
+    public int coordId;
+    public String name;
+
+    public TxnId(ActorRef client, ActorRef coordinator, int id){
+      this.client = client;
+      this.coordinator = coordinator;
+      this.id = id;
+      this.clientId = Integer.parseInt(client.path().name().substring(9));
+      this.coordId = Integer.parseInt(coordinator.path().name().substring(14));
+      this.name = "TxnId@" + coordId + "." + id + "/" + clientId;
+    }
+
+    public boolean matches(Object obj){
+      if(obj == null || obj.getClass() != this.getClass()) return false;
+      TxnId txn = (TxnId) obj;
+      return( txn.client.equals(this.client) );
+    }
+
+    @Override
+    public boolean equals(Object obj){
+      if(this == obj) return true;
+      if(obj == null || obj.getClass() != this.getClass()) return false;
+      TxnId txn = (TxnId) obj;
+      return( txn.client.equals(this.client) && txn.coordinator.equals(this.coordinator) && txn.id == this.id );
+    }
+
+    @Override
+    public int hashCode(){ // map 2 int into a single one
+      int a = coordId;
+      int b = id;
+      // Cantor pairing function
+      // return ((a+b) * (a + b + 1) / 2 + a);
+
+      // Szudzik's function
+      return (a >= b ? a * a + a + b : a + b * b);
+    }
+  }
+
   /*-- Actor methods -------------------------------------------------------- */
 
   private void sendReal(Object msg, ActorRef sender, ActorRef receiver){
@@ -166,49 +211,7 @@ public class TxnCoordinator extends AbstractActor {
     receiver.tell(msg, sender);
   }
 
-  public static class TxnId{
-    public final ActorRef client;
-    public final ActorRef coordinator;
-    public int id;
-    public int coordId;
-    public String name;
-
-    public TxnId(ActorRef client, ActorRef coordinator, int id, int coordId){
-      this.client = client;
-      this.coordinator = coordinator;
-      this.id = id;
-      this.coordId = coordId;
-      this.name = "TxnId@" + coordId + "." + id + "/"
-                + client.path().name().substring(9)  ;
-    }
-
-    public boolean matches(Object obj){
-      if(obj == null || obj.getClass() != this.getClass()) return false;
-      TxnId txn = (TxnId) obj;
-      return( txn.client.equals(this.client) );
-    }
-
-    @Override
-    public boolean equals(Object obj){
-      if(this == obj) return true;
-      if(obj == null || obj.getClass() != this.getClass()) return false;
-      TxnId txn = (TxnId) obj;
-      return( txn.client.equals(this.client) && txn.coordId == this.coordId && txn.id == this.id );
-    }
-
-    @Override
-    public int hashCode(){ // map 2 int into a single one
-      int a = coordId;
-      int b = id;
-      // Cantor pairing function
-      // return ((a+b) * (a + b + 1) / 2 + a);
-
-      // Szudzik's function
-      return (a >= b ? a * a + a + b : a + b * b);
-    }
-  }
-
-  // print log 
+  /*---------------------------------------------------------- */
   private void printLog(String logString, String mode){
     Set<String> logModeAllowed = new HashSet<>();
     if(TxnSystem.logMode.equals("Verbose")){
@@ -232,7 +235,7 @@ public class TxnCoordinator extends AbstractActor {
   }
 
   private TxnId bindRequestOngoing(ActorRef sender){
-    TxnId candidateTxn = new TxnId(sender,getSelf(),0,coordinatorId);
+    TxnId candidateTxn = new TxnId(sender,getSelf(),0);
     for(TxnId key : OngoingTxn.keySet()){
       if(key.matches(candidateTxn)){
         return key;
@@ -247,12 +250,6 @@ public class TxnCoordinator extends AbstractActor {
       res = res + i.path().name() + " ";
     }
     return res;
-  }
-
-  private void printFullOngoing(){
-    OngoingTxn.entrySet().forEach(entry -> {
-      System.out.println(entry.getKey() + " " );
-    });
   }
 
   private String printServerDecisions(List<Boolean> s){
@@ -347,7 +344,7 @@ public class TxnCoordinator extends AbstractActor {
   private void onTxnBeginMsg(TxnBeginMsg msg) {
     
     printLog("\tCOORDI " + coordinatorId + " Received txnBegin from " + getSender().path().name(), "Verbose");
-    TxnId txn = new TxnId(getSender(),getSelf(),globID,coordinatorId);
+    TxnId txn = new TxnId(getSender(),getSelf(),globID);
     OngoingTxn.put(txn,new HashSet<>()); // add new transaction in Ongoing
     ServerDecisions.put(txn,new ArrayList<>()); // add new transaction in ServerDecisions
     txnState.put(txn,CrashCoordType.BeforeDecide.name());

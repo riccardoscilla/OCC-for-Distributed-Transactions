@@ -327,7 +327,7 @@ public class TxnServer extends AbstractActor {
   private void onFwdReadMsg(FwdReadMsg msg) {
 
     workSpace.putIfAbsent(msg.txn, new HashSet<>());
-    // txnHistory.putIfAbsent(msg.txn, null);
+    txnState.put(msg.txn,CrashServerType.BeforeVote.name());
 
     Integer value = getValueFromKey(msg.key, workSpace.get(msg.txn));
     Integer version = getVersionFromKey(msg.key);
@@ -355,7 +355,7 @@ public class TxnServer extends AbstractActor {
     printLog("\t\t" + msg.txn.name + " SERVER " + serverId + " Received Commit Request "
              + " - WS "+printWorkspace(workSpace.get(msg.txn)), "Verbose");
 
-    txnState.put(msg.txn,CrashServerType.BeforeVote.name());
+    // txnState.put(msg.txn,CrashServerType.BeforeVote.name());
     // check if server should crash (before sending vote)
     if(nextCrash.name().equals(txnState.get(msg.txn))) {
       printLog("\t\t" + "SERVER " + serverId + " Crashing - " + nextCrash.name(), "Crash");

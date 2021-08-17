@@ -17,8 +17,8 @@ import it.unitn.ds1.TxnClient.TxnResultMsg;
 
 import it.unitn.ds1.TxnServer.FwdReadResultMsg;
 import it.unitn.ds1.TxnServer.ServerDecisionMsg;
-import it.unitn.ds1.TxnServer.FwdPartecipantsDecisionMsg;
-import it.unitn.ds1.TxnServer.PartecipantsDecisionMsg;
+import it.unitn.ds1.TxnServer.FwdParticipantsDecisionMsg;
+import it.unitn.ds1.TxnServer.ParticipantsDecisionMsg;
 
 import it.unitn.ds1.TxnSystem;
 import it.unitn.ds1.TxnSystem.CrashCoordMsg;
@@ -103,20 +103,20 @@ public class TxnCoordinator extends AbstractActor {
   // COMMIT request from the coordinator to the server
   public static class CanCommitMsg implements Serializable {
     public final TxnId txn;
-    public final Set<ActorRef> partecipants;
-    public CanCommitMsg(TxnId txn, Set<ActorRef> partecipants) {
+    public final Set<ActorRef> participants;
+    public CanCommitMsg(TxnId txn, Set<ActorRef> participants) {
       this.txn = txn;
-      this.partecipants = partecipants;
+      this.participants = participants;
     }
   }
 
   // ABORT from the coordinator to the server
   public static class AbortMsg implements Serializable {
     public final TxnId txn;
-    public final Set<ActorRef> partecipants;
-    public AbortMsg(TxnId txn, Set<ActorRef> partecipants) {
+    public final Set<ActorRef> participants;
+    public AbortMsg(TxnId txn, Set<ActorRef> participants) {
       this.txn = txn;
-      this.partecipants = partecipants;
+      this.participants = participants;
     }
   }
 
@@ -416,15 +416,15 @@ public class TxnCoordinator extends AbstractActor {
     else printLog("\t" + txn.name + " COORDI " + coordinatorId + " Received TxnEnd ABORT from " + getSender().path().name(), "Verbose");
 
     if(txn != null){
-      Set<ActorRef> partecipants = new HashSet<ActorRef>(OngoingTxn.get(txn));
-      partecipants.add(getSelf());
+      Set<ActorRef> participants = new HashSet<ActorRef>(OngoingTxn.get(txn));
+      participants.add(getSelf());
 
       if(msg.commit){ // if received commit, do validation procedure
         printLog("\t" + txn.name + " COORDI "+ coordinatorId + " - Validation with " + printOngoing(OngoingTxn.get(txn)), "Verbose");
 
         setVoteTimeout(txn, 500); // set a timeout waiting for votes
         for(ActorRef server : OngoingTxn.get(txn)){
-          sendReal(new CanCommitMsg(txn, partecipants), getSelf(), server); // ask to commit
+          sendReal(new CanCommitMsg(txn, participants), getSelf(), server); // ask to commit
         }
 
         // check if coordinator should crash (before sending decision)
@@ -438,7 +438,7 @@ public class TxnCoordinator extends AbstractActor {
         printLog("\t" + txn.name + " COORDI "+ coordinatorId + " - Abort to " + printOngoing(OngoingTxn.get(txn)), "Verbose");
         
         for(ActorRef server : OngoingTxn.get(txn)){
-          sendReal(new AbortMsg(txn, partecipants), getSelf(), server); // tell to abort TODO: send FinalDecisionMsg instead?
+          sendReal(new AbortMsg(txn, participants), getSelf(), server); // tell to abort TODO: send FinalDecisionMsg instead?
         }
 
         // remove transaction (do not expect a response back to servers)
@@ -458,8 +458,8 @@ public class TxnCoordinator extends AbstractActor {
 
     ServerDecisions.get(msg.txn).add(msg.commit);
 
-    if( Integer.valueOf(ServerDecisions.get(msg.txn).size())
-        .equals(Integer.valueOf(OngoingTxn.get(msg.txn).size())) || !msg.commit){ // if arrives an abort OR all votes are commits then decide
+    if( Integer.valueOf(ServerDecisions.get(msg.txn).size()).equals(Integer.valueOf(OngoingTxn.get(msg.txn).size())) 
+        || !msg.commit){ // if arrives an abort OR all votes are commits then decide
       
       printLog("\t" + msg.txn.name + " COORDI " + coordinatorId + " Decisions "+ printServerDecisions(ServerDecisions.get(msg.txn)), "Verbose");
       
@@ -470,7 +470,7 @@ public class TxnCoordinator extends AbstractActor {
       // check if coordinator should crash (after sending decision to one server)
       if(nextCrash.name().equals(txnState.get(msg.txn))) {
         printLog("\t" + "COORDI " + coordinatorId + " Crashing - " + nextCrash.name(), "Crash");
-        ActorRef serverToSend = OngoingTxn.get(msg.txn).iterator().next();
+        ActorRef serverToSend = OngoingTxn.get(msg.txn).iterator().next(); // chose a random server to send the result
         sendReal(new FinalDecisionMsg(finalDecision, msg.txn), getSelf(), serverToSend); // send final Decision to only one server
         crash();
         return;
@@ -580,14 +580,14 @@ public class TxnCoordinator extends AbstractActor {
     }
   }
 
-  private void onPartecipantsDecisionMsg(PartecipantsDecisionMsg msg) throws InterruptedException {
+  private void onParticipantsDecisionMsg(ParticipantsDecisionMsg msg) throws InterruptedException {
     if(txnHistory.get(msg.txn) != null){  // if the server knows the decision for a certain transaction
       printLog("\t" + msg.txn.name + " COORDI " + coordinatorId + " Forwarding Final Decision (termination protocol) to server " + getSender().path().name(), "Termination");
-      sendReal(new FwdPartecipantsDecisionMsg(txnHistory.get(msg.txn), msg.txn), getSelf(), getSender());    // comunicate it to the asking server (termination protocol)
+      sendReal(new FwdParticipantsDecisionMsg(txnHistory.get(msg.txn), msg.txn), getSelf(), getSender());    // comunicate it to the asking server (termination protocol)
     }
   }
 
-  private void onFwdPartecipantsDecisionMsg(FwdPartecipantsDecisionMsg msg) throws InterruptedException {
+  private void onFwdParticipantsDecisionMsg(FwdParticipantsDecisionMsg msg) throws InterruptedException {
     
   }
 
@@ -606,8 +606,8 @@ public class TxnCoordinator extends AbstractActor {
             .match(TxnReadTimeoutMsg.class,  this::onTxnReadTimeoutMsg)
             .match(TxnVoteTimeoutMsg.class,  this::onTxnVoteTimeoutMsg)
             .match(CrashCoordMsg.class,  this::onCrashCoordMsg)
-            .match(PartecipantsDecisionMsg.class,  this::onPartecipantsDecisionMsg)
-            //.match(FwdPartecipantsDecisionMsg.class,  this::onFwdPartecipantsDecisionMsg)
+            .match(ParticipantsDecisionMsg.class,  this::onParticipantsDecisionMsg)
+            //.match(FwdParticipantsDecisionMsg.class,  this::onFwdParticipantsDecisionMsg)
             .build();
   }
 

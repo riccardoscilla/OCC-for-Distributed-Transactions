@@ -25,7 +25,7 @@ public class TxnServer extends AbstractActor {
   private final Integer serverId;
   private final Map<Integer, Integer[]> dataStore;
   private final Map<TxnId, Set<Integer[]>> workSpace;
-  private final Map<TxnId, Set<ActorRef>> txnPartecipants;  // map transactions with all its partecipants
+  private final Map<TxnId, Set<ActorRef>> txnParticipants;  // map transactions with all its participants
   private final Map<TxnId, Boolean> txnHistory;             // save an history of all the past transactions
   private final Map<TxnId, Cancellable> decisionTimeout;    // contain a timeout for every transaction waiting for a decision
   private final Map<TxnId, String> txnState;                // follow the steps of a transaction (not voted, voted)
@@ -47,7 +47,7 @@ public class TxnServer extends AbstractActor {
     this.serverId = serverId;
     this.dataStore = new TreeMap<>();
     this.workSpace = new HashMap<>();
-    this.txnPartecipants = new HashMap<>();
+    this.txnParticipants = new HashMap<>();
     this.txnHistory = new HashMap<>();
     this.decisionTimeout = new HashMap<>();
     this.txnState = new HashMap<>();
@@ -101,19 +101,19 @@ public class TxnServer extends AbstractActor {
     }
   }
 
-  // ask to other partecipants the commit decision
-  public static class PartecipantsDecisionMsg implements Serializable {
+  // ask to other participants the commit decision
+  public static class ParticipantsDecisionMsg implements Serializable {
     public final TxnId txn;
-    public PartecipantsDecisionMsg(TxnId txn) {
+    public ParticipantsDecisionMsg(TxnId txn) {
       this.txn = txn;
     }
   }
 
   // reply with commit decision to the other partecipant
-  public static class FwdPartecipantsDecisionMsg implements Serializable {
+  public static class FwdParticipantsDecisionMsg implements Serializable {
     public final boolean decision;
     public final TxnId txn;
-    public FwdPartecipantsDecisionMsg(boolean decision, TxnId txn) {
+    public FwdParticipantsDecisionMsg(boolean decision, TxnId txn) {
       this.decision = decision;
       this.txn = txn;
     }
@@ -198,8 +198,8 @@ public class TxnServer extends AbstractActor {
   //        set write
   private void updateWorkspace(Integer key, Integer value, Set<Integer[]> changes){
     for(Integer[] c : changes){ // c = {key, version, value, r/w}
-      if(c[0].equals(key)){
-        if(c[3] == 0){
+      if(c[0].equals(key)){ // find the change with the same key of the write
+        if(c[3] == 0){ // if it is a read, increment the version
           c[1] = c[1] + 1;
         }
         c[2] = value;
@@ -281,12 +281,12 @@ public class TxnServer extends AbstractActor {
     return res;
   }
 
-  // start the termination protocol asking all the partecipants
+  // start the termination protocol asking all the participants
   // if they have received a decision
   private void terminationProtocol(TxnId txn){
-    for(ActorRef i : txnPartecipants.get(txn)){
+    for(ActorRef i : txnParticipants.get(txn)){
       if(!i.equals(getSelf())){
-        sendReal(new PartecipantsDecisionMsg(txn), getSelf(), i);
+        sendReal(new ParticipantsDecisionMsg(txn), getSelf(), i);
       }
     }
     setTimeout(txn, 500); //TODO: good to loop or just once?
@@ -368,7 +368,7 @@ public class TxnServer extends AbstractActor {
     if(canChange){ 
       printLog("\t\t" + msg.txn.name + " SERVER " + serverId + " Can Change", "Verbose");
       setTimeout(msg.txn, 500); // start a timeout waiting for a decision
-      txnPartecipants.put(msg.txn, msg.partecipants); // save the set of partecipants to the transaction (for termination protocol)
+      txnParticipants.put(msg.txn, msg.participants); // save the set of participants to the transaction (for termination protocol)
     } 
     else{   // if the server send an abort vote it can immediatly abort (coordinator decision will be abort)
       printLog("\t\t" + msg.txn.name + " SERVER " + serverId + " Can't Change", "Verbose");
@@ -396,7 +396,7 @@ public class TxnServer extends AbstractActor {
     
     // clear workspace and other transaction info
     workSpace.remove(msg.txn);
-    txnPartecipants.remove(msg.txn);
+    txnParticipants.remove(msg.txn);
     cancelTimeout(msg.txn);
     txnHistory.put(msg.txn, false);  // add the decision to the history (always abort)
 
@@ -416,7 +416,7 @@ public class TxnServer extends AbstractActor {
 
     // clear workspace and other transaction info
     workSpace.remove(msg.txn);
-    txnPartecipants.remove(msg.txn);
+    txnParticipants.remove(msg.txn);
     cancelTimeout(msg.txn);
     txnHistory.put(msg.txn, msg.decision);  // add the decision to the history
 
@@ -428,14 +428,14 @@ public class TxnServer extends AbstractActor {
     if(txnHistory.get(msg.txn) == null) terminationProtocol(msg.txn);   // when the decision message timeouts the server start the termination protocol
   }
 
-  private void onPartecipantsDecisionMsg(PartecipantsDecisionMsg msg) throws InterruptedException {
+  private void onParticipantsDecisionMsg(ParticipantsDecisionMsg msg) throws InterruptedException {
     if(txnHistory.get(msg.txn) != null){  // if the server knows the decision for a certain transaction
       printLog("\t\t" + msg.txn.name + " SERVER " + serverId + " Forwarding Final Decision (termination protocol) to server " + getSender().path().name(), "Termination");
-      sendReal(new FwdPartecipantsDecisionMsg(txnHistory.get(msg.txn), msg.txn), getSelf(), getSender());    // comunicate it to the asking server (termination protocol)
+      sendReal(new FwdParticipantsDecisionMsg(txnHistory.get(msg.txn), msg.txn), getSelf(), getSender());    // comunicate it to the asking server (termination protocol)
     }
   }
 
-  private void onFwdPartecipantsDecisionMsg(FwdPartecipantsDecisionMsg msg) throws InterruptedException {
+  private void onFwdParticipantsDecisionMsg(FwdParticipantsDecisionMsg msg) throws InterruptedException {
     if(workSpace.get(msg.txn) == null) return;  // if already decided, do nothing
 
     printLog("\t\t" + msg.txn.name + " SERVER " + serverId + " Received Final Decision (termination protocol)", "Termination");
@@ -445,7 +445,7 @@ public class TxnServer extends AbstractActor {
 
     // clear workspace and other transaction info
     workSpace.remove(msg.txn);
-    txnPartecipants.remove(msg.txn);
+    txnParticipants.remove(msg.txn);
     cancelTimeout(msg.txn);
     txnHistory.put(msg.txn, msg.decision);  // add the decision to the history
   
@@ -495,8 +495,8 @@ public class TxnServer extends AbstractActor {
             .match(AbortMsg.class, this::onAbortMsg)
             .match(FinalDecisionMsg.class,  this::onFinalDecisionMsg)
             .match(TxnDecisionTimeoutMsg.class,  this::onTxnDecisionTimeoutMsg)
-            .match(PartecipantsDecisionMsg.class,  this::onPartecipantsDecisionMsg)
-            .match(FwdPartecipantsDecisionMsg.class,  this::onFwdPartecipantsDecisionMsg)
+            .match(ParticipantsDecisionMsg.class,  this::onParticipantsDecisionMsg)
+            .match(FwdParticipantsDecisionMsg.class,  this::onFwdParticipantsDecisionMsg)
             .match(CrashServerMsg.class,  this::onCrashServerMsg)
             .build();
   }

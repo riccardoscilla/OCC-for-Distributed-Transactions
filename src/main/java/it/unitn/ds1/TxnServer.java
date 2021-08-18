@@ -1,7 +1,6 @@
 package it.unitn.ds1;
 
 import java.io.Serializable;
-import java.lang.reflect.Array;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
 
@@ -17,7 +16,6 @@ import it.unitn.ds1.TxnCoordinator.CanCommitMsg;
 import it.unitn.ds1.TxnCoordinator.AbortMsg;
 import it.unitn.ds1.TxnCoordinator.FinalDecisionMsg;
 
-import it.unitn.ds1.TxnSystem;
 import it.unitn.ds1.TxnSystem.CrashServerMsg;
 import it.unitn.ds1.TxnSystem.RecoveryMsg;
 
@@ -32,7 +30,6 @@ public class TxnServer extends AbstractActor {
 
   private final Random r;
 
-  private Cancellable crash;    // crash timeout
   enum CrashServerType {  // type of the next simulated crash
     NONE,
     BeforeVote,
@@ -313,7 +310,7 @@ public class TxnServer extends AbstractActor {
       cancelTimeout(txn);
     }
     //set a time to wake up from crash
-    crash = getContext().system().scheduler().scheduleOnce(
+    getContext().system().scheduler().scheduleOnce(
             Duration.create(timeCrashed, TimeUnit.MILLISECONDS),
             getSelf(),
             new RecoveryMsg(), // message sent to myself

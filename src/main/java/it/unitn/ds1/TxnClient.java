@@ -7,8 +7,6 @@ import java.util.concurrent.TimeUnit;
 import akka.actor.*;
 import scala.concurrent.duration.Duration;
 
-import it.unitn.ds1.TxnSystem;
-
 public class TxnClient extends AbstractActor {
   private static final double COMMIT_PROBABILITY = 0.8;
   private static final double WRITE_PROBABILITY = 0.5;

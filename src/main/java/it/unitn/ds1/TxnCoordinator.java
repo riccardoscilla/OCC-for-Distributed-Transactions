@@ -20,7 +20,6 @@ import it.unitn.ds1.TxnServer.ServerDecisionMsg;
 import it.unitn.ds1.TxnServer.FwdParticipantsDecisionMsg;
 import it.unitn.ds1.TxnServer.ParticipantsDecisionMsg;
 
-import it.unitn.ds1.TxnSystem;
 import it.unitn.ds1.TxnSystem.CrashCoordMsg;
 import it.unitn.ds1.TxnSystem.RecoveryMsg;
 
@@ -38,7 +37,6 @@ public class TxnCoordinator extends AbstractActor {
 
   private final Random r;
 
-  private Cancellable crash;    // crash timeout
   enum CrashCoordType {  // type of the next simulated crash
     NONE,
     BeforeDecide,
@@ -326,7 +324,7 @@ public class TxnCoordinator extends AbstractActor {
       cancelVoteTimeout(txn);
     }
     //set a time to wake up from crash
-    crash = getContext().system().scheduler().scheduleOnce(
+    getContext().system().scheduler().scheduleOnce(
             Duration.create(timeCrashed, TimeUnit.MILLISECONDS),
             getSelf(),
             new RecoveryMsg(), // message sent to myself
@@ -366,12 +364,8 @@ public class TxnCoordinator extends AbstractActor {
              + " - Ask to " + server.path().name(), "Verbose");
 
     setReadTimeout(txn,server,msg.key,500);
-    if(txn != null){
-      OngoingTxn.get(txn).add(server);
-      sendReal(new FwdReadMsg(msg.key, txn), getSelf(), server); // forward the read to the right server
-    } else{
-      printLog("\tNO TXN WITH THIS ID", "Verbose");
-    }
+    OngoingTxn.get(txn).add(server);
+    sendReal(new FwdReadMsg(msg.key, txn), getSelf(), server); // forward the read to the right server
     
   }
 
@@ -397,12 +391,7 @@ public class TxnCoordinator extends AbstractActor {
     printLog("\t" + txn.name + " COORDI " + coordinatorId + " Received Write from " + getSender().path().name() 
              + " - Ask to " + server.path().name(), "Verbose");
 
-    
-    if(txn != null){
-      sendReal(new FwdWriteMsg(msg.key, msg.value, txn), getSelf(), server); // forward the write to the right server
-    } else{
-      printLog("\tNO TXN WITH THIS ID", "Verbose");
-    }
+    sendReal(new FwdWriteMsg(msg.key, msg.value, txn), getSelf(), server); // forward the write to the right server
 
   }
 
@@ -415,39 +404,35 @@ public class TxnCoordinator extends AbstractActor {
     if(msg.commit) printLog("\t" + txn.name + " COORDI " + coordinatorId + " Received TxnEnd COMMIT from " + getSender().path().name(), "Verbose");
     else printLog("\t" + txn.name + " COORDI " + coordinatorId + " Received TxnEnd ABORT from " + getSender().path().name(), "Verbose");
 
-    if(txn != null){
-      Set<ActorRef> participants = new HashSet<ActorRef>(OngoingTxn.get(txn));
-      participants.add(getSelf());
+    Set<ActorRef> participants = new HashSet<ActorRef>(OngoingTxn.get(txn));
+    participants.add(getSelf());
 
-      if(msg.commit){ // if received commit, do validation procedure
-        printLog("\t" + txn.name + " COORDI "+ coordinatorId + " - Validation with " + printOngoing(OngoingTxn.get(txn)), "Verbose");
+    if(msg.commit){ // if received commit, do validation procedure
+      printLog("\t" + txn.name + " COORDI "+ coordinatorId + " - Validation with " + printOngoing(OngoingTxn.get(txn)), "Verbose");
 
-        setVoteTimeout(txn, 500); // set a timeout waiting for votes
-        for(ActorRef server : OngoingTxn.get(txn)){
-          sendReal(new CanCommitMsg(txn, participants), getSelf(), server); // ask to commit
-        }
-
-        // check if coordinator should crash (before sending decision)
-        if(nextCrash.name().equals(txnState.get(txn))) {
-          printLog("\t" + "COORDI " + coordinatorId + " Crashing - " + nextCrash.name(), "Crash");
-          crash();
-          return;
-        }
-
-      } else{ // if received abort, send abort to servers TODO: add false in decision history
-        printLog("\t" + txn.name + " COORDI "+ coordinatorId + " - Abort to " + printOngoing(OngoingTxn.get(txn)), "Verbose");
-        
-        for(ActorRef server : OngoingTxn.get(txn)){
-          sendReal(new AbortMsg(txn, participants), getSelf(), server); // tell to abort TODO: send FinalDecisionMsg instead?
-        }
-
-        // remove transaction (do not expect a response back to servers)
-        OngoingTxn.remove(txn);
-        ServerDecisions.remove(txn);
-        cancelVoteTimeout(txn);
+      setVoteTimeout(txn, 500); // set a timeout waiting for votes
+      for(ActorRef server : OngoingTxn.get(txn)){
+        sendReal(new CanCommitMsg(txn, participants), getSelf(), server); // ask to commit
       }
-    } else{
-      printLog("\tNO TXN WITH THIS ID", "Verbose");
+
+      // check if coordinator should crash (before sending decision)
+      if(nextCrash.name().equals(txnState.get(txn))) {
+        printLog("\t" + "COORDI " + coordinatorId + " Crashing - " + nextCrash.name(), "Crash");
+        crash();
+        return;
+      }
+
+    } else{ // if received abort, send abort to servers TODO: add false in decision history
+      printLog("\t" + txn.name + " COORDI "+ coordinatorId + " - Abort to " + printOngoing(OngoingTxn.get(txn)), "Verbose");
+      
+      for(ActorRef server : OngoingTxn.get(txn)){
+        sendReal(new AbortMsg(txn, participants), getSelf(), server); // tell to abort TODO: send FinalDecisionMsg instead?
+      }
+
+      // remove transaction (do not expect a response back to servers)
+      OngoingTxn.remove(txn);
+      ServerDecisions.remove(txn);
+      cancelVoteTimeout(txn);
     }
   }
 

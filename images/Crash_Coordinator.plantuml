@@ -1,0 +1,102 @@
+@startuml Crash Coordinator
+skinparam sequenceMessageAlign left
+skinparam NoteTextAlignment center
+
+skinparam NoteFontSize 30
+skinparam ArrowFontSize 30
+skinparam ParticipantFontSize 30
+skinparam SequenceDividerFontSize 30
+skinparam SequenceDelayFontSize 30
+
+skinparam ParticipantPadding 110
+
+
+participant Client0
+participant Coordinator0
+participant Server0
+participant Server1
+participant TxnSystem
+
+... Coordinator0 transaction with Server1 and Server0 ...
+== Crash BeforeDecide ==
+...
+TxnSystem -> Coordinator0: CrashServer(BeforeDecide, time)
+... Protocol goes on ...
+Client0 -> Coordinator0: Commit
+Coordinator0 -> Server0: CanCommit(TxnId)
+Coordinator0 -> Server1: CanCommit(TxnId)
+
+Coordinator0 <- Coordinator0: crash 
+destroy Coordinator0
+
+Server0 ->x Coordinator0: ServerDecision(change=True, TxnId)
+Server1 ->x Coordinator0: ServerDecision(change=True, TxnId)
+rnote left
+Lose votes
+end note
+...
+Coordinator0 <- Coordinator0: recover after time
+
+Coordinator0 -> Server0: FinalDecision(abort, TxnId)
+rnote left
+Abort after recovery
+end note
+Coordinator0 -> Server1: FinalDecision(abort, TxnId)
+Coordinator0 -> Client0: TxnResult(abort)
+rnote left
+Commit FAIL
+end note
+
+== Crash AfterDecide ==
+...
+TxnSystem -> Coordinator0: CrashServer(AfterDecide, time)
+... Protocol goes on ...
+Client0 -> Coordinator0: Commit
+Coordinator0 -> Server0: CanCommit(TxnId)
+Coordinator0 -> Server1: CanCommit(TxnId)
+Server0 -> Coordinator0: ServerDecision(change=True, TxnId)
+Server1 -> Coordinator0: ServerDecision(change=True, TxnId)
+rnote left
+Decide commit
+end note
+Coordinator0 -> Server0: FinalDecision(commit, TxnId)
+rnote right
+Decide commit
+end note
+Coordinator0 <- Coordinator0: crash 
+destroy Coordinator0
+...
+Server1 -> Server1: timeout on \nFinalDecision
+Server1 ->x Coordinator0: ParticipantDecision(TxnId)
+rnote right
+Termination protocol
+Ask to participants
+end note
+Server1 -> Server0: ParticipantDecision(TxnId)
+Server0 -> Server1: FwdParticipantsDecision(commit, TxnId)
+rnote right
+Decide commit
+end note
+...
+Coordinator0 <- Coordinator0: recover after time
+Coordinator0 -> Server0: FinalDecision(commit, TxnId)
+rnote right
+Already decided
+end note
+
+rnote left
+Send final decision
+after recovery
+end note
+
+Coordinator0 -> Server1: FinalDecision(commit, TxnId)
+rnote right
+Already decided
+end note
+
+Coordinator0 -> Client0: TxnResult(commit)
+rnote left
+Commit OK
+end note
+
+@enduml

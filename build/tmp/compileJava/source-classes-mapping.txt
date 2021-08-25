@@ -33,6 +33,7 @@ it/unitn/ds1/TxnCoordinator.java
 it/unitn/ds1/TxnSystem.java
  it.unitn.ds1.TxnSystem
  it.unitn.ds1.TxnSystem$1
+ it.unitn.ds1.TxnSystem$2
  it.unitn.ds1.TxnSystem$CrashCoordMsg
  it.unitn.ds1.TxnSystem$CrashServerMsg
  it.unitn.ds1.TxnSystem$RecoveryMsg

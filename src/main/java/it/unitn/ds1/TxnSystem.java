@@ -20,8 +20,8 @@ import it.unitn.ds1.TxnServer.CrashServerType;
 import it.unitn.ds1.TxnCoordinator.CrashCoordType;
 
 public class TxnSystem {
-  final static int N_CLIENTS = 1;
-  final static int N_COORDINATORS = 1;
+  final static int N_CLIENTS = 3;
+  final static int N_COORDINATORS = 3;
   final static int N_SERVERS = 3;
   final static int maxKey = N_SERVERS*10-1;
 
@@ -33,10 +33,9 @@ public class TxnSystem {
 
   static final String logMode = "Verbose";
   static int seed = 405556085;
-  // 54154073
+  // 405556085
 
   static Cancellable serverCrash;
-
 
   //Start a crash simulation
   public static class CrashServerMsg implements Serializable {
@@ -70,6 +69,7 @@ public class TxnSystem {
       int max = Math.max(N_CLIENTS,Math.max(N_COORDINATORS,N_SERVERS));
       seed = r.nextInt(Integer.MAX_VALUE/max); 
     }
+    r.setSeed(seed);
     System.out.println("Seed: " + seed);
 
     Config myConfig = ConfigFactory.parseString("akka.log-dead-letters = off");
@@ -107,38 +107,43 @@ public class TxnSystem {
       client.tell(welcomeCoord, ActorRef.noSender());
     }
     
-    
     // automated crash simulator
-    // Cancellable cancellable = system.scheduler().scheduleWithFixedDelay(
-    //         Duration.ofMillis(1000), // initial wait 
-    //         Duration.ofMillis(1000), // fixed delay
-    //         new Runnable() {
-    //           @Override
-    //           public void run() {
-    //             if (r.nextDouble() < 0){
-    //               ActorRef serverToCrash = servers.get(r.nextInt(servers.size()));
-    //               // CrashServerType nextCrash = CrashServerType.values()[r.nextInt(CrashServerType.values().length)];
-    //               int timeToCrash = (int)(((r.nextDouble())*(maxCrash - minCrash)) + minCrash);
-    //               serverToCrash.tell(new CrashServerMsg(CrashServerType.BeforeVote, timeToCrash), ActorRef.noSender());
-    //             }
-    //             else{
-    //               ActorRef coordToCrash = coordinators.get(r.nextInt(coordinators.size()));
-    //               // CrashCoordType nextCrash = ...
-    //               int timeToCrash = (int)(((r.nextDouble())*(maxCrash - minCrash)) + minCrash);
-    //               coordToCrash.tell(new CrashCoordMsg(CrashCoordType.BeforeDecide, timeToCrash), ActorRef.noSender());
-    //             }
+    Cancellable cancellable = system.scheduler().scheduleWithFixedDelay(
+            Duration.ofMillis(1000), // initial wait 
+            Duration.ofMillis(1000), // fixed delay
+            new Runnable() {
+              @Override
+              public void run() {
+                if (r.nextDouble() < 0.5){
+                  ActorRef serverToCrash = servers.get(r.nextInt(servers.size()));
+                  CrashServerType nextCrash = CrashServerType.values()[r.nextInt(CrashServerType.values().length)];
+                  int timeToCrash = (int)(((r.nextDouble())*(maxCrash - minCrash)) + minCrash);
+                  serverToCrash.tell(new CrashServerMsg(nextCrash, timeToCrash), ActorRef.noSender());
+                }
+                else{
+                  ActorRef coordToCrash = coordinators.get(r.nextInt(coordinators.size()));
+                  CrashCoordType nextCrash =  CrashCoordType.values()[r.nextInt(CrashCoordType.values().length)];
+                  int timeToCrash = (int)(((r.nextDouble())*(maxCrash - minCrash)) + minCrash);
+                  coordToCrash.tell(new CrashCoordMsg(nextCrash, timeToCrash), ActorRef.noSender());
+                }
                 
-    //           }
-    //         },
-    //         system.dispatcher()
-    // );
+              }
+            },
+            system.dispatcher()
+    );
 
     // manual crash simulator
-    inputContinue();
-    ActorRef coordToCrash = coordinators.get(r.nextInt(coordinators.size()));
-    int timeToCrash = 5000;
-    coordToCrash.tell(new CrashCoordMsg(CrashCoordType.BeforeDecide, timeToCrash), ActorRef.noSender());
-    inputContinue();
+    // inputContinue();
+
+    // ActorRef coordToCrash = coordinators.get(r.nextInt(coordinators.size()));
+    // int timeToCrash = 500;
+    // coordToCrash.tell(new CrashCoordMsg(CrashCoordType.AfterDecide, timeToCrash), ActorRef.noSender());
+
+    // ActorRef serverToCrash = servers.get(0);
+    // int timeToCrash = 200;
+    // serverToCrash.tell(new CrashServerMsg(CrashServerType.AfterVote, timeToCrash), ActorRef.noSender());
+
+    // inputContinue();
 
     inputTerminate(system, clients);
   }

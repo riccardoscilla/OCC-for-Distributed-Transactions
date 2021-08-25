@@ -248,7 +248,7 @@ public class TxnClient extends AbstractActor {
     // otherwise, read two again
     if(opDone) numOpDone++;
     // if(numOpDone >= numOpTotal) { TODO: real code
-    if(numOpDone >= 2) {
+    if(numOpDone >= 1) {
       endTxn();
     }
     else if(opDone) {

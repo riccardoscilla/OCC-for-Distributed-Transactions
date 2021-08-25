@@ -1,0 +1,165 @@
+@startuml  Concurrent Validation 2C2S
+skinparam sequenceMessageAlign left
+skinparam NoteTextAlignment center
+
+skinparam NoteFontSize 30
+skinparam ArrowFontSize 30
+skinparam ParticipantFontSize 30
+skinparam SequenceDividerFontSize 30
+
+skinparam ParticipantPadding 30
+participant Client0
+participant Client1
+participant Coordinator0
+participant Server0
+participant Server1
+==Begin Transaction==
+Client0 [#blue]-> Coordinator0: TxnBegin
+rnote right
+Create TxnId 0.0/0
+end note
+
+Client1 [#red]-> Coordinator0: TxnBegin
+rnote right
+Create TxnId 0.1/1
+end note
+
+Coordinator0 [#blue]-> Client0: TxnAccept
+Coordinator0 [#red]-> Client1: TxnAccept
+
+==Read items== 
+Client0 [#blue]-> Coordinator0: Read(client=0, key=1)
+Client0 [#blue]-> Coordinator0: Read(client=0, key=9)
+
+Coordinator0 [#blue]-> Server0: FwdRead(key=1, TxnId=0.0/0)
+hnote right
+**workSpace TxnId 0.0/0**
+key=1, version=0, value=100, 0
+end note
+
+Client1 [#red]-> Coordinator0: Read(client=1, key=1)
+Client1 [#red]-> Coordinator0: Read(client=1, key=19)
+
+Coordinator0 [#blue]-> Server0: FwdRead(key=9, TxnId=0.0/0)
+hnote right
+**workSpace TxnId 0.0/0**
+key=1, version=0, value=100, 0 
+key=9, version=0, value=100, 0
+end note
+
+Coordinator0 [#red]-> Server0: FwdRead(key=1, TxnId=0.1/1)
+hnote right
+**workSpace TxnId 0.1/1**
+key=1, version=0, value=100, 0
+end note
+
+Coordinator0 [#red]-> Server1: FwdRead(key=19, TxnId=0.1/1)
+hnote right
+**workSpace TxnId 0.1/1**
+key=19, version=0, value=100, 0
+end note
+
+Server0 [#blue]-> Coordinator0: FwdReadResult(key=1, value=100, TxnId=0.0/0)
+Server0 [#blue]-> Coordinator0: FwdReadResult(key=9, value=100, TxnId=0.0/0)
+
+Coordinator0 [#blue]-> Client0: ReadResult(key=1, value=100)
+Coordinator0 [#blue]-> Client0: ReadResult(key=9, value=100)
+note left
+Can send writes immediately
+end note
+
+
+Server1 [#red]-> Coordinator0: FwdReadResult(key=19, value=100, TxnId=0.1/1)
+Coordinator0 [#red]-> Client1: ReadResult(key=19, value=100)
+Server0 [#red]-> Coordinator0: FwdReadResult(key=1, value=100, TxnId=0.1/1)
+Coordinator0 [#red]-> Client1: ReadResult(key=1, value=100)
+note left
+Can send writes immediately
+end note
+
+==Write items==
+Client0 [#blue]-> Coordinator0: Write(client=0, key=1, value=50)
+Client0 [#blue]-> Coordinator0: Write(client=0, key=9, value=150)
+note left
+Can send Commit immediately
+end note
+
+Coordinator0 [#blue]-> Server0: FwdWrite(key=1, value=50, TxnId=0.0/0)
+hnote right
+**workSpace TxnId 0.0/0**
+key=1, version=1, value=50, 1
+key=9, version=0, value=100, 0
+end note
+
+
+Client1 [#red]-> Coordinator0: Write(client=0, key=1, value=30)
+Client1 [#red]-> Coordinator0: Write(client=0, key=19, value=170)
+note left
+Can send Commit immediately
+end note
+
+Coordinator0 [#blue]-> Server0: FwdWrite(key=9, value=150, TxnId=0.0/0)
+hnote right
+**workSpace TxnId 0.0/0**
+key=1, version=1, value=50, 1
+key=9, version=1 value=150, 1
+end note
+
+Coordinator0 [#red]-> Server0: FwdWrite(key=1, value=70, TxnId=0.1/1)
+hnote right
+**workSpace TxnId 0.1/1**
+key=1, version=1, value=70, 1 
+end note
+
+Coordinator0 [#red]-> Server1: FwdWrite(key=19, value=130, TxnId=0.1/1)
+hnote right
+**workSpace TxnId 0.1/1**
+key=19, version=1, value=130, 1
+end note
+
+==Commit phase==
+Client0 [#blue]-> Coordinator0: Commit
+Client1 [#red]-> Coordinator0: Commit
+
+Coordinator0 [#blue]-> Server0: CanCommit(TxnId=0.0/0)
+rnote right
+Acquire lock on items 1 and 9
+end note
+
+Coordinator0 [#red]-> Server1: CanCommit(TxnId=0.1/1)
+rnote right
+Acquire lock on item 19
+end note
+
+Coordinator0 [#red]-> Server0: CanCommit(TxnId=0.1/1)
+rnote right
+Cannot acquire lock on item 1
+Discard changes directly
+end note
+
+Server0 [#blue]-> Coordinator0: ServerDecision(change=True, TxnId=0.0/0)
+
+Coordinator0 [#blue]-> Server0: FinalDecision(commit, TxnId=0.0/0)
+rnote right
+Apply changes
+end note
+
+Coordinator0 [#blue]-> Client0: TxnResult(commit)
+rnote left
+Commit OK
+end note
+
+Server1 [#red]-> Coordinator0: ServerDecision(change=True, TxnId=0.1/1)
+Server0 [#red]-> Coordinator0: ServerDecision(change=False, TxnId=0.1/1)
+
+Coordinator0 [#red]-> Server1: FinalDecision(abort, TxnId=0.1/1)
+rnote right
+Discard changes
+end note
+
+Coordinator0 [#red]-> Client1: TxnResult(abort)
+rnote left
+Commit FAIL
+end note
+
+@enduml

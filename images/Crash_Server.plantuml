@@ -1,0 +1,93 @@
+@startuml Crash Server
+skinparam sequenceMessageAlign left
+skinparam NoteTextAlignment center
+
+skinparam NoteFontSize 30
+skinparam ArrowFontSize 30
+skinparam ParticipantFontSize 30
+skinparam SequenceDividerFontSize 30
+skinparam SequenceDelayFontSize 30
+
+skinparam ParticipantPadding 30
+
+participant Client0
+participant Coordinator0
+participant Server0
+participant Server1
+participant TxnSystem
+
+... Server1 transaction with Coordinator0 and Server0 ...
+== Crash BeforeVote ==
+...
+TxnSystem -> Server1: CrashServer(BeforeVote, time)
+... Protocol goes on ...
+Client0 -> Coordinator0: Commit
+Coordinator0 -> Server0: CanCommit(TxnId)
+rnote right
+Vote commit
+end note
+Coordinator0 -> Server1: CanCommit(TxnId)
+Server0 -> Coordinator0: ServerDecision(change=True, TxnId)
+
+Server1 -> Server1: crash 
+destroy Server1
+rnote right
+Do not vote
+end note
+...
+Server1 -> Server1: recover after time
+
+Server1 -> Coordinator0: ServerDecision(change=False, TxnId)
+rnote right
+Abort after recovery
+Discard changes directly
+end note
+Coordinator0 -> Server0: FinalDecision(abort, TxnId)
+Coordinator0 -> Client0: TxnResult(abort)
+rnote left
+Commit FAIL
+end note
+
+== Crash AfterVote ==
+...
+TxnSystem -> Server1: CrashServer(AfterVote, time)
+... Protocol goes on ...
+Client0 -> Coordinator0: Commit
+Coordinator0 -> Server0: CanCommit(TxnId)
+rnote right
+Vote commit
+end note
+Coordinator0 -> Server1: CanCommit(TxnId)
+rnote right
+Vote commit
+end note
+Server0 -> Coordinator0: ServerDecision(change=True, TxnId)
+Server1 -> Coordinator0: ServerDecision(change=True, TxnId)
+
+Server1 -> Server1: crash 
+destroy Server1
+
+Coordinator0 -> Server0: FinalDecision(commit, TxnId)
+Coordinator0 ->x Server1: FinalDecision(commit, TxnId)
+rnote right
+Lose decision
+end note
+Coordinator0 -> Client0: TxnResult(commit)
+rnote left
+Commit OK
+end note
+...
+Server1 -> Server1: recover after time
+Server1 -> Coordinator0: ParticipantDecision(TxnId)
+rnote right
+Termination protocol
+Ask to participants
+end note
+Server1 -> Server0: ParticipantDecision(TxnId)
+Coordinator0 -> Server1: FwdParticipantsDecision(commit, TxnId)
+rnote right
+Decide commit
+end note
+Server0 -> Server1: FwdParticipantsDecision(commit, TxnId)
+
+@enduml

@@ -332,7 +332,7 @@ public class TxnServer extends AbstractActor {
     addWorkspace(msg.key, version, value, workSpace.get(msg.txn));   
 
     printLog("\t\t" + msg.txn.name + " SERVER " + serverId + " Received Read from " + getSender().path().name()
-             + " - WS "+ printWorkspace(workSpace.get(msg.txn)), "Verbose");
+             + " - WS " + printWorkspace(workSpace.get(msg.txn)), "Verbose");
 
     sendReal(new FwdReadResultMsg(msg.key, value, msg.txn), getSelf(), getSender());
 
@@ -343,16 +343,15 @@ public class TxnServer extends AbstractActor {
     updateWorkspace(msg.key, msg.value, workSpace.get(msg.txn));
 
     printLog("\t\t" + msg.txn.name + " SERVER " + serverId + " Received Write from " + getSender().path().name() 
-             + " - WS "+ printWorkspace(workSpace.get(msg.txn)), "Verbose");
+             + " - WS " + printWorkspace(workSpace.get(msg.txn)), "Verbose");
 
   }
 
   /*------------------------------------------------------- */
   private void onCanCommitMsg(CanCommitMsg msg){
     printLog("\t\t" + msg.txn.name + " SERVER " + serverId + " Received Commit Request "
-             + " - WS "+printWorkspace(workSpace.get(msg.txn)), "Verbose");
+             + " - WS " + printWorkspace(workSpace.get(msg.txn)), "Verbose");
 
-    // txnState.put(msg.txn,CrashServerType.BeforeVote.name());
     // check if server should crash (before sending vote)
     if(nextCrash.name().equals(txnState.get(msg.txn))) {
       printLog("\t\t" + "SERVER " + serverId + " Crashing - " + nextCrash.name(), "Crash");
@@ -394,6 +393,7 @@ public class TxnServer extends AbstractActor {
     // clear workspace and other transaction info
     workSpace.remove(msg.txn);
     txnParticipants.remove(msg.txn);
+    txnState.remove(msg.txn);
     cancelTimeout(msg.txn);
     txnHistory.put(msg.txn, false);  // add the decision to the history (always abort)
 
@@ -414,6 +414,7 @@ public class TxnServer extends AbstractActor {
     // clear workspace and other transaction info
     workSpace.remove(msg.txn);
     txnParticipants.remove(msg.txn);
+    txnState.remove(msg.txn);
     cancelTimeout(msg.txn);
     txnHistory.put(msg.txn, msg.decision);  // add the decision to the history
 
@@ -443,6 +444,7 @@ public class TxnServer extends AbstractActor {
     // clear workspace and other transaction info
     workSpace.remove(msg.txn);
     txnParticipants.remove(msg.txn);
+    txnState.remove(msg.txn);
     cancelTimeout(msg.txn);
     txnHistory.put(msg.txn, msg.decision);  // add the decision to the history
   
@@ -464,7 +466,7 @@ public class TxnServer extends AbstractActor {
     // Handle crash
     // Depending on the state that the server was in each transaction,
     // do the steps of 2PC cohort recovery
-    for(TxnId txn : workSpace.keySet()){
+    for(TxnId txn : new HashSet<>(workSpace.keySet())){
 
       if(txnState.get(txn).equals(CrashServerType.BeforeVote.name())){
         printLog("\t\t" + txn.name + " SERVER " + serverId + " Sending abort after recovery", "Crash");
@@ -478,6 +480,8 @@ public class TxnServer extends AbstractActor {
         printLog("\t\t" + txn.name + " SERVER " + serverId + " Ask to the others after recovery", "Crash");
         terminationProtocol(txn);
       }
+
+      txnState.remove(txn);
       
     }
 

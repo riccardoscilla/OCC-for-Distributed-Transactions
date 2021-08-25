@@ -331,6 +331,7 @@ public class TxnCoordinator extends AbstractActor {
             getContext().system().dispatcher(), getSelf()
     );
     getContext().become(crashed()); //ignore following messages
+    
   }
 
   /*-- Message handlers ----------------------------------------------------- */
@@ -432,6 +433,7 @@ public class TxnCoordinator extends AbstractActor {
       // remove transaction (do not expect a response back to servers)
       OngoingTxn.remove(txn);
       ServerDecisions.remove(txn);
+      txnState.remove(txn);
       cancelVoteTimeout(txn);
     }
   }
@@ -470,6 +472,7 @@ public class TxnCoordinator extends AbstractActor {
       // remove transaction
       OngoingTxn.remove(msg.txn);
       ServerDecisions.remove(msg.txn);
+      txnState.remove(msg.txn);
       cancelVoteTimeout(msg.txn);
 
     }
@@ -493,6 +496,7 @@ public class TxnCoordinator extends AbstractActor {
     // remove transaction
     OngoingTxn.remove(msg.txn);
     ServerDecisions.remove(msg.txn);
+    txnState.remove(msg.txn);
   }
 
   /* --------------------------------------------------------------------*/
@@ -512,6 +516,7 @@ public class TxnCoordinator extends AbstractActor {
     // remove transaction
     OngoingTxn.remove(msg.txn);
     ServerDecisions.remove(msg.txn);
+    txnState.remove(msg.txn);
   }
 
   /* --------------------------------------------------------------------*/
@@ -530,7 +535,7 @@ public class TxnCoordinator extends AbstractActor {
     // Handle crash
     // Depending on the state that the coordinator was in each transaction,
     // do the steps of 2PC cohort recovery
-    for(TxnId txn : OngoingTxn.keySet()){
+    for(TxnId txn : new HashSet<>(OngoingTxn.keySet())){
 
       if(txnState.get(txn).equals(CrashCoordType.BeforeDecide.name())){
         printLog("\t" + txn.name + " COORDI " + coordinatorId + " Sending abort after recovery", "Crash");
@@ -543,9 +548,6 @@ public class TxnCoordinator extends AbstractActor {
         }
         sendReal(new TxnResultMsg(finalDecision), getSelf(), txn.client); // send final Decision 
 
-        // remove transaction
-        OngoingTxn.remove(txn);
-        ServerDecisions.remove(txn);
       }
 
       if(txnState.get(txn).equals(CrashCoordType.AfterDecide.name())){
@@ -557,10 +559,12 @@ public class TxnCoordinator extends AbstractActor {
         }
         sendReal(new TxnResultMsg(finalDecision), getSelf(), txn.client); // send final Decision 
 
-        // remove transaction
-        OngoingTxn.remove(txn);
-        ServerDecisions.remove(txn);
       }
+
+      // remove transaction
+      OngoingTxn.remove(txn);
+      ServerDecisions.remove(txn);
+      txnState.remove(txn);
       
     }
   }
@@ -571,12 +575,6 @@ public class TxnCoordinator extends AbstractActor {
       sendReal(new FwdParticipantsDecisionMsg(txnHistory.get(msg.txn), msg.txn), getSelf(), getSender());    // comunicate it to the asking server (termination protocol)
     }
   }
-
-  private void onFwdParticipantsDecisionMsg(FwdParticipantsDecisionMsg msg) throws InterruptedException {
-    
-  }
-
-
 
   @Override
   public Receive createReceive() {
@@ -592,7 +590,6 @@ public class TxnCoordinator extends AbstractActor {
             .match(TxnVoteTimeoutMsg.class,  this::onTxnVoteTimeoutMsg)
             .match(CrashCoordMsg.class,  this::onCrashCoordMsg)
             .match(ParticipantsDecisionMsg.class,  this::onParticipantsDecisionMsg)
-            //.match(FwdParticipantsDecisionMsg.class,  this::onFwdParticipantsDecisionMsg)
             .build();
   }
 

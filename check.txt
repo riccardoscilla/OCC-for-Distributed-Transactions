@@ -1,0 +1,174 @@
+Seed: 20508881
+Actor Info: clients:5 coordinators:2 servers:19
+Client Order [0, 3, 4, 1, 2, 1, 0, 1, 4, 0, 1, 2, 3, 2, 2, 3, 2, 4, 3, 2, 4, 3, 1, 4, 0, 0, 1, 0, 2, 0, 4, 2, 0, 3, 0, 1, 4, 2, 0, 2, 1, 1, 2, 1, 4, 0, 4, 3, 4, 1, 0, 0, 4, 4, 1, 1, 4, 2, 1, 0, 4, 4, 4, 3, 0, 2, 4, 0, 2, 1, 1, 4, 1, 4, 1, 4, 4, 1, 4, 4, 2, 0, 0, 0, 0, 3, 0, 0, 4, 2, 1, 0, 4, 0, 0, 1, 2, 4, 3, 1, 1]
+
+CLIENT 1 COMMIT FAIL (1/1)
+CLIENT 0 COMMIT FAIL (1/1)
+CLIENT 4 COMMIT FAIL (1/1)
+CLIENT 2 COMMIT FAIL (1/1)
+CLIENT 3 COMMIT FAIL (1/1)
+CLIENT 2 COMMIT FAIL (3/3)
+CLIENT 3 COMMIT FAIL (2/2)
+CLIENT 4 COMMIT FAIL (2/2)
+CLIENT 2 COMMIT FAIL (5/5)
+CLIENT 1 COMMIT FAIL (4/4)
+CLIENT 0 COMMIT FAIL (3/3)
+CLIENT 0 COMMIT FAIL (4/4)
+CLIENT 1 COMMIT FAIL (5/5)
+CLIENT 2 COMMIT FAIL (6/6)
+CLIENT 4 COMMIT FAIL (5/5)
+CLIENT 2 COMMIT FAIL (7/7)
+CLIENT 3 COMMIT FAIL (5/5)
+CLIENT 0 COMMIT FAIL (8/8)
+CLIENT 1 COMMIT FAIL (6/6)
+CLIENT 0 COMMIT FAIL (9/9)
+CLIENT 2 COMMIT FAIL (9/9)
+CLIENT 1 COMMIT FAIL (7/7)
+CLIENT 2 COMMIT FAIL (10/10)
+CLIENT 4 COMMIT FAIL (7/7)
+CLIENT 0 COMMIT FAIL (10/10)
+CLIENT 3 COMMIT FAIL (6/6)
+CLIENT 4 COMMIT FAIL (9/9)
+CLIENT 1 COMMIT FAIL (10/10)
+CLIENT 0 COMMIT FAIL (11/11)
+CLIENT 4 COMMIT FAIL (10/10)
+CLIENT 1 COMMIT FAIL (11/11)
+CLIENT 2 COMMIT FAIL (11/11)
+CLIENT 0 COMMIT FAIL (13/13)
+CLIENT 4 COMMIT FAIL (14/14)
+CLIENT 4 COMMIT FAIL (15/15)
+CLIENT 3 COMMIT FAIL (7/7)
+CLIENT 0 COMMIT FAIL (14/14)
+CLIENT 2 COMMIT FAIL (12/12)
+CLIENT 4 COMMIT FAIL (16/16)
+CLIENT 0 COMMIT FAIL (15/15)
+CLIENT 2 COMMIT FAIL (13/13)
+CLIENT 1 COMMIT FAIL (14/14)
+CLIENT 1 COMMIT FAIL (15/15)
+CLIENT 4 COMMIT FAIL (17/17)
+CLIENT 4 COMMIT FAIL (18/18)
+CLIENT 1 COMMIT FAIL (17/17)
+CLIENT 4 COMMIT FAIL (19/19)
+CLIENT 1 COMMIT FAIL (18/18)
+CLIENT 2 COMMIT FAIL (14/14)
+CLIENT 0 COMMIT FAIL (16/16)
+CLIENT 0 COMMIT FAIL (17/17)
+CLIENT 3 COMMIT FAIL (8/8)
+CLIENT 0 COMMIT FAIL (20/20)
+CLIENT 0 COMMIT FAIL (21/21)
+CLIENT 4 COMMIT FAIL (23/23)
+CLIENT 2 COMMIT FAIL (15/15)
+CLIENT 1 COMMIT FAIL (19/19)
+CLIENT 0 COMMIT FAIL (22/22)
+CLIENT 4 COMMIT FAIL (24/24)
+CLIENT 0 COMMIT FAIL (24/24)
+CLIENT 1 COMMIT FAIL (20/20)
+CLIENT 2 COMMIT FAIL (16/16)
+CLIENT 4 COMMIT FAIL (25/25)
+CLIENT 3 COMMIT FAIL (9/9)
+CLIENT 1 COMMIT FAIL (21/21)
+CLIENT 1 COMMIT FAIL (22/22)
+
+TxnId@1.1/0 {txnServer13=1000, txnServer12=1000, txnServer11=1000, txnServer10=1000, txnServer17=1000, txnServer5=1000, txnServer6=1000, txnServer16=1000, txnServer7=1000, txnServer14=1000, txnServer8=1000, txnServer9=1000, txnServer18=1000, txnServer0=1000, txnServer1=1000, txnServer2=1000, txnServer4=1000}
+TxnId@0.2/3 {txnServer13=1000, txnServer12=1000, txnServer11=1000, txnServer10=1000, txnServer17=1000, txnServer5=1000, txnServer6=1000, txnServer16=1000, txnServer7=1000, txnServer15=1000, txnServer14=1000, txnServer8=1000, txnServer9=1000, txnServer18=1000, txnServer0=1000, txnServer1=1000, txnServer2=1000, txnServer3=1000, txnServer4=1000}
+TxnId@0.0/4 {txnServer13=1000, txnServer12=1000, txnServer11=1000, txnServer10=1000, txnServer17=1000, txnServer5=1000, txnServer6=1000, txnServer16=1000, txnServer7=1000, txnServer15=1000, txnServer14=1000, txnServer8=1000, txnServer9=1000, txnServer18=1000, txnServer0=1000, txnServer1=1000, txnServer2=1000, txnServer3=1000, txnServer4=1000}
+TxnId@1.0/1 {txnServer13=1000, txnServer12=1000, txnServer11=1000, txnServer10=1000, txnServer17=1000, txnServer5=1000, txnServer6=1000, txnServer16=1000, txnServer7=1000, txnServer15=1000, txnServer14=1000, txnServer8=1000, txnServer9=1000, txnServer18=1000, txnServer0=1000, txnServer1=1000, txnServer2=1000, txnServer3=1000, txnServer4=1000}
+TxnId@0.1/2 {txnServer13=1000, txnServer12=1000, txnServer11=1000, txnServer10=1000, txnServer17=1000, txnServer5=1000, txnServer6=1000, txnServer16=1000, txnServer7=1000, txnServer15=1000, txnServer14=1000, txnServer8=1000, txnServer9=1000, txnServer18=1000, txnServer0=1000, txnServer1=1000, txnServer2=1000, txnServer3=1000, txnServer4=1000}
+TxnId@1.4/1 {txnServer13=1000, txnServer12=1000, txnServer11=1000, txnServer10=1000, txnServer17=1000, txnServer5=1000, txnServer6=1000, txnServer16=1000, txnServer7=1000, txnServer15=1000, txnServer14=1000, txnServer8=1000, txnServer9=1000, txnServer18=1000, txnServer0=1000, txnServer1=1000, txnServer2=1000, txnServer3=1000, txnServer4=1000}
+TxnId@1.3/0 {txnServer13=1000, txnServer12=1000, txnServer11=1000, txnServer10=1000, txnServer17=1000, txnServer5=1000, txnServer6=1000, txnServer16=1000, txnServer7=1000, txnServer15=1000, txnServer14=1000, txnServer8=1000, txnServer9=1000, txnServer18=1000, txnServer0=1000, txnServer1=1000, txnServer2=1000, txnServer3=1000, txnServer4=1000}
+TxnId@0.4/1 {txnServer13=1000, txnServer12=1000, txnServer11=1000, txnServer10=1000, txnServer17=1000, txnServer5=1000, txnServer6=1000, txnServer16=1000, txnServer7=1000, txnServer15=1000, txnServer14=1000, txnServer8=1000, txnServer9=1000, txnServer18=1000, txnServer0=1000, txnServer1=1000, txnServer2=1000, txnServer3=1000, txnServer4=1000}
+TxnId@1.2/4 {txnServer13=1000, txnServer12=1000, txnServer11=1000, txnServer10=1000, txnServer17=1000, txnServer5=1000, txnServer6=1000, txnServer16=1000, txnServer7=1000, txnServer15=1000, txnServer14=1000, txnServer8=1000, txnServer9=1000, txnServer18=1000, txnServer0=1000, txnServer1=1000, txnServer2=1000, txnServer3=1000, txnServer4=1000}
+TxnId@1.6/0 {txnServer13=1000, txnServer12=1000, txnServer11=1000, txnServer10=1000, txnServer17=1000, txnServer5=1000, txnServer6=1000, txnServer16=1000, txnServer7=1000, txnServer15=1000, txnServer14=1000, txnServer8=1000, txnServer9=1000, txnServer18=1000, txnServer0=1000, txnServer1=1000, txnServer2=1000, txnServer3=1000, txnServer4=1000}
+TxnId@1.7/1 {txnServer13=1000, txnServer12=1000, txnServer11=1000, txnServer10=1000, txnServer17=1000, txnServer5=1000, txnServer6=1000, txnServer16=1000, txnServer7=1000, txnServer15=1000, txnServer14=1000, txnServer8=1000, txnServer9=1000, txnServer18=1000, txnServer0=1000, txnServer1=1000, txnServer2=1000, txnServer3=1000, txnServer4=1000}
+TxnId@0.7/2 {txnServer13=1000, txnServer12=1000, txnServer11=1000, txnServer10=1000, txnServer17=1000, txnServer5=1000, txnServer6=1000, txnServer16=1000, txnServer7=1000, txnServer15=1000, txnServer14=1000, txnServer8=1000, txnServer9=1000, txnServer18=1000, txnServer0=1000, txnServer1=1000, txnServer2=1000, txnServer3=1000, txnServer4=1000}
+TxnId@0.6/3 {txnServer13=1000, txnServer12=1000, txnServer11=1000, txnServer10=1000, txnServer17=1000, txnServer5=1000, txnServer6=1000, txnServer16=1000, txnServer7=1000, txnServer15=1000, txnServer14=1000, txnServer8=1000, txnServer9=1000, txnServer18=1000, txnServer0=1000, txnServer1=1000, txnServer2=1000, txnServer3=1000, txnServer4=1000}
+TxnId@0.5/2 {txnServer13=1000, txnServer12=1000, txnServer11=1000, txnServer10=1000, txnServer17=1000, txnServer5=1000, txnServer6=1000, txnServer16=1000, txnServer7=1000, txnServer15=1000, txnServer14=1000, txnServer8=1000, txnServer9=1000, txnServer18=1000, txnServer0=1000, txnServer1=1000, txnServer2=1000, txnServer3=1000, txnServer4=1000}
+TxnId@0.8/2 {txnServer13=1000, txnServer12=1000, txnServer11=1000, txnServer10=1000, txnServer17=1000, txnServer5=1000, txnServer6=1000, txnServer16=1000, txnServer7=1000, txnServer15=1000, txnServer14=1000, txnServer8=1000, txnServer9=1000, txnServer18=1000, txnServer0=1000, txnServer1=1000, txnServer2=1000, txnServer3=1000, txnServer4=1000}
+TxnId@0.10/3 {txnServer13=1000, txnServer12=1000, txnServer11=1000, txnServer10=1000, txnServer17=1000, txnServer5=1000, txnServer6=1000, txnServer16=1000, txnServer7=1000, txnServer15=1000, txnServer14=1000, txnServer8=1000, txnServer9=1000, txnServer18=1000, txnServer0=1000, txnServer1=1000, txnServer2=1000, txnServer3=1000, txnServer4=1000}
+TxnId@0.16/2 {txnServer13=1000, txnServer12=1000, txnServer11=1000, txnServer10=1000, txnServer17=1000, txnServer5=1000, txnServer6=1000, txnServer16=1000, txnServer7=1000, txnServer15=1000, txnServer14=1000, txnServer8=1000, txnServer9=1000, txnServer18=1000, txnServer0=1000, txnServer1=1000, txnServer2=1000, txnServer3=1000, txnServer4=1000}
+TxnId@0.12/4 {txnServer13=1000, txnServer12=1000, txnServer11=1000, txnServer10=1000, txnServer17=1000, txnServer5=1000, txnServer6=1000, txnServer16=1000, txnServer7=1000, txnServer15=1000, txnServer14=1000, txnServer8=1000, txnServer9=1000, txnServer18=1000, txnServer0=1000, txnServer1=1000, txnServer2=1000, txnServer3=1000, txnServer4=1000}
+TxnId@1.10/3 {txnServer13=1000, txnServer12=1000, txnServer11=1000, txnServer10=1000, txnServer17=1000, txnServer5=1000, txnServer6=1000, txnServer16=1000, txnServer7=1000, txnServer15=1000, txnServer14=1000, txnServer8=1000, txnServer9=1000, txnServer18=1000, txnServer0=1000, txnServer1=1000, txnServer2=1000, txnServer3=1000, txnServer4=1000}
+TxnId@1.8/2 {txnServer13=1000, txnServer12=1000, txnServer11=1000, txnServer10=1000, txnServer17=1000, txnServer5=1000, txnServer6=1000, txnServer16=1000, txnServer7=1000, txnServer15=1000, txnServer14=1000, txnServer8=1000, txnServer9=1000, txnServer18=1000, txnServer0=1000, txnServer1=1000, txnServer2=1000, txnServer3=1000, txnServer4=1000}
+TxnId@1.12/4 {txnServer13=1000, txnServer12=1000, txnServer11=1000, txnServer10=1000, txnServer17=1000, txnServer5=1000, txnServer6=1000, txnServer16=1000, txnServer7=1000, txnServer15=1000, txnServer14=1000, txnServer8=1000, txnServer9=1000, txnServer18=1000, txnServer0=1000, txnServer1=1000, txnServer2=1000, txnServer3=1000, txnServer4=1000}
+TxnId@0.23/3 {txnServer13=1000, txnServer12=1000, txnServer11=1000, txnServer10=1000, txnServer17=1000, txnServer5=1000, txnServer6=1000, txnServer16=1000, txnServer7=1000, txnServer15=1000, txnServer14=1000, txnServer8=1000, txnServer9=1000, txnServer18=1000, txnServer0=1000, txnServer1=1000, txnServer2=1000, txnServer3=1000, txnServer4=1000}
+TxnId@1.17/1 {txnServer13=1000, txnServer12=1000, txnServer11=1000, txnServer10=1000, txnServer17=1000, txnServer5=1000, txnServer6=1000, txnServer16=1000, txnServer7=1000, txnServer15=1000, txnServer14=1000, txnServer8=1000, txnServer9=1000, txnServer18=1000, txnServer0=1000, txnServer1=1000, txnServer2=1000, txnServer3=1000, txnServer4=1000}
+TxnId@1.16/4 {txnServer13=1000, txnServer12=1000, txnServer11=1000, txnServer10=1000, txnServer17=1000, txnServer5=1000, txnServer6=1000, txnServer16=1000, txnServer7=1000, txnServer15=1000, txnServer14=1000, txnServer8=1000, txnServer9=1000, txnServer18=1000, txnServer0=1000, txnServer1=1000, txnServer2=1000, txnServer3=1000, txnServer4=1000}
+TxnId@0.17/0 {txnServer13=1000, txnServer12=1000, txnServer11=1000, txnServer10=1000, txnServer17=1000, txnServer5=1000, txnServer6=1000, txnServer16=1000, txnServer7=1000, txnServer15=1000, txnServer14=1000, txnServer8=1000, txnServer9=1000, txnServer18=1000, txnServer0=1000, txnServer1=1000, txnServer2=1000, txnServer3=1000, txnServer4=1000}
+TxnId@1.9/0 {txnServer13=1000, txnServer12=1000, txnServer11=1000, txnServer10=1000, txnServer17=1000, txnServer5=1000, txnServer6=1000, txnServer16=1000, txnServer7=1000, txnServer15=1000, txnServer14=1000, txnServer8=1000, txnServer9=1000, txnServer18=1000, txnServer0=1000, txnServer1=1000, txnServer2=1000, txnServer3=1000, txnServer4=1000}
+TxnId@0.21/1 {txnServer13=1000, txnServer12=1000, txnServer11=1000, txnServer10=1000, txnServer17=1000, txnServer5=1000, txnServer6=1000, txnServer16=1000, txnServer7=1000, txnServer15=1000, txnServer14=1000, txnServer8=1000, txnServer9=1000, txnServer18=1000, txnServer0=1000, txnServer1=1000, txnServer2=1000, txnServer3=1000, txnServer4=1000}
+TxnId@0.24/0 {txnServer13=1000, txnServer12=1000, txnServer11=1000, txnServer10=1000, txnServer17=1000, txnServer5=1000, txnServer6=1000, txnServer16=1000, txnServer7=1000, txnServer15=1000, txnServer14=1000, txnServer8=1000, txnServer9=1000, txnServer18=1000, txnServer0=1000, txnServer1=1000, txnServer2=1000, txnServer3=1000, txnServer4=1000}
+TxnId@0.20/2 {txnServer13=1000, txnServer12=1000, txnServer11=1000, txnServer10=1000, txnServer17=1000, txnServer5=1000, txnServer6=1000, txnServer16=1000, txnServer7=1000, txnServer15=1000, txnServer14=1000, txnServer8=1000, txnServer9=1000, txnServer18=1000, txnServer0=1000, txnServer1=1000, txnServer2=1000, txnServer3=1000, txnServer4=1000}
+TxnId@1.24/0 {txnServer13=1000, txnServer12=1000, txnServer11=1000, txnServer10=1000, txnServer17=1000, txnServer5=1000, txnServer6=1000, txnServer16=1000, txnServer7=1000, txnServer15=1000, txnServer14=1000, txnServer8=1000, txnServer9=1000, txnServer18=1000, txnServer0=1000, txnServer1=1000, txnServer2=1000, txnServer3=1000, txnServer4=1000}
+TxnId@1.14/4 {txnServer13=1000, txnServer12=1000, txnServer11=1000, txnServer10=1000, txnServer17=1000, txnServer5=1000, txnServer6=1000, txnServer16=1000, txnServer7=1000, txnServer15=1000, txnServer14=1000, txnServer8=1000, txnServer9=1000, txnServer18=1000, txnServer0=1000, txnServer1=1000, txnServer2=1000, txnServer3=1000, txnServer4=1000}
+TxnId@0.18/2 {txnServer13=1000, txnServer12=1000, txnServer11=1000, txnServer10=1000, txnServer17=1000, txnServer5=1000, txnServer6=1000, txnServer16=1000, txnServer7=1000, txnServer15=1000, txnServer14=1000, txnServer8=1000, txnServer9=1000, txnServer18=1000, txnServer0=1000, txnServer1=1000, txnServer2=1000, txnServer3=1000, txnServer4=1000}
+TxnId@1.15/0 {txnServer13=1000, txnServer12=1000, txnServer11=1000, txnServer10=1000, txnServer17=1000, txnServer5=1000, txnServer6=1000, txnServer16=1000, txnServer7=1000, txnServer15=1000, txnServer14=1000, txnServer8=1000, txnServer9=1000, txnServer18=1000, txnServer0=1000, txnServer1=1000, txnServer2=1000, txnServer3=1000, txnServer4=1000}
+TxnId@1.23/3 {txnServer13=1000, txnServer12=1000, txnServer11=1000, txnServer10=1000, txnServer17=1000, txnServer5=1000, txnServer6=1000, txnServer16=1000, txnServer7=1000, txnServer15=1000, txnServer14=1000, txnServer8=1000, txnServer9=1000, txnServer18=1000, txnServer0=1000, txnServer1=1000, txnServer2=1000, txnServer3=1000, txnServer4=1000}
+TxnId@1.31/0 {txnServer13=1000, txnServer12=1000, txnServer11=1000, txnServer10=1000, txnServer17=1000, txnServer5=1000, txnServer6=1000, txnServer16=1000, txnServer7=1000, txnServer15=1000, txnServer14=1000, txnServer8=1000, txnServer9=1000, txnServer18=1000, txnServer0=1000, txnServer1=1000, txnServer2=1000, txnServer3=1000, txnServer4=1000}
+TxnId@0.28/1 {txnServer13=1000, txnServer12=1000, txnServer11=1000, txnServer10=1000, txnServer17=1000, txnServer5=1000, txnServer6=1000, txnServer16=1000, txnServer7=1000, txnServer15=1000, txnServer14=1000, txnServer8=1000, txnServer9=1000, txnServer18=1000, txnServer0=1000, txnServer1=1000, txnServer2=1000, txnServer3=1000, txnServer4=1000}
+TxnId@0.25/4 {txnServer13=1000, txnServer12=1000, txnServer11=1000, txnServer10=1000, txnServer17=1000, txnServer5=1000, txnServer6=1000, txnServer16=1000, txnServer7=1000, txnServer15=1000, txnServer14=1000, txnServer8=1000, txnServer9=1000, txnServer18=1000, txnServer0=1000, txnServer1=1000, txnServer2=1000, txnServer3=1000, txnServer4=1000}
+TxnId@1.20/2 {txnServer13=1000, txnServer12=1000, txnServer11=1000, txnServer10=1000, txnServer17=1000, txnServer5=1000, txnServer6=1000, txnServer16=1000, txnServer7=1000, txnServer15=1000, txnServer14=1000, txnServer8=1000, txnServer9=1000, txnServer18=1000, txnServer0=1000, txnServer1=1000, txnServer2=1000, txnServer3=1000, txnServer4=1000}
+TxnId@0.40/0 {txnServer13=1000, txnServer12=1000, txnServer11=1000, txnServer10=1000, txnServer17=1000, txnServer5=1000, txnServer6=1000, txnServer16=1000, txnServer7=1000, txnServer15=1000, txnServer14=1000, txnServer8=1000, txnServer9=1000, txnServer18=1000, txnServer0=1000, txnServer1=1000, txnServer2=1000, txnServer3=1000, txnServer4=1000}
+TxnId@0.31/2 {txnServer13=1000, txnServer12=1000, txnServer11=1000, txnServer10=1000, txnServer17=1000, txnServer5=1000, txnServer6=1000, txnServer16=1000, txnServer7=1000, txnServer15=1000, txnServer14=1000, txnServer8=1000, txnServer9=1000, txnServer18=1000, txnServer0=1000, txnServer1=1000, txnServer2=1000, txnServer3=1000, txnServer4=1000}
+TxnId@0.33/1 {txnServer13=1000, txnServer12=1000, txnServer11=1000, txnServer10=1000, txnServer17=1000, txnServer5=1000, txnServer6=1000, txnServer16=1000, txnServer7=1000, txnServer15=1000, txnServer14=1000, txnServer8=1000, txnServer9=1000, txnServer18=1000, txnServer0=1000, txnServer1=1000, txnServer2=1000, txnServer3=1000, txnServer4=1000}
+TxnId@1.28/1 {txnServer13=1000, txnServer12=1000, txnServer11=1000, txnServer10=1000, txnServer17=1000, txnServer5=1000, txnServer6=1000, txnServer16=1000, txnServer7=1000, txnServer15=1000, txnServer14=1000, txnServer8=1000, txnServer9=1000, txnServer18=1000, txnServer0=1000, txnServer1=1000, txnServer2=1000, txnServer3=1000, txnServer4=1000}
+TxnId@1.32/1 {txnServer13=1000, txnServer12=1000, txnServer11=1000, txnServer10=1000, txnServer17=1000, txnServer5=1000, txnServer6=1000, txnServer16=1000, txnServer7=1000, txnServer15=1000, txnServer14=1000, txnServer8=1000, txnServer9=1000, txnServer18=1000, txnServer0=1000, txnServer1=1000, txnServer2=1000, txnServer3=1000, txnServer4=1000}
+TxnId@0.32/4 {txnServer13=1000, txnServer12=1000, txnServer11=1000, txnServer10=1000, txnServer17=1000, txnServer5=1000, txnServer6=1000, txnServer16=1000, txnServer7=1000, txnServer15=1000, txnServer14=1000, txnServer8=1000, txnServer9=1000, txnServer18=1000, txnServer0=1000, txnServer1=1000, txnServer2=1000, txnServer3=1000, txnServer4=1000}
+TxnId@0.36/4 {txnServer13=1000, txnServer12=1000, txnServer11=1000, txnServer10=1000, txnServer17=1000, txnServer5=1000, txnServer6=1000, txnServer16=1000, txnServer7=1000, txnServer15=1000, txnServer14=1000, txnServer8=1000, txnServer9=1000, txnServer18=1000, txnServer0=1000, txnServer1=1000, txnServer2=1000, txnServer3=1000, txnServer4=1000}
+TxnId@0.41/3 {txnServer13=1000, txnServer12=1000, txnServer11=1000, txnServer10=1000, txnServer17=1000, txnServer5=1000, txnServer6=1000, txnServer16=1000, txnServer7=1000, txnServer15=1000, txnServer14=1000, txnServer8=1000, txnServer9=1000, txnServer18=1000, txnServer0=1000, txnServer1=1000, txnServer2=1000, txnServer3=1000, txnServer4=1000}
+TxnId@1.22/4 {txnServer13=1000, txnServer12=1000, txnServer11=1000, txnServer10=1000, txnServer17=1000, txnServer5=1000, txnServer6=1000, txnServer16=1000, txnServer7=1000, txnServer15=1000, txnServer14=1000, txnServer8=1000, txnServer9=1000, txnServer18=1000, txnServer0=1000, txnServer1=1000, txnServer2=1000, txnServer3=1000, txnServer4=1000}
+TxnId@0.47/1 {txnServer13=1000, txnServer12=1000, txnServer11=1000, txnServer10=1000, txnServer17=1000, txnServer5=1000, txnServer6=1000, txnServer16=1000, txnServer7=1000, txnServer15=1000, txnServer14=1000, txnServer8=1000, txnServer9=1000, txnServer18=1000, txnServer0=1000, txnServer1=1000, txnServer2=1000, txnServer3=1000, txnServer4=1000}
+TxnId@0.30/4 {txnServer13=1000, txnServer12=1000, txnServer11=1000, txnServer10=1000, txnServer17=1000, txnServer5=1000, txnServer6=1000, txnServer16=1000, txnServer7=1000, txnServer15=1000, txnServer14=1000, txnServer8=1000, txnServer9=1000, txnServer18=1000, txnServer0=1000, txnServer1=1000, txnServer2=1000, txnServer3=1000, txnServer4=1000}
+TxnId@0.26/1 {txnServer13=1000, txnServer12=1000, txnServer11=1000, txnServer10=1000, txnServer17=1000, txnServer5=1000, txnServer6=1000, txnServer16=1000, txnServer7=1000, txnServer15=1000, txnServer14=1000, txnServer8=1000, txnServer9=1000, txnServer18=1000, txnServer0=1000, txnServer1=1000, txnServer2=1000, txnServer3=1000, txnServer4=1000}
+
+TxnId@1.1/0 0 OK
+TxnId@0.2/3 0 OK
+TxnId@0.0/4 0 OK
+TxnId@1.0/1 0 OK
+TxnId@0.1/2 0 OK
+TxnId@1.4/1 0 OK
+TxnId@1.3/0 0 OK
+TxnId@0.4/1 0 OK
+TxnId@1.2/4 0 OK
+TxnId@1.6/0 0 OK
+TxnId@1.7/1 0 OK
+TxnId@0.7/2 0 OK
+TxnId@0.6/3 0 OK
+TxnId@0.5/2 0 OK
+TxnId@0.8/2 0 OK
+TxnId@0.10/3 0 OK
+TxnId@0.16/2 0 OK
+TxnId@0.12/4 0 OK
+TxnId@1.10/3 0 OK
+TxnId@1.8/2 0 OK
+TxnId@1.12/4 0 OK
+TxnId@0.23/3 0 OK
+TxnId@1.17/1 0 OK
+TxnId@1.16/4 0 OK
+TxnId@0.17/0 0 OK
+TxnId@1.9/0 0 OK
+TxnId@0.21/1 0 OK
+TxnId@0.24/0 0 OK
+TxnId@0.20/2 0 OK
+TxnId@1.24/0 0 OK
+TxnId@1.14/4 0 OK
+TxnId@0.18/2 0 OK
+TxnId@1.15/0 0 OK
+TxnId@1.23/3 0 OK
+TxnId@1.31/0 0 OK
+TxnId@0.28/1 0 OK
+TxnId@0.25/4 0 OK
+TxnId@1.20/2 0 OK
+TxnId@0.40/0 0 OK
+TxnId@0.31/2 0 OK
+TxnId@0.33/1 0 OK
+TxnId@1.28/1 0 OK
+TxnId@1.32/1 0 OK
+TxnId@0.32/4 0 OK
+TxnId@0.36/4 0 OK
+TxnId@0.41/3 0 OK
+TxnId@1.22/4 0 OK
+TxnId@0.47/1 0 OK
+TxnId@0.30/4 0 OK
+TxnId@0.26/1 0 OK
+
+Final sum = 19000 OK

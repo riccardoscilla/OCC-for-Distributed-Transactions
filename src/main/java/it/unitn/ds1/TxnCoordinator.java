@@ -108,16 +108,7 @@ public class TxnCoordinator extends AbstractActor {
     }
   }
 
-  // ABORT from the coordinator to the server
-  public static class AbortMsg implements Serializable {
-    public final TxnId txn;
-    public final Set<ActorRef> participants;
-    public AbortMsg(TxnId txn, Set<ActorRef> participants) {
-      this.txn = txn;
-      this.participants = participants;
-    }
-  }
-
+  // Send decision (commit/abort) to the server
   public static class FinalDecisionMsg implements Serializable {
     public final Boolean decision;
     public final TxnId txn;
@@ -423,12 +414,18 @@ public class TxnCoordinator extends AbstractActor {
         return;
       }
 
-    } else{ // if received abort, send abort to servers TODO: add false in decision history
+    } 
+    else { // if received abort, send abort to servers
       printLog("\t" + txn.name + " COORDI "+ coordinatorId + " - Abort to " + printOngoing(OngoingTxn.get(txn)), "Verbose");
       
+      Boolean finalDecision = false;
+      txnHistory.put(txn, finalDecision);
+
       for(ActorRef server : OngoingTxn.get(txn)){
-        sendReal(new AbortMsg(txn, participants), getSelf(), server); // tell to abort TODO: send FinalDecisionMsg instead?
+        sendReal(new FinalDecisionMsg(finalDecision, txn), getSelf(), server); // tell to abort
       }
+
+      sendReal(new TxnResultMsg(finalDecision), getSelf(), txn.client); // send final Decision 
 
       // remove transaction (do not expect a response back to servers)
       OngoingTxn.remove(txn);

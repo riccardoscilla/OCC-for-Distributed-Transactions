@@ -21,7 +21,7 @@ public class Check{
         line = line.replace("\0", "");
         String[] l = line.split(" ");
    
-        if(Arrays.stream(l).anyMatch("END"::equals)){
+        if(Arrays.stream(l).anyMatch("BEGIN"::equals)){
           // System.out.println(line);
           order.add(l[1]);
         }
@@ -125,20 +125,51 @@ public class Check{
   }
 
   /*---------------------------------------------------------- */
+  public static void printOKFAIL(){
+    String line;
+    try {
+      
+      Map<String, String> print = new LinkedHashMap<>();
+      BufferedReader reader = new BufferedReader(new FileReader(fileName));
+
+      while((line = reader.readLine()) != null) {
+        line = line.replace("\0", "");
+        String[] l = line.split(" ");
+  
+        if(Arrays.stream(l).anyMatch("OK"::equals) || Arrays.stream(l).anyMatch("FAIL"::equals)
+          && Arrays.stream(l).anyMatch("COMMIT"::equals)){
+          System.out.println(line);
+          
+        }
+      }
+
+      reader.close();
+
+    } catch(Exception ex) {
+      ex.printStackTrace();
+    }
+  }
+
+  /*---------------------------------------------------------- */
   public static void main(String[] args) {
     fileName = args[0];
+
+    printKeyword("Seed:");
+    printKeyword("Info:");
 
     getOrder();  
     System.out.println("Client Order "+order);
     System.out.println();
 
-    printKeyword("ABORT");
-    printKeyword("OK");
-    printKeyword("FAIL");
+    // printKeyword("OK");
+    // printKeyword("FAIL");
+    // System.out.println();
+    
+    printOKFAIL();
     System.out.println();
 
-    printKeyword("[CHECK]");
-    System.out.println();
+    // printKeyword("[CHECK]");
+    // System.out.println();
 
     for(String o : order){
       matchOrder(o);

@@ -13,7 +13,6 @@ import it.unitn.ds1.TxnCoordinator.FwdReadMsg;
 import it.unitn.ds1.TxnCoordinator.FwdWriteMsg;
 
 import it.unitn.ds1.TxnCoordinator.CanCommitMsg;
-import it.unitn.ds1.TxnCoordinator.AbortMsg;
 import it.unitn.ds1.TxnCoordinator.FinalDecisionMsg;
 
 import it.unitn.ds1.TxnSystem.CrashServerMsg;
@@ -385,20 +384,6 @@ public class TxnServer extends AbstractActor {
   }
 
   /*------------------------------------------------------- */
-  private void onAbortMsg(AbortMsg msg){
-    printLog("\t\t" + msg.txn.name + " SERVER " + serverId + " Received abort", "Verbose");
-
-    FreeLocks(workSpace.get(msg.txn)); // free the locks that may have been acquired
-    
-    // clear workspace and other transaction info
-    workSpace.remove(msg.txn);
-    txnParticipants.remove(msg.txn);
-    txnState.remove(msg.txn);
-    cancelTimeout(msg.txn);
-    txnHistory.put(msg.txn, false);  // add the decision to the history (always abort)
-
-    printLog(printCheck(msg.txn),"Check");
-  }
 
   private void onFinalDecisionMsg(FinalDecisionMsg msg){
     if(workSpace.get(msg.txn) == null) { // if already aborted do nothing
@@ -434,19 +419,24 @@ public class TxnServer extends AbstractActor {
   }
 
   private void onFwdParticipantsDecisionMsg(FwdParticipantsDecisionMsg msg) throws InterruptedException {
-    if(workSpace.get(msg.txn) == null) return;  // if already decided, do nothing
+    if(workSpace.get(msg.txn) == null) { // if already aborted do nothing
+      printLog(printCheck(msg.txn),"Check");
+      return; 
+    } 
 
     printLog("\t\t" + msg.txn.name + " SERVER " + serverId + " Received Final Decision (termination protocol)", "Termination");
     
     if( msg.decision ) ApplyChanges(workSpace.get(msg.txn));
     else FreeLocks(workSpace.get(msg.txn)); // free the locks that may have been acquired
 
+    txnHistory.put(msg.txn, msg.decision);  // add the decision to the history
+
     // clear workspace and other transaction info
     workSpace.remove(msg.txn);
     txnParticipants.remove(msg.txn);
     txnState.remove(msg.txn);
     cancelTimeout(msg.txn);
-    txnHistory.put(msg.txn, msg.decision);  // add the decision to the history
+    
   
     printLog(printCheck(msg.txn),"Check");
   }
@@ -493,7 +483,6 @@ public class TxnServer extends AbstractActor {
             .match(FwdReadMsg.class,  this::onFwdReadMsg)
             .match(FwdWriteMsg.class,  this::onFwdWriteMsg)
             .match(CanCommitMsg.class,  this::onCanCommitMsg)
-            .match(AbortMsg.class, this::onAbortMsg)
             .match(FinalDecisionMsg.class,  this::onFinalDecisionMsg)
             .match(TxnDecisionTimeoutMsg.class,  this::onTxnDecisionTimeoutMsg)
             .match(ParticipantsDecisionMsg.class,  this::onParticipantsDecisionMsg)

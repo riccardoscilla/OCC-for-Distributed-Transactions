@@ -20,7 +20,6 @@ it/unitn/ds1/TxnClient.java
  it.unitn.ds1.TxnClient$WriteMsg
 it/unitn/ds1/TxnCoordinator.java
  it.unitn.ds1.TxnCoordinator
- it.unitn.ds1.TxnCoordinator$AbortMsg
  it.unitn.ds1.TxnCoordinator$CanCommitMsg
  it.unitn.ds1.TxnCoordinator$CrashCoordType
  it.unitn.ds1.TxnCoordinator$FinalDecisionMsg
@@ -34,6 +33,8 @@ it/unitn/ds1/TxnSystem.java
  it.unitn.ds1.TxnSystem
  it.unitn.ds1.TxnSystem$1
  it.unitn.ds1.TxnSystem$2
+ it.unitn.ds1.TxnSystem$3
+ it.unitn.ds1.TxnSystem$4
  it.unitn.ds1.TxnSystem$CrashCoordMsg
  it.unitn.ds1.TxnSystem$CrashServerMsg
  it.unitn.ds1.TxnSystem$RecoveryMsg

@@ -20,10 +20,10 @@ import it.unitn.ds1.TxnServer.CrashServerType;
 import it.unitn.ds1.TxnCoordinator.CrashCoordType;
 
 public class TxnSystem {
-  final static int N_CLIENTS = 3;
-  final static int N_COORDINATORS = 3;
-  final static int N_SERVERS = 3;
-  final static int maxKey = N_SERVERS*10-1;
+  // final static int N_CLIENTS = 6;
+  // final static int N_COORDINATORS = 5;
+  // final static int N_SERVERS = 11;
+  // final static int maxKey = N_SERVERS*10-1;
 
   final static int maxDelay = 50;
   final static int minDelay = 10;
@@ -31,8 +31,10 @@ public class TxnSystem {
   final static int maxCrash = 800;
   final static int minCrash = 300;
 
-  static final String logMode = "Verbose";
-  static int seed = 405556085;
+  final static int simDuration = 90*1000; // seconds*1000
+
+  static final String logMode = "Check";
+  static int seed = 0; // set 0 to generate randomly
   // 405556085
 
   static Cancellable serverCrash;
@@ -65,16 +67,25 @@ public class TxnSystem {
 
   public static void main(String[] args) {
     Random r = new Random();
+
+    // Set actor quantity
+    int N_CLIENTS = (int)(((r.nextDouble())*(10 - 2)) + 2);
+    int N_COORDINATORS = (int)(((r.nextDouble())*(10 - 2)) + 2);
+    int N_SERVERS = (int)(((r.nextDouble())*(N_CLIENTS*4 - N_CLIENTS*2)) + N_CLIENTS*2);
+    int maxKey = N_SERVERS*10-1;
+
+    // Set seed
     if (seed == 0){
       int max = Math.max(N_CLIENTS,Math.max(N_COORDINATORS,N_SERVERS));
       seed = r.nextInt(Integer.MAX_VALUE/max); 
     }
     r.setSeed(seed);
-    System.out.println("Seed: " + seed);
 
-    Config myConfig = ConfigFactory.parseString("akka.log-dead-letters = off");
+    System.out.println("Seed: " + seed);
+    System.out.println("Actor Info: clients:"+N_CLIENTS+" coordinators:"+N_COORDINATORS+" servers:"+N_SERVERS);
 
     // Create the actor system
+    Config myConfig = ConfigFactory.parseString("akka.log-dead-letters = off");
     final ActorSystem system = ActorSystem.create("txnSystem", myConfig.withFallback(ConfigFactory.load()));
 
     // Create client nodes and put them to a list
@@ -107,7 +118,7 @@ public class TxnSystem {
       client.tell(welcomeCoord, ActorRef.noSender());
     }
     
-    // automated crash simulator
+    // Automated crash simulator
     Cancellable cancellable = system.scheduler().scheduleWithFixedDelay(
             Duration.ofMillis(1000), // initial wait 
             Duration.ofMillis(1000), // fixed delay
@@ -132,20 +143,57 @@ public class TxnSystem {
             system.dispatcher()
     );
 
-    // manual crash simulator
+    // Manual crash simulator
     // inputContinue();
-
-    // ActorRef coordToCrash = coordinators.get(r.nextInt(coordinators.size()));
-    // int timeToCrash = 500;
-    // coordToCrash.tell(new CrashCoordMsg(CrashCoordType.AfterDecide, timeToCrash), ActorRef.noSender());
 
     // ActorRef serverToCrash = servers.get(0);
     // int timeToCrash = 200;
-    // serverToCrash.tell(new CrashServerMsg(CrashServerType.AfterVote, timeToCrash), ActorRef.noSender());
+    // CrashServerType nextCrash = CrashServerType.AfterVote;
+    // serverToCrash.tell(new CrashServerMsg(nextCrash, timeToCrash), ActorRef.noSender());
+
+    // ActorRef coordToCrash = coordinators.get(0);
+    // int timeToCrash = 500;
+    // CrashCoordType nextCrash = CrashCoordType.AfterDecide;
+    // coordToCrash.tell(new CrashCoordMsg(nextCrash, timeToCrash), ActorRef.noSender());
 
     // inputContinue();
 
-    inputTerminate(system, clients);
+
+    // Automated termination
+    system.scheduler().scheduleOnce(
+      Duration.ofMillis(simDuration),
+      new Runnable() {
+        @Override
+        public void run() {
+          terminate(system, clients);
+        }
+      },
+      system.dispatcher()
+    );
+
+    // Manual termination
+    // inputTerminate(system, clients);
+
+
+  }
+
+  public static void terminate(ActorSystem system, List<ActorRef> clients) {
+
+    for (ActorRef client: clients) {
+      client.tell(new StopMsg(), ActorRef.noSender());
+    }
+
+    system.scheduler().scheduleOnce(
+            Duration.ofMillis(2000),
+            new Runnable() {
+              @Override
+              public void run() {
+                system.terminate();
+              }
+            },
+            system.dispatcher()
+    );
+    
   }
 
   public static void inputContinue() {

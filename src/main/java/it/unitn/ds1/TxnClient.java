@@ -134,8 +134,7 @@ public class TxnClient extends AbstractActor {
   void beginTxn() {
 
     // some delay between transactions from the same client
-    try { Thread.sleep(10); } //TODO: real code
-    // try { Thread.sleep(r.nextInt(20)); }
+    try { Thread.sleep(10); }
     catch (InterruptedException e) { e.printStackTrace(); }
 
     acceptedTxn = false;
@@ -162,8 +161,8 @@ public class TxnClient extends AbstractActor {
 
   // end the current TXN sending TxnEndMsg to the coordinator
   void endTxn() {
-    // boolean doCommit = r.nextDouble() < COMMIT_PROBABILITY; //TODO: real code
-    boolean doCommit = true;
+    boolean doCommit = r.nextDouble() < COMMIT_PROBABILITY; //TODO: real code
+    // boolean doCommit = false;
     currentCoordinator.tell(new TxnEndMsg(clientId, doCommit), getSelf());
     firstValue = null;
     secondValue = null;
@@ -239,16 +238,16 @@ public class TxnClient extends AbstractActor {
     boolean opDone = (firstValue != null && secondValue != null);
 
     // do we only read or also write?
-    // double writeRandom = r.nextDouble(); TODO: real code
-    double writeRandom = 0;
+    double writeRandom = r.nextDouble(); // TODO: real code
+    // double writeRandom = 0;
     boolean doWrite = writeRandom < WRITE_PROBABILITY;
     if(doWrite && opDone) writeTwo();
     
     // check if the transaction should end;
     // otherwise, read two again
     if(opDone) numOpDone++;
-    // if(numOpDone >= numOpTotal) { TODO: real code
-    if(numOpDone >= 1) {
+    if(numOpDone >= numOpTotal) { // TODO: real code
+    // if(numOpDone >= 1) {
       endTxn();
     }
     else if(opDone) {

@@ -1,174 +1,170 @@
-Seed: 20508881
-Actor Info: clients:5 coordinators:2 servers:19
-Client Order [0, 3, 4, 1, 2, 1, 0, 1, 4, 0, 1, 2, 3, 2, 2, 3, 2, 4, 3, 2, 4, 3, 1, 4, 0, 0, 1, 0, 2, 0, 4, 2, 0, 3, 0, 1, 4, 2, 0, 2, 1, 1, 2, 1, 4, 0, 4, 3, 4, 1, 0, 0, 4, 4, 1, 1, 4, 2, 1, 0, 4, 4, 4, 3, 0, 2, 4, 0, 2, 1, 1, 4, 1, 4, 1, 4, 4, 1, 4, 4, 2, 0, 0, 0, 0, 3, 0, 0, 4, 2, 1, 0, 4, 0, 0, 1, 2, 4, 3, 1, 1]
+Seed: 28537233
+Actor Info: clients:7 coordinators:6 servers:36
+Client Order [2, 3, 4, 1, 5, 6, 0, 3, 2, 2, 6, 4, 3, 0, 1, 5, 4, 1, 6, 0, 2, 6, 6, 5, 3, 0, 1, 3, 0, 5, 4, 6, 2, 3, 5, 0, 1, 5, 4, 2, 3, 6, 1, 6, 0, 5, 3, 4, 0, 5, 2, 4, 1, 0, 6, 3, 6, 2, 5, 1, 3, 6, 0]
 
-CLIENT 1 COMMIT FAIL (1/1)
-CLIENT 0 COMMIT FAIL (1/1)
-CLIENT 4 COMMIT FAIL (1/1)
+CLIENT 3 COMMIT OK (1/1)
 CLIENT 2 COMMIT FAIL (1/1)
-CLIENT 3 COMMIT FAIL (1/1)
-CLIENT 2 COMMIT FAIL (3/3)
-CLIENT 3 COMMIT FAIL (2/2)
+CLIENT 6 COMMIT FAIL (1/1)
+CLIENT 4 COMMIT FAIL (1/1)
+CLIENT 3 COMMIT OK (2/2)
+CLIENT 0 COMMIT FAIL (1/1)
+CLIENT 1 COMMIT FAIL (1/1)
+CLIENT 5 COMMIT FAIL (1/1)
 CLIENT 4 COMMIT FAIL (2/2)
-CLIENT 2 COMMIT FAIL (5/5)
-CLIENT 1 COMMIT FAIL (4/4)
+CLIENT 1 COMMIT OK (1/2)
+CLIENT 6 COMMIT FAIL (2/2)
+CLIENT 0 COMMIT FAIL (2/2)
+CLIENT 2 COMMIT FAIL (3/3)
+CLIENT 6 COMMIT OK (1/3)
+CLIENT 5 COMMIT OK (1/2)
+CLIENT 3 COMMIT FAIL (1/3)
 CLIENT 0 COMMIT FAIL (3/3)
+CLIENT 1 COMMIT FAIL (2/3)
+CLIENT 3 COMMIT FAIL (2/4)
 CLIENT 0 COMMIT FAIL (4/4)
-CLIENT 1 COMMIT FAIL (5/5)
+CLIENT 5 COMMIT FAIL (2/3)
+CLIENT 4 COMMIT FAIL (3/3)
+CLIENT 6 COMMIT FAIL (4/5)
+CLIENT 2 COMMIT FAIL (4/4)
+CLIENT 3 COMMIT FAIL (3/5)
+CLIENT 5 COMMIT FAIL (3/4)
+CLIENT 0 COMMIT FAIL (5/5)
+CLIENT 1 COMMIT FAIL (3/4)
+CLIENT 5 COMMIT OK (2/5)
+CLIENT 4 COMMIT FAIL (4/4)
+CLIENT 2 COMMIT FAIL (5/5)
+CLIENT 3 COMMIT FAIL (4/6)
+CLIENT 6 COMMIT FAIL (5/6)
+CLIENT 1 COMMIT FAIL (4/5)
+CLIENT 6 COMMIT OK (2/7)
+CLIENT 0 COMMIT FAIL (6/6)
+CLIENT 5 COMMIT FAIL (4/6)
+CLIENT 3 COMMIT FAIL (5/7)
+CLIENT 4 COMMIT OK (1/5)
+CLIENT 0 COMMIT FAIL (7/7)
+CLIENT 5 COMMIT FAIL (5/7)
 CLIENT 2 COMMIT FAIL (6/6)
-CLIENT 4 COMMIT FAIL (5/5)
+CLIENT 4 COMMIT FAIL (5/6)
+CLIENT 1 COMMIT FAIL (5/6)
+CLIENT 0 COMMIT OK (1/8)
+CLIENT 6 COMMIT FAIL (6/8)
+CLIENT 3 COMMIT FAIL (6/8)
+CLIENT 6 COMMIT FAIL (7/9)
 CLIENT 2 COMMIT FAIL (7/7)
-CLIENT 3 COMMIT FAIL (5/5)
-CLIENT 0 COMMIT FAIL (8/8)
-CLIENT 1 COMMIT FAIL (6/6)
-CLIENT 0 COMMIT FAIL (9/9)
-CLIENT 2 COMMIT FAIL (9/9)
-CLIENT 1 COMMIT FAIL (7/7)
-CLIENT 2 COMMIT FAIL (10/10)
-CLIENT 4 COMMIT FAIL (7/7)
-CLIENT 0 COMMIT FAIL (10/10)
-CLIENT 3 COMMIT FAIL (6/6)
-CLIENT 4 COMMIT FAIL (9/9)
-CLIENT 1 COMMIT FAIL (10/10)
-CLIENT 0 COMMIT FAIL (11/11)
-CLIENT 4 COMMIT FAIL (10/10)
-CLIENT 1 COMMIT FAIL (11/11)
-CLIENT 2 COMMIT FAIL (11/11)
-CLIENT 0 COMMIT FAIL (13/13)
-CLIENT 4 COMMIT FAIL (14/14)
-CLIENT 4 COMMIT FAIL (15/15)
-CLIENT 3 COMMIT FAIL (7/7)
-CLIENT 0 COMMIT FAIL (14/14)
-CLIENT 2 COMMIT FAIL (12/12)
-CLIENT 4 COMMIT FAIL (16/16)
-CLIENT 0 COMMIT FAIL (15/15)
-CLIENT 2 COMMIT FAIL (13/13)
-CLIENT 1 COMMIT FAIL (14/14)
-CLIENT 1 COMMIT FAIL (15/15)
-CLIENT 4 COMMIT FAIL (17/17)
-CLIENT 4 COMMIT FAIL (18/18)
-CLIENT 1 COMMIT FAIL (17/17)
-CLIENT 4 COMMIT FAIL (19/19)
-CLIENT 1 COMMIT FAIL (18/18)
-CLIENT 2 COMMIT FAIL (14/14)
-CLIENT 0 COMMIT FAIL (16/16)
-CLIENT 0 COMMIT FAIL (17/17)
-CLIENT 3 COMMIT FAIL (8/8)
-CLIENT 0 COMMIT FAIL (20/20)
-CLIENT 0 COMMIT FAIL (21/21)
-CLIENT 4 COMMIT FAIL (23/23)
-CLIENT 2 COMMIT FAIL (15/15)
-CLIENT 1 COMMIT FAIL (19/19)
-CLIENT 0 COMMIT FAIL (22/22)
-CLIENT 4 COMMIT FAIL (24/24)
-CLIENT 0 COMMIT FAIL (24/24)
-CLIENT 1 COMMIT FAIL (20/20)
-CLIENT 2 COMMIT FAIL (16/16)
-CLIENT 4 COMMIT FAIL (25/25)
-CLIENT 3 COMMIT FAIL (9/9)
-CLIENT 1 COMMIT FAIL (21/21)
-CLIENT 1 COMMIT FAIL (22/22)
+CLIENT 5 COMMIT FAIL (6/8)
+CLIENT 1 COMMIT FAIL (6/7)
+CLIENT 3 COMMIT FAIL (7/9)
+CLIENT 6 COMMIT FAIL (8/10)
+CLIENT 0 COMMIT OK (2/9)
 
-TxnId@1.1/0 {txnServer13=1000, txnServer12=1000, txnServer11=1000, txnServer10=1000, txnServer17=1000, txnServer5=1000, txnServer6=1000, txnServer16=1000, txnServer7=1000, txnServer14=1000, txnServer8=1000, txnServer9=1000, txnServer18=1000, txnServer0=1000, txnServer1=1000, txnServer2=1000, txnServer4=1000}
-TxnId@0.2/3 {txnServer13=1000, txnServer12=1000, txnServer11=1000, txnServer10=1000, txnServer17=1000, txnServer5=1000, txnServer6=1000, txnServer16=1000, txnServer7=1000, txnServer15=1000, txnServer14=1000, txnServer8=1000, txnServer9=1000, txnServer18=1000, txnServer0=1000, txnServer1=1000, txnServer2=1000, txnServer3=1000, txnServer4=1000}
-TxnId@0.0/4 {txnServer13=1000, txnServer12=1000, txnServer11=1000, txnServer10=1000, txnServer17=1000, txnServer5=1000, txnServer6=1000, txnServer16=1000, txnServer7=1000, txnServer15=1000, txnServer14=1000, txnServer8=1000, txnServer9=1000, txnServer18=1000, txnServer0=1000, txnServer1=1000, txnServer2=1000, txnServer3=1000, txnServer4=1000}
-TxnId@1.0/1 {txnServer13=1000, txnServer12=1000, txnServer11=1000, txnServer10=1000, txnServer17=1000, txnServer5=1000, txnServer6=1000, txnServer16=1000, txnServer7=1000, txnServer15=1000, txnServer14=1000, txnServer8=1000, txnServer9=1000, txnServer18=1000, txnServer0=1000, txnServer1=1000, txnServer2=1000, txnServer3=1000, txnServer4=1000}
-TxnId@0.1/2 {txnServer13=1000, txnServer12=1000, txnServer11=1000, txnServer10=1000, txnServer17=1000, txnServer5=1000, txnServer6=1000, txnServer16=1000, txnServer7=1000, txnServer15=1000, txnServer14=1000, txnServer8=1000, txnServer9=1000, txnServer18=1000, txnServer0=1000, txnServer1=1000, txnServer2=1000, txnServer3=1000, txnServer4=1000}
-TxnId@1.4/1 {txnServer13=1000, txnServer12=1000, txnServer11=1000, txnServer10=1000, txnServer17=1000, txnServer5=1000, txnServer6=1000, txnServer16=1000, txnServer7=1000, txnServer15=1000, txnServer14=1000, txnServer8=1000, txnServer9=1000, txnServer18=1000, txnServer0=1000, txnServer1=1000, txnServer2=1000, txnServer3=1000, txnServer4=1000}
-TxnId@1.3/0 {txnServer13=1000, txnServer12=1000, txnServer11=1000, txnServer10=1000, txnServer17=1000, txnServer5=1000, txnServer6=1000, txnServer16=1000, txnServer7=1000, txnServer15=1000, txnServer14=1000, txnServer8=1000, txnServer9=1000, txnServer18=1000, txnServer0=1000, txnServer1=1000, txnServer2=1000, txnServer3=1000, txnServer4=1000}
-TxnId@0.4/1 {txnServer13=1000, txnServer12=1000, txnServer11=1000, txnServer10=1000, txnServer17=1000, txnServer5=1000, txnServer6=1000, txnServer16=1000, txnServer7=1000, txnServer15=1000, txnServer14=1000, txnServer8=1000, txnServer9=1000, txnServer18=1000, txnServer0=1000, txnServer1=1000, txnServer2=1000, txnServer3=1000, txnServer4=1000}
-TxnId@1.2/4 {txnServer13=1000, txnServer12=1000, txnServer11=1000, txnServer10=1000, txnServer17=1000, txnServer5=1000, txnServer6=1000, txnServer16=1000, txnServer7=1000, txnServer15=1000, txnServer14=1000, txnServer8=1000, txnServer9=1000, txnServer18=1000, txnServer0=1000, txnServer1=1000, txnServer2=1000, txnServer3=1000, txnServer4=1000}
-TxnId@1.6/0 {txnServer13=1000, txnServer12=1000, txnServer11=1000, txnServer10=1000, txnServer17=1000, txnServer5=1000, txnServer6=1000, txnServer16=1000, txnServer7=1000, txnServer15=1000, txnServer14=1000, txnServer8=1000, txnServer9=1000, txnServer18=1000, txnServer0=1000, txnServer1=1000, txnServer2=1000, txnServer3=1000, txnServer4=1000}
-TxnId@1.7/1 {txnServer13=1000, txnServer12=1000, txnServer11=1000, txnServer10=1000, txnServer17=1000, txnServer5=1000, txnServer6=1000, txnServer16=1000, txnServer7=1000, txnServer15=1000, txnServer14=1000, txnServer8=1000, txnServer9=1000, txnServer18=1000, txnServer0=1000, txnServer1=1000, txnServer2=1000, txnServer3=1000, txnServer4=1000}
-TxnId@0.7/2 {txnServer13=1000, txnServer12=1000, txnServer11=1000, txnServer10=1000, txnServer17=1000, txnServer5=1000, txnServer6=1000, txnServer16=1000, txnServer7=1000, txnServer15=1000, txnServer14=1000, txnServer8=1000, txnServer9=1000, txnServer18=1000, txnServer0=1000, txnServer1=1000, txnServer2=1000, txnServer3=1000, txnServer4=1000}
-TxnId@0.6/3 {txnServer13=1000, txnServer12=1000, txnServer11=1000, txnServer10=1000, txnServer17=1000, txnServer5=1000, txnServer6=1000, txnServer16=1000, txnServer7=1000, txnServer15=1000, txnServer14=1000, txnServer8=1000, txnServer9=1000, txnServer18=1000, txnServer0=1000, txnServer1=1000, txnServer2=1000, txnServer3=1000, txnServer4=1000}
-TxnId@0.5/2 {txnServer13=1000, txnServer12=1000, txnServer11=1000, txnServer10=1000, txnServer17=1000, txnServer5=1000, txnServer6=1000, txnServer16=1000, txnServer7=1000, txnServer15=1000, txnServer14=1000, txnServer8=1000, txnServer9=1000, txnServer18=1000, txnServer0=1000, txnServer1=1000, txnServer2=1000, txnServer3=1000, txnServer4=1000}
-TxnId@0.8/2 {txnServer13=1000, txnServer12=1000, txnServer11=1000, txnServer10=1000, txnServer17=1000, txnServer5=1000, txnServer6=1000, txnServer16=1000, txnServer7=1000, txnServer15=1000, txnServer14=1000, txnServer8=1000, txnServer9=1000, txnServer18=1000, txnServer0=1000, txnServer1=1000, txnServer2=1000, txnServer3=1000, txnServer4=1000}
-TxnId@0.10/3 {txnServer13=1000, txnServer12=1000, txnServer11=1000, txnServer10=1000, txnServer17=1000, txnServer5=1000, txnServer6=1000, txnServer16=1000, txnServer7=1000, txnServer15=1000, txnServer14=1000, txnServer8=1000, txnServer9=1000, txnServer18=1000, txnServer0=1000, txnServer1=1000, txnServer2=1000, txnServer3=1000, txnServer4=1000}
-TxnId@0.16/2 {txnServer13=1000, txnServer12=1000, txnServer11=1000, txnServer10=1000, txnServer17=1000, txnServer5=1000, txnServer6=1000, txnServer16=1000, txnServer7=1000, txnServer15=1000, txnServer14=1000, txnServer8=1000, txnServer9=1000, txnServer18=1000, txnServer0=1000, txnServer1=1000, txnServer2=1000, txnServer3=1000, txnServer4=1000}
-TxnId@0.12/4 {txnServer13=1000, txnServer12=1000, txnServer11=1000, txnServer10=1000, txnServer17=1000, txnServer5=1000, txnServer6=1000, txnServer16=1000, txnServer7=1000, txnServer15=1000, txnServer14=1000, txnServer8=1000, txnServer9=1000, txnServer18=1000, txnServer0=1000, txnServer1=1000, txnServer2=1000, txnServer3=1000, txnServer4=1000}
-TxnId@1.10/3 {txnServer13=1000, txnServer12=1000, txnServer11=1000, txnServer10=1000, txnServer17=1000, txnServer5=1000, txnServer6=1000, txnServer16=1000, txnServer7=1000, txnServer15=1000, txnServer14=1000, txnServer8=1000, txnServer9=1000, txnServer18=1000, txnServer0=1000, txnServer1=1000, txnServer2=1000, txnServer3=1000, txnServer4=1000}
-TxnId@1.8/2 {txnServer13=1000, txnServer12=1000, txnServer11=1000, txnServer10=1000, txnServer17=1000, txnServer5=1000, txnServer6=1000, txnServer16=1000, txnServer7=1000, txnServer15=1000, txnServer14=1000, txnServer8=1000, txnServer9=1000, txnServer18=1000, txnServer0=1000, txnServer1=1000, txnServer2=1000, txnServer3=1000, txnServer4=1000}
-TxnId@1.12/4 {txnServer13=1000, txnServer12=1000, txnServer11=1000, txnServer10=1000, txnServer17=1000, txnServer5=1000, txnServer6=1000, txnServer16=1000, txnServer7=1000, txnServer15=1000, txnServer14=1000, txnServer8=1000, txnServer9=1000, txnServer18=1000, txnServer0=1000, txnServer1=1000, txnServer2=1000, txnServer3=1000, txnServer4=1000}
-TxnId@0.23/3 {txnServer13=1000, txnServer12=1000, txnServer11=1000, txnServer10=1000, txnServer17=1000, txnServer5=1000, txnServer6=1000, txnServer16=1000, txnServer7=1000, txnServer15=1000, txnServer14=1000, txnServer8=1000, txnServer9=1000, txnServer18=1000, txnServer0=1000, txnServer1=1000, txnServer2=1000, txnServer3=1000, txnServer4=1000}
-TxnId@1.17/1 {txnServer13=1000, txnServer12=1000, txnServer11=1000, txnServer10=1000, txnServer17=1000, txnServer5=1000, txnServer6=1000, txnServer16=1000, txnServer7=1000, txnServer15=1000, txnServer14=1000, txnServer8=1000, txnServer9=1000, txnServer18=1000, txnServer0=1000, txnServer1=1000, txnServer2=1000, txnServer3=1000, txnServer4=1000}
-TxnId@1.16/4 {txnServer13=1000, txnServer12=1000, txnServer11=1000, txnServer10=1000, txnServer17=1000, txnServer5=1000, txnServer6=1000, txnServer16=1000, txnServer7=1000, txnServer15=1000, txnServer14=1000, txnServer8=1000, txnServer9=1000, txnServer18=1000, txnServer0=1000, txnServer1=1000, txnServer2=1000, txnServer3=1000, txnServer4=1000}
-TxnId@0.17/0 {txnServer13=1000, txnServer12=1000, txnServer11=1000, txnServer10=1000, txnServer17=1000, txnServer5=1000, txnServer6=1000, txnServer16=1000, txnServer7=1000, txnServer15=1000, txnServer14=1000, txnServer8=1000, txnServer9=1000, txnServer18=1000, txnServer0=1000, txnServer1=1000, txnServer2=1000, txnServer3=1000, txnServer4=1000}
-TxnId@1.9/0 {txnServer13=1000, txnServer12=1000, txnServer11=1000, txnServer10=1000, txnServer17=1000, txnServer5=1000, txnServer6=1000, txnServer16=1000, txnServer7=1000, txnServer15=1000, txnServer14=1000, txnServer8=1000, txnServer9=1000, txnServer18=1000, txnServer0=1000, txnServer1=1000, txnServer2=1000, txnServer3=1000, txnServer4=1000}
-TxnId@0.21/1 {txnServer13=1000, txnServer12=1000, txnServer11=1000, txnServer10=1000, txnServer17=1000, txnServer5=1000, txnServer6=1000, txnServer16=1000, txnServer7=1000, txnServer15=1000, txnServer14=1000, txnServer8=1000, txnServer9=1000, txnServer18=1000, txnServer0=1000, txnServer1=1000, txnServer2=1000, txnServer3=1000, txnServer4=1000}
-TxnId@0.24/0 {txnServer13=1000, txnServer12=1000, txnServer11=1000, txnServer10=1000, txnServer17=1000, txnServer5=1000, txnServer6=1000, txnServer16=1000, txnServer7=1000, txnServer15=1000, txnServer14=1000, txnServer8=1000, txnServer9=1000, txnServer18=1000, txnServer0=1000, txnServer1=1000, txnServer2=1000, txnServer3=1000, txnServer4=1000}
-TxnId@0.20/2 {txnServer13=1000, txnServer12=1000, txnServer11=1000, txnServer10=1000, txnServer17=1000, txnServer5=1000, txnServer6=1000, txnServer16=1000, txnServer7=1000, txnServer15=1000, txnServer14=1000, txnServer8=1000, txnServer9=1000, txnServer18=1000, txnServer0=1000, txnServer1=1000, txnServer2=1000, txnServer3=1000, txnServer4=1000}
-TxnId@1.24/0 {txnServer13=1000, txnServer12=1000, txnServer11=1000, txnServer10=1000, txnServer17=1000, txnServer5=1000, txnServer6=1000, txnServer16=1000, txnServer7=1000, txnServer15=1000, txnServer14=1000, txnServer8=1000, txnServer9=1000, txnServer18=1000, txnServer0=1000, txnServer1=1000, txnServer2=1000, txnServer3=1000, txnServer4=1000}
-TxnId@1.14/4 {txnServer13=1000, txnServer12=1000, txnServer11=1000, txnServer10=1000, txnServer17=1000, txnServer5=1000, txnServer6=1000, txnServer16=1000, txnServer7=1000, txnServer15=1000, txnServer14=1000, txnServer8=1000, txnServer9=1000, txnServer18=1000, txnServer0=1000, txnServer1=1000, txnServer2=1000, txnServer3=1000, txnServer4=1000}
-TxnId@0.18/2 {txnServer13=1000, txnServer12=1000, txnServer11=1000, txnServer10=1000, txnServer17=1000, txnServer5=1000, txnServer6=1000, txnServer16=1000, txnServer7=1000, txnServer15=1000, txnServer14=1000, txnServer8=1000, txnServer9=1000, txnServer18=1000, txnServer0=1000, txnServer1=1000, txnServer2=1000, txnServer3=1000, txnServer4=1000}
-TxnId@1.15/0 {txnServer13=1000, txnServer12=1000, txnServer11=1000, txnServer10=1000, txnServer17=1000, txnServer5=1000, txnServer6=1000, txnServer16=1000, txnServer7=1000, txnServer15=1000, txnServer14=1000, txnServer8=1000, txnServer9=1000, txnServer18=1000, txnServer0=1000, txnServer1=1000, txnServer2=1000, txnServer3=1000, txnServer4=1000}
-TxnId@1.23/3 {txnServer13=1000, txnServer12=1000, txnServer11=1000, txnServer10=1000, txnServer17=1000, txnServer5=1000, txnServer6=1000, txnServer16=1000, txnServer7=1000, txnServer15=1000, txnServer14=1000, txnServer8=1000, txnServer9=1000, txnServer18=1000, txnServer0=1000, txnServer1=1000, txnServer2=1000, txnServer3=1000, txnServer4=1000}
-TxnId@1.31/0 {txnServer13=1000, txnServer12=1000, txnServer11=1000, txnServer10=1000, txnServer17=1000, txnServer5=1000, txnServer6=1000, txnServer16=1000, txnServer7=1000, txnServer15=1000, txnServer14=1000, txnServer8=1000, txnServer9=1000, txnServer18=1000, txnServer0=1000, txnServer1=1000, txnServer2=1000, txnServer3=1000, txnServer4=1000}
-TxnId@0.28/1 {txnServer13=1000, txnServer12=1000, txnServer11=1000, txnServer10=1000, txnServer17=1000, txnServer5=1000, txnServer6=1000, txnServer16=1000, txnServer7=1000, txnServer15=1000, txnServer14=1000, txnServer8=1000, txnServer9=1000, txnServer18=1000, txnServer0=1000, txnServer1=1000, txnServer2=1000, txnServer3=1000, txnServer4=1000}
-TxnId@0.25/4 {txnServer13=1000, txnServer12=1000, txnServer11=1000, txnServer10=1000, txnServer17=1000, txnServer5=1000, txnServer6=1000, txnServer16=1000, txnServer7=1000, txnServer15=1000, txnServer14=1000, txnServer8=1000, txnServer9=1000, txnServer18=1000, txnServer0=1000, txnServer1=1000, txnServer2=1000, txnServer3=1000, txnServer4=1000}
-TxnId@1.20/2 {txnServer13=1000, txnServer12=1000, txnServer11=1000, txnServer10=1000, txnServer17=1000, txnServer5=1000, txnServer6=1000, txnServer16=1000, txnServer7=1000, txnServer15=1000, txnServer14=1000, txnServer8=1000, txnServer9=1000, txnServer18=1000, txnServer0=1000, txnServer1=1000, txnServer2=1000, txnServer3=1000, txnServer4=1000}
-TxnId@0.40/0 {txnServer13=1000, txnServer12=1000, txnServer11=1000, txnServer10=1000, txnServer17=1000, txnServer5=1000, txnServer6=1000, txnServer16=1000, txnServer7=1000, txnServer15=1000, txnServer14=1000, txnServer8=1000, txnServer9=1000, txnServer18=1000, txnServer0=1000, txnServer1=1000, txnServer2=1000, txnServer3=1000, txnServer4=1000}
-TxnId@0.31/2 {txnServer13=1000, txnServer12=1000, txnServer11=1000, txnServer10=1000, txnServer17=1000, txnServer5=1000, txnServer6=1000, txnServer16=1000, txnServer7=1000, txnServer15=1000, txnServer14=1000, txnServer8=1000, txnServer9=1000, txnServer18=1000, txnServer0=1000, txnServer1=1000, txnServer2=1000, txnServer3=1000, txnServer4=1000}
-TxnId@0.33/1 {txnServer13=1000, txnServer12=1000, txnServer11=1000, txnServer10=1000, txnServer17=1000, txnServer5=1000, txnServer6=1000, txnServer16=1000, txnServer7=1000, txnServer15=1000, txnServer14=1000, txnServer8=1000, txnServer9=1000, txnServer18=1000, txnServer0=1000, txnServer1=1000, txnServer2=1000, txnServer3=1000, txnServer4=1000}
-TxnId@1.28/1 {txnServer13=1000, txnServer12=1000, txnServer11=1000, txnServer10=1000, txnServer17=1000, txnServer5=1000, txnServer6=1000, txnServer16=1000, txnServer7=1000, txnServer15=1000, txnServer14=1000, txnServer8=1000, txnServer9=1000, txnServer18=1000, txnServer0=1000, txnServer1=1000, txnServer2=1000, txnServer3=1000, txnServer4=1000}
-TxnId@1.32/1 {txnServer13=1000, txnServer12=1000, txnServer11=1000, txnServer10=1000, txnServer17=1000, txnServer5=1000, txnServer6=1000, txnServer16=1000, txnServer7=1000, txnServer15=1000, txnServer14=1000, txnServer8=1000, txnServer9=1000, txnServer18=1000, txnServer0=1000, txnServer1=1000, txnServer2=1000, txnServer3=1000, txnServer4=1000}
-TxnId@0.32/4 {txnServer13=1000, txnServer12=1000, txnServer11=1000, txnServer10=1000, txnServer17=1000, txnServer5=1000, txnServer6=1000, txnServer16=1000, txnServer7=1000, txnServer15=1000, txnServer14=1000, txnServer8=1000, txnServer9=1000, txnServer18=1000, txnServer0=1000, txnServer1=1000, txnServer2=1000, txnServer3=1000, txnServer4=1000}
-TxnId@0.36/4 {txnServer13=1000, txnServer12=1000, txnServer11=1000, txnServer10=1000, txnServer17=1000, txnServer5=1000, txnServer6=1000, txnServer16=1000, txnServer7=1000, txnServer15=1000, txnServer14=1000, txnServer8=1000, txnServer9=1000, txnServer18=1000, txnServer0=1000, txnServer1=1000, txnServer2=1000, txnServer3=1000, txnServer4=1000}
-TxnId@0.41/3 {txnServer13=1000, txnServer12=1000, txnServer11=1000, txnServer10=1000, txnServer17=1000, txnServer5=1000, txnServer6=1000, txnServer16=1000, txnServer7=1000, txnServer15=1000, txnServer14=1000, txnServer8=1000, txnServer9=1000, txnServer18=1000, txnServer0=1000, txnServer1=1000, txnServer2=1000, txnServer3=1000, txnServer4=1000}
-TxnId@1.22/4 {txnServer13=1000, txnServer12=1000, txnServer11=1000, txnServer10=1000, txnServer17=1000, txnServer5=1000, txnServer6=1000, txnServer16=1000, txnServer7=1000, txnServer15=1000, txnServer14=1000, txnServer8=1000, txnServer9=1000, txnServer18=1000, txnServer0=1000, txnServer1=1000, txnServer2=1000, txnServer3=1000, txnServer4=1000}
-TxnId@0.47/1 {txnServer13=1000, txnServer12=1000, txnServer11=1000, txnServer10=1000, txnServer17=1000, txnServer5=1000, txnServer6=1000, txnServer16=1000, txnServer7=1000, txnServer15=1000, txnServer14=1000, txnServer8=1000, txnServer9=1000, txnServer18=1000, txnServer0=1000, txnServer1=1000, txnServer2=1000, txnServer3=1000, txnServer4=1000}
-TxnId@0.30/4 {txnServer13=1000, txnServer12=1000, txnServer11=1000, txnServer10=1000, txnServer17=1000, txnServer5=1000, txnServer6=1000, txnServer16=1000, txnServer7=1000, txnServer15=1000, txnServer14=1000, txnServer8=1000, txnServer9=1000, txnServer18=1000, txnServer0=1000, txnServer1=1000, txnServer2=1000, txnServer3=1000, txnServer4=1000}
-TxnId@0.26/1 {txnServer13=1000, txnServer12=1000, txnServer11=1000, txnServer10=1000, txnServer17=1000, txnServer5=1000, txnServer6=1000, txnServer16=1000, txnServer7=1000, txnServer15=1000, txnServer14=1000, txnServer8=1000, txnServer9=1000, txnServer18=1000, txnServer0=1000, txnServer1=1000, txnServer2=1000, txnServer3=1000, txnServer4=1000}
+TxnId@4.0/2 {txnServer20=1000, txnServer24=1000, txnServer23=1000, txnServer22=924, txnServer21=1097, txnServer5=1000, txnServer28=1000, txnServer27=1000, txnServer6=980, txnServer26=1000, txnServer25=929, txnServer9=1010, txnServer29=1000, txnServer0=1000, txnServer1=1000, txnServer2=1033, txnServer3=1000, txnServer31=1076, txnServer30=1000, txnServer13=1000, txnServer35=1000, txnServer12=1028, txnServer34=972, txnServer11=1000, txnServer33=1000, txnServer32=924, txnServer17=1000, txnServer16=1043, txnServer15=889, txnServer14=1076, txnServer19=1024, txnServer18=1000}
+TxnId@5.0/3 {txnServer20=1000, txnServer24=1000, txnServer23=1000, txnServer22=924, txnServer21=1097, txnServer5=1000, txnServer28=1000, txnServer27=1000, txnServer6=980, txnServer26=1000, txnServer7=1071, txnServer25=929, txnServer8=1000, txnServer9=1010, txnServer29=1000, txnServer0=1000, txnServer1=1000, txnServer2=1033, txnServer3=1000, txnServer4=910, txnServer31=1076, txnServer30=1000, txnServer13=1000, txnServer35=1000, txnServer12=1028, txnServer34=972, txnServer11=1000, txnServer33=1000, txnServer32=924, txnServer10=1014, txnServer17=1000, txnServer16=1043, txnServer15=889, txnServer14=1076, txnServer19=1024, txnServer18=1000}
+TxnId@2.1/4 {txnServer20=1000, txnServer24=1000, txnServer23=1000, txnServer22=924, txnServer21=1097, txnServer5=1000, txnServer28=1000, txnServer27=1000, txnServer6=980, txnServer26=1000, txnServer7=1071, txnServer25=929, txnServer8=1000, txnServer9=1010, txnServer29=1000, txnServer0=1000, txnServer1=1000, txnServer2=1033, txnServer3=1000, txnServer4=910, txnServer31=1076, txnServer30=1000, txnServer13=1000, txnServer35=1000, txnServer12=1028, txnServer34=972, txnServer11=1000, txnServer33=1000, txnServer32=924, txnServer10=1014, txnServer17=1000, txnServer16=1043, txnServer15=889, txnServer14=1076, txnServer19=1024, txnServer18=1000}
+TxnId@0.0/1 {txnServer20=973, txnServer24=1000, txnServer23=1049, txnServer22=924, txnServer21=1028, txnServer5=1000, txnServer28=985, txnServer27=1026, txnServer6=980, txnServer26=1064, txnServer7=1094, txnServer25=929, txnServer8=1072, txnServer9=1010, txnServer29=963, txnServer0=954, txnServer1=1063, txnServer2=1033, txnServer3=885, txnServer4=899, txnServer31=1012, txnServer30=1000, txnServer13=1000, txnServer35=1000, txnServer12=1028, txnServer34=949, txnServer11=1056, txnServer33=1000, txnServer32=968, txnServer10=951, txnServer17=974, txnServer16=960, txnServer15=889, txnServer14=1113, txnServer19=1180, txnServer18=922}
+TxnId@0.2/5 {txnServer20=973, txnServer24=1000, txnServer23=1049, txnServer22=924, txnServer21=1028, txnServer5=1000, txnServer28=985, txnServer27=1026, txnServer6=1057, txnServer26=1064, txnServer7=1094, txnServer25=929, txnServer8=1072, txnServer9=1010, txnServer29=963, txnServer0=954, txnServer1=1063, txnServer2=1033, txnServer3=885, txnServer4=899, txnServer31=1012, txnServer30=1000, txnServer13=1000, txnServer35=901, txnServer12=1120, txnServer34=949, txnServer11=1056, txnServer33=1000, txnServer32=968, txnServer10=951, txnServer17=974, txnServer16=960, txnServer15=889, txnServer14=1113, txnServer19=1180, txnServer18=922}
+TxnId@2.0/6 {txnServer20=1000, txnServer24=1000, txnServer23=1000, txnServer22=924, txnServer21=1028, txnServer5=1000, txnServer28=1000, txnServer27=1026, txnServer6=980, txnServer26=1064, txnServer7=1071, txnServer25=929, txnServer8=1000, txnServer9=1010, txnServer29=963, txnServer0=1000, txnServer1=1000, txnServer2=1033, txnServer3=1000, txnServer4=910, txnServer31=1076, txnServer30=1000, txnServer13=1000, txnServer35=1000, txnServer12=1028, txnServer34=972, txnServer11=1000, txnServer33=1000, txnServer32=924, txnServer10=1014, txnServer17=1000, txnServer16=1043, txnServer15=889, txnServer14=1113, txnServer19=1024, txnServer18=1000}
+TxnId@0.1/0 {txnServer20=973, txnServer24=997, txnServer23=1000, txnServer22=924, txnServer21=1028, txnServer5=1000, txnServer28=985, txnServer27=1026, txnServer6=1057, txnServer26=1064, txnServer7=1071, txnServer25=929, txnServer8=1000, txnServer9=1010, txnServer29=963, txnServer0=954, txnServer1=1063, txnServer2=1033, txnServer3=885, txnServer4=899, txnServer31=1012, txnServer30=1000, txnServer13=1000, txnServer35=901, txnServer12=1028, txnServer34=949, txnServer11=1000, txnServer33=1000, txnServer32=968, txnServer10=951, txnServer17=1000, txnServer16=960, txnServer15=889, txnServer14=1113, txnServer19=1024, txnServer18=922}
+TxnId@3.0/3 {txnServer20=973, txnServer24=997, txnServer23=1049, txnServer22=924, txnServer21=1028, txnServer5=1000, txnServer28=985, txnServer27=1026, txnServer6=1057, txnServer26=1064, txnServer7=1094, txnServer25=929, txnServer8=1072, txnServer9=1010, txnServer29=963, txnServer0=954, txnServer1=1063, txnServer2=1033, txnServer3=885, txnServer4=899, txnServer31=1012, txnServer30=1000, txnServer13=1000, txnServer35=901, txnServer12=1120, txnServer34=949, txnServer11=1056, txnServer33=1000, txnServer32=968, txnServer10=951, txnServer17=974, txnServer16=960, txnServer15=889, txnServer14=1113, txnServer19=1180, txnServer18=922}
+TxnId@0.3/2 {txnServer20=973, txnServer24=997, txnServer23=1049, txnServer22=924, txnServer21=1028, txnServer5=1000, txnServer28=903, txnServer27=1004, txnServer6=1057, txnServer26=1064, txnServer7=1194, txnServer25=917, txnServer8=1072, txnServer9=1084, txnServer29=963, txnServer0=954, txnServer1=1063, txnServer2=1105, txnServer3=813, txnServer4=899, txnServer31=1012, txnServer30=1000, txnServer13=1000, txnServer35=901, txnServer12=890, txnServer34=949, txnServer11=1151, txnServer33=1000, txnServer32=1103, txnServer10=951, txnServer17=974, txnServer16=960, txnServer15=889, txnServer14=1113, txnServer19=1140, txnServer18=922}
+TxnId@0.6/2 {txnServer20=1102, txnServer24=1135, txnServer23=1046, txnServer22=924, txnServer21=1028, txnServer5=973, txnServer28=972, txnServer27=1067, txnServer6=1057, txnServer26=964, txnServer7=1083, txnServer25=869, txnServer8=1072, txnServer9=1084, txnServer29=1008, txnServer0=974, txnServer1=1160, txnServer2=1047, txnServer3=850, txnServer4=899, txnServer31=1053, txnServer30=830, txnServer13=948, txnServer35=857, txnServer12=890, txnServer34=949, txnServer11=1099, txnServer33=1000, txnServer32=1142, txnServer10=954, txnServer17=1018, txnServer16=940, txnServer15=889, txnServer14=1113, txnServer19=1140, txnServer18=922}
+TxnId@1.0/6 {txnServer20=973, txnServer24=997, txnServer23=1049, txnServer22=924, txnServer21=1028, txnServer5=1000, txnServer28=903, txnServer27=1004, txnServer6=1057, txnServer26=964, txnServer7=1194, txnServer25=917, txnServer8=1072, txnServer9=1084, txnServer29=963, txnServer0=954, txnServer1=1145, txnServer2=1047, txnServer3=813, txnServer4=899, txnServer31=1012, txnServer30=1000, txnServer13=1000, txnServer35=901, txnServer12=890, txnServer34=949, txnServer11=1151, txnServer33=1000, txnServer32=1103, txnServer10=951, txnServer17=1018, txnServer16=960, txnServer15=889, txnServer14=1113, txnServer19=1140, txnServer18=922}
+TxnId@1.1/4 {txnServer20=973, txnServer24=997, txnServer23=1049, txnServer22=924, txnServer21=1028, txnServer5=1000, txnServer28=985, txnServer27=1026, txnServer6=1057, txnServer26=1064, txnServer7=1094, txnServer25=929, txnServer8=1072, txnServer9=1010, txnServer29=963, txnServer0=954, txnServer1=1063, txnServer2=1033, txnServer3=813, txnServer4=899, txnServer31=1012, txnServer30=1000, txnServer13=1000, txnServer35=901, txnServer12=1120, txnServer34=949, txnServer11=1151, txnServer33=1000, txnServer32=968, txnServer10=951, txnServer17=1018, txnServer16=960, txnServer15=889, txnServer14=1113, txnServer19=1180, txnServer18=922}
+TxnId@0.4/3 {txnServer20=1102, txnServer24=1135, txnServer23=1046, txnServer22=924, txnServer21=1038, txnServer5=973, txnServer28=972, txnServer27=1067, txnServer6=1057, txnServer26=964, txnServer7=1083, txnServer25=929, txnServer8=1072, txnServer9=1010, txnServer29=1008, txnServer0=974, txnServer1=1160, txnServer2=1033, txnServer3=850, txnServer4=899, txnServer31=1053, txnServer30=1000, txnServer13=1000, txnServer35=901, txnServer12=890, txnServer34=949, txnServer11=1099, txnServer33=1000, txnServer32=1142, txnServer10=954, txnServer17=1018, txnServer16=940, txnServer15=851, txnServer14=1113, txnServer19=1140, txnServer18=922}
+TxnId@4.1/0 {txnServer20=1102, txnServer24=997, txnServer23=1049, txnServer22=924, txnServer21=1038, txnServer5=1000, txnServer28=903, txnServer27=1004, txnServer6=1057, txnServer26=964, txnServer7=1194, txnServer25=929, txnServer8=1072, txnServer9=1084, txnServer29=963, txnServer0=954, txnServer1=1160, txnServer2=1105, txnServer3=813, txnServer4=899, txnServer31=1012, txnServer30=1000, txnServer13=1000, txnServer35=901, txnServer12=890, txnServer34=949, txnServer11=1151, txnServer33=1000, txnServer32=1103, txnServer10=951, txnServer17=974, txnServer16=960, txnServer15=889, txnServer14=1113, txnServer19=1140, txnServer18=922}
+TxnId@3.1/1 {txnServer20=973, txnServer24=997, txnServer23=1049, txnServer22=924, txnServer21=1028, txnServer5=1000, txnServer28=903, txnServer27=1004, txnServer6=1057, txnServer26=964, txnServer7=1194, txnServer25=917, txnServer8=1072, txnServer9=1084, txnServer29=963, txnServer0=954, txnServer1=1145, txnServer2=1105, txnServer3=813, txnServer4=899, txnServer31=1012, txnServer30=1000, txnServer13=1000, txnServer35=901, txnServer12=890, txnServer34=949, txnServer11=1151, txnServer33=1000, txnServer32=1103, txnServer10=951, txnServer17=974, txnServer16=960, txnServer15=889, txnServer14=1113, txnServer19=1140, txnServer18=922}
+TxnId@4.2/5 {txnServer20=1102, txnServer24=1135, txnServer23=1046, txnServer22=924, txnServer21=1028, txnServer5=973, txnServer28=972, txnServer27=1067, txnServer6=1057, txnServer26=964, txnServer7=1083, txnServer25=869, txnServer8=1072, txnServer9=1084, txnServer29=963, txnServer0=974, txnServer1=1160, txnServer2=1047, txnServer3=850, txnServer4=899, txnServer31=1053, txnServer30=830, txnServer13=948, txnServer35=857, txnServer12=890, txnServer34=949, txnServer11=1099, txnServer33=1000, txnServer32=1142, txnServer10=954, txnServer17=1018, txnServer16=940, txnServer15=851, txnServer14=1083, txnServer19=1140, txnServer18=922}
+TxnId@4.3/4 {txnServer20=1102, txnServer24=1135, txnServer23=1046, txnServer22=924, txnServer21=1038, txnServer5=973, txnServer28=972, txnServer27=1067, txnServer6=1057, txnServer26=964, txnServer7=1083, txnServer25=869, txnServer8=1072, txnServer9=1084, txnServer29=963, txnServer0=974, txnServer1=1160, txnServer2=1047, txnServer3=850, txnServer4=899, txnServer31=1053, txnServer30=830, txnServer13=948, txnServer35=857, txnServer12=890, txnServer34=949, txnServer11=1099, txnServer33=1000, txnServer32=1142, txnServer10=954, txnServer17=1018, txnServer16=940, txnServer15=851, txnServer14=1083, txnServer19=1140, txnServer18=922}
+TxnId@0.5/1 {txnServer20=1102, txnServer24=1135, txnServer23=1046, txnServer22=924, txnServer21=1038, txnServer5=973, txnServer28=972, txnServer27=1067, txnServer6=1057, txnServer26=964, txnServer7=1083, txnServer25=869, txnServer8=1072, txnServer9=1084, txnServer29=1008, txnServer0=974, txnServer1=1160, txnServer2=1047, txnServer3=850, txnServer4=899, txnServer31=1053, txnServer30=830, txnServer13=948, txnServer35=857, txnServer12=890, txnServer34=949, txnServer11=1099, txnServer33=1000, txnServer32=1142, txnServer10=954, txnServer17=1018, txnServer16=940, txnServer15=851, txnServer14=1083, txnServer19=1140, txnServer18=922}
+TxnId@1.2/6 {txnServer20=1102, txnServer24=997, txnServer23=1026, txnServer22=924, txnServer21=1038, txnServer5=1000, txnServer28=972, txnServer27=1004, txnServer6=1057, txnServer26=964, txnServer7=1117, txnServer25=918, txnServer8=1072, txnServer9=1084, txnServer29=1008, txnServer0=967, txnServer1=1145, txnServer2=1105, txnServer3=812, txnServer4=899, txnServer31=1053, txnServer30=929, txnServer13=948, txnServer35=901, txnServer12=890, txnServer34=949, txnServer11=1189, txnServer33=1000, txnServer32=1142, txnServer10=951, txnServer17=974, txnServer16=940, txnServer15=889, txnServer14=1098, txnServer19=1140, txnServer18=922}
+TxnId@5.1/0 {txnServer20=1102, txnServer24=997, txnServer23=1046, txnServer22=924, txnServer21=1038, txnServer5=973, txnServer28=972, txnServer27=1004, txnServer6=1057, txnServer26=964, txnServer7=1083, txnServer25=869, txnServer8=1072, txnServer9=1084, txnServer29=1008, txnServer0=974, txnServer1=1160, txnServer2=1047, txnServer3=850, txnServer4=899, txnServer31=1053, txnServer30=830, txnServer13=948, txnServer35=857, txnServer12=890, txnServer34=949, txnServer11=1099, txnServer33=1000, txnServer32=1142, txnServer10=954, txnServer17=1018, txnServer16=940, txnServer15=851, txnServer14=1083, txnServer19=1140, txnServer18=922}
+TxnId@1.6/2 {txnServer20=1102, txnServer24=1135, txnServer23=956, txnServer22=924, txnServer21=1038, txnServer5=973, txnServer28=972, txnServer27=1067, txnServer6=1043, txnServer26=964, txnServer7=1104, txnServer25=869, txnServer8=1072, txnServer9=1001, txnServer29=1008, txnServer0=974, txnServer1=1160, txnServer2=1005, txnServer3=850, txnServer4=920, txnServer31=1053, txnServer30=889, txnServer13=948, txnServer35=884, txnServer12=890, txnServer34=949, txnServer11=1024, txnServer33=1000, txnServer32=1142, txnServer10=954, txnServer17=1018, txnServer16=940, txnServer15=851, txnServer14=1083, txnServer19=1073, txnServer18=901}
+TxnId@4.4/6 {txnServer20=1102, txnServer24=1135, txnServer23=1046, txnServer22=924, txnServer21=1038, txnServer5=973, txnServer28=972, txnServer27=1067, txnServer6=1057, txnServer26=964, txnServer7=1083, txnServer25=869, txnServer8=1072, txnServer9=1084, txnServer29=1008, txnServer0=974, txnServer1=1160, txnServer2=1005, txnServer3=850, txnServer4=899, txnServer31=1053, txnServer30=889, txnServer13=948, txnServer35=857, txnServer12=890, txnServer34=949, txnServer11=1099, txnServer33=1000, txnServer32=1142, txnServer10=954, txnServer17=1018, txnServer16=940, txnServer15=851, txnServer14=1083, txnServer19=1140, txnServer18=922}
+TxnId@1.5/6 {txnServer20=1102, txnServer24=1135, txnServer23=956, txnServer22=924, txnServer21=1038, txnServer5=995, txnServer28=972, txnServer27=1067, txnServer6=1057, txnServer26=964, txnServer7=1083, txnServer25=869, txnServer8=1162, txnServer9=1001, txnServer29=1008, txnServer0=1028, txnServer1=1160, txnServer2=1005, txnServer3=850, txnServer4=899, txnServer31=1053, txnServer30=889, txnServer13=948, txnServer35=884, txnServer12=890, txnServer34=949, txnServer11=1024, txnServer33=1000, txnServer32=1142, txnServer10=954, txnServer17=1018, txnServer16=940, txnServer15=851, txnServer14=1083, txnServer19=1073, txnServer18=901}
+TxnId@1.3/5 {txnServer20=1102, txnServer24=1135, txnServer23=1046, txnServer22=924, txnServer21=1038, txnServer5=973, txnServer28=972, txnServer27=1067, txnServer6=1057, txnServer26=964, txnServer7=1083, txnServer25=869, txnServer8=1162, txnServer9=1084, txnServer29=1008, txnServer0=974, txnServer1=1160, txnServer2=1047, txnServer3=850, txnServer4=899, txnServer31=1053, txnServer30=889, txnServer13=948, txnServer35=857, txnServer12=890, txnServer34=949, txnServer11=1099, txnServer33=1000, txnServer32=1142, txnServer10=954, txnServer17=1018, txnServer16=940, txnServer15=851, txnServer14=1083, txnServer19=1140, txnServer18=922}
+TxnId@3.2/3 {txnServer20=1102, txnServer24=1135, txnServer23=1046, txnServer22=924, txnServer21=1038, txnServer5=973, txnServer28=972, txnServer27=1067, txnServer6=1057, txnServer26=964, txnServer7=1083, txnServer25=869, txnServer8=1072, txnServer9=1084, txnServer29=1008, txnServer0=974, txnServer1=1160, txnServer2=1047, txnServer3=850, txnServer4=899, txnServer31=1053, txnServer30=830, txnServer13=948, txnServer35=857, txnServer12=890, txnServer34=949, txnServer11=1099, txnServer33=1000, txnServer32=1142, txnServer10=954, txnServer17=1018, txnServer16=940, txnServer15=851, txnServer14=1083, txnServer19=1140, txnServer18=922}
+TxnId@5.2/0 {txnServer20=1102, txnServer24=1135, txnServer23=1046, txnServer22=924, txnServer21=1038, txnServer5=973, txnServer28=972, txnServer27=1067, txnServer6=1057, txnServer26=964, txnServer7=1083, txnServer25=869, txnServer8=1072, txnServer9=1084, txnServer29=1008, txnServer0=974, txnServer1=1160, txnServer2=1047, txnServer3=850, txnServer4=899, txnServer31=1053, txnServer30=830, txnServer13=948, txnServer35=857, txnServer12=890, txnServer34=949, txnServer11=1099, txnServer33=1000, txnServer32=1142, txnServer10=954, txnServer17=1018, txnServer16=940, txnServer15=851, txnServer14=1083, txnServer19=1140, txnServer18=922}
+TxnId@2.3/1 {txnServer20=1102, txnServer24=1135, txnServer23=1046, txnServer22=924, txnServer21=1038, txnServer5=973, txnServer28=972, txnServer27=1067, txnServer6=1057, txnServer26=964, txnServer7=1083, txnServer25=869, txnServer8=1072, txnServer9=1084, txnServer29=1008, txnServer0=974, txnServer1=1160, txnServer2=1047, txnServer3=850, txnServer4=899, txnServer31=1053, txnServer30=830, txnServer13=948, txnServer35=857, txnServer12=890, txnServer34=949, txnServer11=1099, txnServer33=1000, txnServer32=1142, txnServer10=954, txnServer17=1018, txnServer16=940, txnServer15=851, txnServer14=1083, txnServer19=1140, txnServer18=922}
+TxnId@3.3/3 {txnServer20=1102, txnServer24=1135, txnServer23=1046, txnServer22=924, txnServer21=1038, txnServer5=973, txnServer28=972, txnServer27=1067, txnServer6=1057, txnServer26=964, txnServer7=1083, txnServer25=869, txnServer8=1072, txnServer9=1084, txnServer29=1008, txnServer0=974, txnServer1=1160, txnServer2=1047, txnServer3=850, txnServer4=899, txnServer31=1053, txnServer30=830, txnServer13=948, txnServer35=857, txnServer12=890, txnServer34=949, txnServer11=1099, txnServer33=1000, txnServer32=1142, txnServer10=954, txnServer17=1018, txnServer16=940, txnServer15=851, txnServer14=1083, txnServer19=1140, txnServer18=922}
+TxnId@1.4/0 {txnServer20=1102, txnServer24=1135, txnServer23=1046, txnServer22=924, txnServer21=1038, txnServer5=973, txnServer28=972, txnServer27=1067, txnServer6=1057, txnServer26=964, txnServer7=1083, txnServer25=869, txnServer8=1072, txnServer9=1084, txnServer29=1008, txnServer0=974, txnServer1=1160, txnServer2=1047, txnServer3=850, txnServer4=899, txnServer31=1053, txnServer30=830, txnServer13=948, txnServer35=857, txnServer12=890, txnServer34=949, txnServer11=1099, txnServer33=1000, txnServer32=1142, txnServer10=954, txnServer17=1018, txnServer16=940, txnServer15=851, txnServer14=1083, txnServer19=1140, txnServer18=922}
+TxnId@3.4/5 {txnServer20=1102, txnServer24=1135, txnServer23=1046, txnServer22=924, txnServer21=1038, txnServer5=973, txnServer28=972, txnServer27=1067, txnServer6=1057, txnServer26=964, txnServer7=1083, txnServer25=869, txnServer8=1072, txnServer9=1084, txnServer29=1008, txnServer0=974, txnServer1=1160, txnServer2=1047, txnServer3=850, txnServer4=899, txnServer31=1053, txnServer30=830, txnServer13=948, txnServer35=857, txnServer12=890, txnServer34=949, txnServer11=1099, txnServer33=1000, txnServer32=1142, txnServer10=954, txnServer17=1018, txnServer16=940, txnServer15=851, txnServer14=1083, txnServer19=1140, txnServer18=922}
+TxnId@5.3/4 {txnServer20=1102, txnServer24=1135, txnServer23=956, txnServer22=924, txnServer21=1038, txnServer5=973, txnServer28=972, txnServer27=1067, txnServer6=1043, txnServer26=964, txnServer7=1104, txnServer25=869, txnServer8=1162, txnServer9=1001, txnServer29=1107, txnServer0=1028, txnServer1=1160, txnServer2=1005, txnServer3=850, txnServer4=920, txnServer31=1053, txnServer30=889, txnServer13=948, txnServer35=884, txnServer12=890, txnServer34=949, txnServer11=1024, txnServer33=1000, txnServer32=1142, txnServer10=954, txnServer17=1002, txnServer16=940, txnServer15=866, txnServer14=1083, txnServer19=1073, txnServer18=901}
+TxnId@5.5/6 {txnServer20=1102, txnServer24=1135, txnServer23=891, txnServer22=936, txnServer21=1101, txnServer5=973, txnServer28=972, txnServer27=1067, txnServer6=1043, txnServer26=1001, txnServer7=1104, txnServer25=869, txnServer8=1162, txnServer9=1009, txnServer29=1030, txnServer0=1029, txnServer1=1160, txnServer2=1005, txnServer3=805, txnServer4=827, txnServer31=1053, txnServer30=934, txnServer13=948, txnServer35=884, txnServer12=967, txnServer34=949, txnServer11=1024, txnServer33=918, txnServer32=1142, txnServer10=978, txnServer17=1021, txnServer16=960, txnServer15=866, txnServer14=1176, txnServer19=1036, txnServer18=901}
+TxnId@2.6/2 {txnServer20=1093, txnServer24=1047, txnServer23=814, txnServer22=936, txnServer21=1192, txnServer5=896, txnServer28=899, txnServer27=1078, txnServer6=1043, txnServer26=1036, txnServer7=1283, txnServer25=869, txnServer8=1227, txnServer9=1033, txnServer29=944, txnServer0=1194, txnServer1=1160, txnServer2=988, txnServer3=805, txnServer4=961, txnServer31=993, txnServer30=934, txnServer13=957, txnServer35=851, txnServer12=967, txnServer34=1049, txnServer11=1026, txnServer33=918, txnServer32=1107, txnServer10=978, txnServer17=1021, txnServer16=960, txnServer15=780, txnServer14=1116, txnServer19=1036, txnServer18=912}
+TxnId@5.4/3 {txnServer20=1102, txnServer24=1135, txnServer23=956, txnServer22=936, txnServer21=1192, txnServer5=995, txnServer28=972, txnServer27=1067, txnServer6=1043, txnServer26=964, txnServer7=1104, txnServer25=869, txnServer8=1227, txnServer9=1001, txnServer29=944, txnServer0=1194, txnServer1=1160, txnServer2=1005, txnServer3=850, txnServer4=961, txnServer31=1053, txnServer30=934, txnServer13=957, txnServer35=851, txnServer12=967, txnServer34=949, txnServer11=1026, txnServer33=1000, txnServer32=1142, txnServer10=954, txnServer17=1002, txnServer16=960, txnServer15=866, txnServer14=1083, txnServer19=1036, txnServer18=901}
+TxnId@4.5/5 {txnServer20=1102, txnServer24=1135, txnServer23=956, txnServer22=924, txnServer21=1192, txnServer5=995, txnServer28=972, txnServer27=1067, txnServer6=1043, txnServer26=964, txnServer7=1104, txnServer25=869, txnServer8=1162, txnServer9=1001, txnServer29=1107, txnServer0=1028, txnServer1=1160, txnServer2=1005, txnServer3=850, txnServer4=920, txnServer31=1053, txnServer30=889, txnServer13=948, txnServer35=884, txnServer12=890, txnServer34=949, txnServer11=1024, txnServer33=1000, txnServer32=1142, txnServer10=954, txnServer17=1002, txnServer16=940, txnServer15=866, txnServer14=1083, txnServer19=1073, txnServer18=901}
+TxnId@3.5/0 {txnServer20=1102, txnServer24=1135, txnServer23=956, txnServer22=936, txnServer21=1101, txnServer5=995, txnServer28=972, txnServer27=1067, txnServer6=1043, txnServer26=964, txnServer7=1104, txnServer25=869, txnServer8=1162, txnServer9=1001, txnServer29=1107, txnServer0=1028, txnServer1=1160, txnServer2=1005, txnServer3=850, txnServer4=920, txnServer31=1053, txnServer30=934, txnServer13=948, txnServer35=884, txnServer12=890, txnServer34=949, txnServer11=1024, txnServer33=918, txnServer32=1142, txnServer10=954, txnServer17=1002, txnServer16=940, txnServer15=866, txnServer14=1083, txnServer19=1073, txnServer18=901}
+TxnId@3.6/1 {txnServer20=1102, txnServer24=1135, txnServer23=956, txnServer22=924, txnServer21=1038, txnServer5=995, txnServer28=972, txnServer27=1067, txnServer6=1043, txnServer26=964, txnServer7=1104, txnServer25=869, txnServer8=1162, txnServer9=1001, txnServer29=1107, txnServer0=1028, txnServer1=1160, txnServer2=1005, txnServer3=850, txnServer4=920, txnServer31=1053, txnServer30=934, txnServer13=948, txnServer35=884, txnServer12=890, txnServer34=949, txnServer11=1024, txnServer33=1000, txnServer32=1142, txnServer10=954, txnServer17=1002, txnServer16=940, txnServer15=866, txnServer14=1083, txnServer19=1073, txnServer18=901}
+TxnId@4.6/5 {txnServer20=1102, txnServer24=1135, txnServer23=891, txnServer22=936, txnServer21=1038, txnServer5=995, txnServer28=972, txnServer27=1067, txnServer6=1043, txnServer26=1001, txnServer7=1104, txnServer25=869, txnServer8=1162, txnServer9=1009, txnServer29=1030, txnServer0=1029, txnServer1=1160, txnServer2=1005, txnServer3=805, txnServer4=920, txnServer31=1053, txnServer30=934, txnServer13=948, txnServer35=884, txnServer12=967, txnServer34=949, txnServer11=1024, txnServer33=918, txnServer32=1142, txnServer10=978, txnServer17=1002, txnServer16=960, txnServer15=866, txnServer14=1176, txnServer19=1036, txnServer18=901}
+TxnId@4.7/4 {txnServer20=1102, txnServer24=1135, txnServer23=822, txnServer22=936, txnServer21=1106, txnServer5=896, txnServer28=1077, txnServer27=1078, txnServer6=1043, txnServer26=1001, txnServer7=1173, txnServer25=869, txnServer8=1209, txnServer9=966, txnServer29=944, txnServer0=1107, txnServer1=1233, txnServer2=988, txnServer3=805, txnServer4=868, txnServer31=1053, txnServer30=893, txnServer13=948, txnServer35=851, txnServer12=967, txnServer34=1048, txnServer11=1026, txnServer33=918, txnServer32=1142, txnServer10=978, txnServer17=928, txnServer16=960, txnServer15=866, txnServer14=1162, txnServer19=1001, txnServer18=901}
+TxnId@1.7/3 {txnServer20=1102, txnServer24=1135, txnServer23=822, txnServer22=936, txnServer21=1101, txnServer5=995, txnServer28=972, txnServer27=1078, txnServer6=1043, txnServer26=1001, txnServer7=1104, txnServer25=869, txnServer8=1162, txnServer9=1009, txnServer29=1030, txnServer0=1029, txnServer1=1233, txnServer2=1005, txnServer3=805, txnServer4=827, txnServer31=1053, txnServer30=934, txnServer13=948, txnServer35=884, txnServer12=967, txnServer34=949, txnServer11=1024, txnServer33=918, txnServer32=1142, txnServer10=978, txnServer17=1021, txnServer16=960, txnServer15=866, txnServer14=1176, txnServer19=1036, txnServer18=901}
+TxnId@3.9/6 {txnServer20=1093, txnServer24=1135, txnServer23=814, txnServer22=936, txnServer21=1101, txnServer5=896, txnServer28=972, txnServer27=1078, txnServer6=1043, txnServer26=1001, txnServer7=1104, txnServer25=869, txnServer8=1227, txnServer9=1033, txnServer29=944, txnServer0=1029, txnServer1=1226, txnServer2=1005, txnServer3=805, txnServer4=961, txnServer31=1053, txnServer30=893, txnServer13=957, txnServer35=851, txnServer12=967, txnServer34=1049, txnServer11=1026, txnServer33=918, txnServer32=1107, txnServer10=978, txnServer17=928, txnServer16=960, txnServer15=780, txnServer14=1116, txnServer19=1036, txnServer18=912}
+TxnId@3.8/1 {txnServer20=1102, txnServer24=1135, txnServer23=822, txnServer22=936, txnServer21=1106, txnServer5=896, txnServer28=1077, txnServer27=1078, txnServer6=1043, txnServer26=1001, txnServer7=1173, txnServer25=869, txnServer8=1209, txnServer9=966, txnServer29=944, txnServer0=1107, txnServer1=1233, txnServer2=988, txnServer3=805, txnServer4=868, txnServer31=1053, txnServer30=893, txnServer13=948, txnServer35=851, txnServer12=967, txnServer34=1049, txnServer11=1026, txnServer33=918, txnServer32=1142, txnServer10=978, txnServer17=928, txnServer16=960, txnServer15=866, txnServer14=1162, txnServer19=1001, txnServer18=901}
+TxnId@4.9/6 {txnServer20=1093, txnServer24=1047, txnServer23=814, txnServer22=936, txnServer21=1192, txnServer5=896, txnServer28=1077, txnServer27=1078, txnServer6=1043, txnServer26=1036, txnServer7=1283, txnServer25=869, txnServer8=1227, txnServer9=1033, txnServer29=944, txnServer0=1194, txnServer1=1226, txnServer2=988, txnServer3=805, txnServer4=961, txnServer31=993, txnServer30=893, txnServer13=957, txnServer35=851, txnServer12=967, txnServer34=1049, txnServer11=1026, txnServer33=918, txnServer32=1142, txnServer10=978, txnServer17=928, txnServer16=960, txnServer15=780, txnServer14=1116, txnServer19=1001, txnServer18=901}
+TxnId@5.6/0 {txnServer20=1102, txnServer24=1135, txnServer23=822, txnServer22=936, txnServer21=1106, txnServer5=896, txnServer28=1077, txnServer27=1078, txnServer6=1043, txnServer26=1001, txnServer7=1283, txnServer25=869, txnServer8=1209, txnServer9=966, txnServer29=944, txnServer0=1194, txnServer1=1233, txnServer2=988, txnServer3=805, txnServer4=868, txnServer31=1053, txnServer30=893, txnServer13=957, txnServer35=851, txnServer12=967, txnServer34=1048, txnServer11=1026, txnServer33=918, txnServer32=1142, txnServer10=978, txnServer17=928, txnServer16=960, txnServer15=866, txnServer14=1162, txnServer19=1001, txnServer18=901}
+TxnId@2.4/5 {txnServer20=1102, txnServer24=1135, txnServer23=822, txnServer22=936, txnServer21=1106, txnServer5=896, txnServer28=1077, txnServer27=1078, txnServer6=1043, txnServer26=1001, txnServer7=1283, txnServer25=869, txnServer8=1209, txnServer9=966, txnServer29=944, txnServer0=1107, txnServer1=1233, txnServer2=988, txnServer3=805, txnServer4=868, txnServer31=1053, txnServer30=893, txnServer13=948, txnServer35=851, txnServer12=967, txnServer34=1048, txnServer11=1026, txnServer33=918, txnServer32=1142, txnServer10=978, txnServer17=928, txnServer16=960, txnServer15=866, txnServer14=1162, txnServer19=1001, txnServer18=901}
+TxnId@3.10/3 {txnServer20=1093, txnServer24=1047, txnServer23=814, txnServer22=936, txnServer21=1106, txnServer5=896, txnServer28=1077, txnServer27=1078, txnServer6=1043, txnServer26=1001, txnServer7=1283, txnServer25=869, txnServer8=1227, txnServer9=1033, txnServer29=944, txnServer0=1194, txnServer1=1233, txnServer2=988, txnServer3=805, txnServer4=961, txnServer31=993, txnServer30=893, txnServer13=957, txnServer35=851, txnServer12=967, txnServer34=1048, txnServer11=1026, txnServer33=918, txnServer32=1107, txnServer10=978, txnServer17=928, txnServer16=960, txnServer15=866, txnServer14=1116, txnServer19=1001, txnServer18=912}
+TxnId@1.8/4 {txnServer20=1102, txnServer24=1135, txnServer23=822, txnServer22=936, txnServer21=1106, txnServer5=896, txnServer28=1077, txnServer27=1078, txnServer6=1043, txnServer26=1001, txnServer7=1173, txnServer25=869, txnServer8=1209, txnServer9=966, txnServer29=944, txnServer0=1194, txnServer1=1233, txnServer2=988, txnServer3=805, txnServer4=961, txnServer31=1053, txnServer30=893, txnServer13=948, txnServer35=851, txnServer12=967, txnServer34=1048, txnServer11=1026, txnServer33=918, txnServer32=1142, txnServer10=978, txnServer17=928, txnServer16=960, txnServer15=866, txnServer14=1162, txnServer19=1001, txnServer18=901}
+TxnId@4.8/0 {txnServer20=1093, txnServer24=1047, txnServer23=814, txnServer22=936, txnServer21=1192, txnServer5=896, txnServer28=899, txnServer27=1078, txnServer6=1043, txnServer26=1036, txnServer7=1283, txnServer25=869, txnServer8=1227, txnServer9=1033, txnServer29=944, txnServer0=1194, txnServer1=1226, txnServer2=988, txnServer3=805, txnServer4=961, txnServer31=993, txnServer30=893, txnServer13=957, txnServer35=851, txnServer12=967, txnServer34=1049, txnServer11=1026, txnServer33=918, txnServer32=1107, txnServer10=978, txnServer17=928, txnServer16=960, txnServer15=780, txnServer14=1116, txnServer19=1001, txnServer18=912}
+TxnId@2.5/5 {txnServer20=1093, txnServer24=1047, txnServer23=814, txnServer22=936, txnServer21=1192, txnServer5=896, txnServer28=899, txnServer27=1078, txnServer6=1043, txnServer26=1036, txnServer7=1283, txnServer25=869, txnServer8=1227, txnServer9=1033, txnServer29=944, txnServer0=1194, txnServer1=1226, txnServer2=988, txnServer3=805, txnServer4=961, txnServer31=993, txnServer30=893, txnServer13=957, txnServer35=851, txnServer12=967, txnServer34=1049, txnServer11=1026, txnServer33=918, txnServer32=1107, txnServer10=978, txnServer17=928, txnServer16=960, txnServer15=780, txnServer14=1116, txnServer19=1001, txnServer18=912}
+TxnId@2.7/4 {txnServer20=1077, txnServer24=1166, txnServer23=814, txnServer22=936, txnServer21=1177, txnServer5=896, txnServer28=899, txnServer27=891, txnServer6=1027, txnServer26=1068, txnServer7=1283, txnServer25=900, txnServer8=1301, txnServer9=998, txnServer29=1016, txnServer0=1156, txnServer1=1226, txnServer2=956, txnServer3=805, txnServer4=1003, txnServer31=993, txnServer30=893, txnServer13=833, txnServer35=888, txnServer12=967, txnServer34=1072, txnServer11=1058, txnServer33=966, txnServer32=1061, txnServer10=978, txnServer17=994, txnServer16=940, txnServer15=838, txnServer14=979, txnServer19=1001, txnServer18=912}
+TxnId@5.7/1 {txnServer20=1077, txnServer24=1047, txnServer23=814, txnServer22=936, txnServer21=1192, txnServer5=896, txnServer28=899, txnServer27=1078, txnServer6=1027, txnServer26=1036, txnServer7=1283, txnServer25=900, txnServer8=1227, txnServer9=1033, txnServer29=944, txnServer0=1194, txnServer1=1226, txnServer2=988, txnServer3=805, txnServer4=961, txnServer31=993, txnServer30=893, txnServer13=957, txnServer35=888, txnServer12=967, txnServer34=1049, txnServer11=1026, txnServer33=918, txnServer32=1107, txnServer10=978, txnServer17=928, txnServer16=960, txnServer15=780, txnServer14=1116, txnServer19=1001, txnServer18=912}
+TxnId@5.8/0 {txnServer20=1077, txnServer24=1166, txnServer23=814, txnServer22=936, txnServer21=1177, txnServer5=910, txnServer28=910, txnServer27=891, txnServer6=1027, txnServer26=1068, txnServer7=1318, txnServer25=900, txnServer8=1301, txnServer9=998, txnServer29=1016, txnServer0=1156, txnServer1=1198, txnServer2=956, txnServer3=805, txnServer4=1003, txnServer31=993, txnServer30=893, txnServer13=833, txnServer35=888, txnServer12=967, txnServer34=1072, txnServer11=1058, txnServer33=966, txnServer32=1061, txnServer10=978, txnServer17=994, txnServer16=940, txnServer15=838, txnServer14=979, txnServer19=1001, txnServer18=912}
+TxnId@0.8/6 {txnServer20=1093, txnServer24=1047, txnServer23=814, txnServer22=936, txnServer21=1177, txnServer5=910, txnServer28=899, txnServer27=891, txnServer6=1043, txnServer26=1036, txnServer7=1283, txnServer25=869, txnServer8=1227, txnServer9=1033, txnServer29=944, txnServer0=1194, txnServer1=1226, txnServer2=988, txnServer3=805, txnServer4=961, txnServer31=993, txnServer30=893, txnServer13=957, txnServer35=851, txnServer12=967, txnServer34=1072, txnServer11=1026, txnServer33=918, txnServer32=1107, txnServer10=978, txnServer17=928, txnServer16=960, txnServer15=838, txnServer14=979, txnServer19=1001, txnServer18=912}
+TxnId@1.9/3 {txnServer20=1093, txnServer24=1047, txnServer23=814, txnServer22=936, txnServer21=1192, txnServer5=896, txnServer28=899, txnServer27=1078, txnServer6=1043, txnServer26=1036, txnServer7=1283, txnServer25=869, txnServer8=1227, txnServer9=1033, txnServer29=944, txnServer0=1194, txnServer1=1226, txnServer2=988, txnServer3=805, txnServer4=961, txnServer31=993, txnServer30=893, txnServer13=957, txnServer35=851, txnServer12=967, txnServer34=1049, txnServer11=1026, txnServer33=918, txnServer32=1107, txnServer10=978, txnServer17=928, txnServer16=960, txnServer15=780, txnServer14=1116, txnServer19=1001, txnServer18=912}
 
-TxnId@1.1/0 0 OK
-TxnId@0.2/3 0 OK
-TxnId@0.0/4 0 OK
-TxnId@1.0/1 0 OK
-TxnId@0.1/2 0 OK
-TxnId@1.4/1 0 OK
-TxnId@1.3/0 0 OK
-TxnId@0.4/1 0 OK
-TxnId@1.2/4 0 OK
-TxnId@1.6/0 0 OK
-TxnId@1.7/1 0 OK
-TxnId@0.7/2 0 OK
-TxnId@0.6/3 0 OK
-TxnId@0.5/2 0 OK
-TxnId@0.8/2 0 OK
-TxnId@0.10/3 0 OK
-TxnId@0.16/2 0 OK
-TxnId@0.12/4 0 OK
-TxnId@1.10/3 0 OK
-TxnId@1.8/2 0 OK
-TxnId@1.12/4 0 OK
-TxnId@0.23/3 0 OK
-TxnId@1.17/1 0 OK
-TxnId@1.16/4 0 OK
-TxnId@0.17/0 0 OK
-TxnId@1.9/0 0 OK
-TxnId@0.21/1 0 OK
-TxnId@0.24/0 0 OK
-TxnId@0.20/2 0 OK
-TxnId@1.24/0 0 OK
-TxnId@1.14/4 0 OK
-TxnId@0.18/2 0 OK
-TxnId@1.15/0 0 OK
-TxnId@1.23/3 0 OK
-TxnId@1.31/0 0 OK
-TxnId@0.28/1 0 OK
-TxnId@0.25/4 0 OK
-TxnId@1.20/2 0 OK
-TxnId@0.40/0 0 OK
-TxnId@0.31/2 0 OK
-TxnId@0.33/1 0 OK
-TxnId@1.28/1 0 OK
-TxnId@1.32/1 0 OK
-TxnId@0.32/4 0 OK
-TxnId@0.36/4 0 OK
-TxnId@0.41/3 0 OK
-TxnId@1.22/4 0 OK
-TxnId@0.47/1 0 OK
-TxnId@0.30/4 0 OK
-TxnId@0.26/1 0 OK
+TxnId@4.0/2 0 OK
+TxnId@5.0/3 0 OK
+TxnId@2.1/4 0 OK
+TxnId@0.0/1 0 OK
+TxnId@0.2/5 0 OK
+TxnId@2.0/6 0 OK
+TxnId@0.1/0 0 OK
+TxnId@3.0/3 0 OK
+TxnId@0.3/2 0 OK
+TxnId@0.6/2 0 OK
+TxnId@1.0/6 0 OK
+TxnId@1.1/4 0 OK
+TxnId@0.4/3 0 OK
+TxnId@4.1/0 0 OK
+TxnId@3.1/1 0 OK
+TxnId@4.2/5 0 OK
+TxnId@4.3/4 0 OK
+TxnId@0.5/1 0 OK
+TxnId@1.2/6 0 OK
+TxnId@5.1/0 0 OK
+TxnId@1.6/2 0 OK
+TxnId@4.4/6 0 OK
+TxnId@1.5/6 0 OK
+TxnId@1.3/5 0 OK
+TxnId@3.2/3 0 OK
+TxnId@5.2/0 0 OK
+TxnId@2.3/1 0 OK
+TxnId@3.3/3 0 OK
+TxnId@1.4/0 0 OK
+TxnId@3.4/5 0 OK
+TxnId@5.3/4 0 OK
+TxnId@5.5/6 0 OK
+TxnId@2.6/2 0 OK
+TxnId@5.4/3 0 OK
+TxnId@4.5/5 0 OK
+TxnId@3.5/0 0 OK
+TxnId@3.6/1 0 OK
+TxnId@4.6/5 0 OK
+TxnId@4.7/4 0 OK
+TxnId@1.7/3 0 OK
+TxnId@3.9/6 0 OK
+TxnId@3.8/1 0 OK
+TxnId@4.9/6 0 OK
+TxnId@5.6/0 0 OK
+TxnId@2.4/5 0 OK
+TxnId@3.10/3 0 OK
+TxnId@1.8/4 0 OK
+TxnId@4.8/0 0 OK
+TxnId@2.5/5 0 OK
+TxnId@2.7/4 0 OK
+TxnId@5.7/1 0 OK
+TxnId@5.8/0 0 OK
+TxnId@0.8/6 0 OK
+TxnId@1.9/3 0 OK
 
-Final sum = 19000 OK
+Final sum = 36000 OK

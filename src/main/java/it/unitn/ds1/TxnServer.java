@@ -285,7 +285,7 @@ public class TxnServer extends AbstractActor {
         sendReal(new ParticipantsDecisionMsg(txn), getSelf(), i);
       }
     }
-    setTimeout(txn, 500); //TODO: good to loop or just once?
+    setTimeout(txn, TxnSystem.N_SERVERS*70); //TODO: good to loop or just once?
   }
 
   // set a decision timeout with delay t
@@ -338,7 +338,8 @@ public class TxnServer extends AbstractActor {
   }
 
   private void onFwdWriteMsg(FwdWriteMsg msg) {
-
+    if(workSpace.get(msg.txn) == null){return;}
+    
     updateWorkspace(msg.key, msg.value, workSpace.get(msg.txn));
 
     printLog("\t\t" + msg.txn.name + " SERVER " + serverId + " Received Write from " + getSender().path().name() 
@@ -348,12 +349,14 @@ public class TxnServer extends AbstractActor {
 
   /*------------------------------------------------------- */
   private void onCanCommitMsg(CanCommitMsg msg){
+    if(workSpace.get(msg.txn) == null){return;}
+
     printLog("\t\t" + msg.txn.name + " SERVER " + serverId + " Received Commit Request "
              + " - WS " + printWorkspace(workSpace.get(msg.txn)), "Verbose");
 
     // check if server should crash (before sending vote)
     if(nextCrash.name().equals(txnState.get(msg.txn))) {
-      printLog("\t\t" + "SERVER " + serverId + " Crashing - " + nextCrash.name(), "Crash");
+      printLog("\t\t" + "SERVER " + serverId + " Crashing - " + nextCrash.name(), "Check");
       crash();
       return;
     }
@@ -362,7 +365,7 @@ public class TxnServer extends AbstractActor {
 
     if(canChange){ 
       printLog("\t\t" + msg.txn.name + " SERVER " + serverId + " Can Change", "Verbose");
-      setTimeout(msg.txn, 500); // start a timeout waiting for a decision
+      setTimeout(msg.txn, TxnSystem.N_SERVERS*70); // start a timeout waiting for a decision
       txnParticipants.put(msg.txn, msg.participants); // save the set of participants to the transaction (for termination protocol)
     } 
     else{   // if the server send an abort vote it can immediatly abort (coordinator decision will be abort)
@@ -449,7 +452,7 @@ public class TxnServer extends AbstractActor {
   }
 
   private void onRecoveryMsg(RecoveryMsg msg) throws InterruptedException{
-    printLog("\t\t" + "SERVER " + serverId + " Recovered after crash", "Crash");
+    printLog("\t\t" + "SERVER " + serverId + " Recovered after crash", "Check");
     getContext().become(createReceive());
     nextCrash = CrashServerType.NONE;
 

@@ -20,20 +20,25 @@ import it.unitn.ds1.TxnServer.CrashServerType;
 import it.unitn.ds1.TxnCoordinator.CrashCoordType;
 
 public class TxnSystem {
-  // final static int N_CLIENTS = 6;
-  // final static int N_COORDINATORS = 5;
-  // final static int N_SERVERS = 11;
+  // final static int N_CLIENTS = 3;
+  // final static int N_COORDINATORS = 3;
+  // final static int N_SERVERS = 3;
   // final static int maxKey = N_SERVERS*10-1;
+
+  static int N_CLIENTS;
+  static int N_COORDINATORS;
+  static int N_SERVERS;
+  static int maxKey;
 
   final static int maxDelay = 50;
   final static int minDelay = 10;
 
-  final static int maxCrash = 800;
-  final static int minCrash = 300;
+  static int maxCrash;
+  static int minCrash;
 
   final static int simDuration = 90*1000; // seconds*1000
 
-  static final String logMode = "Check";
+  static final String logMode = "Verbose";
   static int seed = 0; // set 0 to generate randomly
   // 405556085
 
@@ -69,10 +74,13 @@ public class TxnSystem {
     Random r = new Random();
 
     // Set actor quantity
-    int N_CLIENTS = (int)(((r.nextDouble())*(10 - 2)) + 2);
-    int N_COORDINATORS = (int)(((r.nextDouble())*(10 - 2)) + 2);
-    int N_SERVERS = (int)(((r.nextDouble())*(N_CLIENTS*4 - N_CLIENTS*2)) + N_CLIENTS*2);
-    int maxKey = N_SERVERS*10-1;
+    N_CLIENTS = (int)(((r.nextDouble())*(10 - 2)) + 2);
+    N_COORDINATORS = (int)(((r.nextDouble())*(10 - 2)) + 2);
+    N_SERVERS = (int)(((r.nextDouble())*(N_CLIENTS*6 - N_CLIENTS*4)) + N_CLIENTS*4);
+    maxKey = N_SERVERS*10-1;
+
+    maxCrash = (int)(N_SERVERS*70*1.5);
+    minCrash = (int)(N_SERVERS*70*0.7);
 
     // Set seed
     if (seed == 0){
@@ -107,21 +115,21 @@ public class TxnSystem {
     }
 
     // Send Welcome message to all Clients to make known the Coordinators
-    WelcomeClientMsg welcomeClient = new WelcomeClientMsg(maxKey,coordinators);
+    WelcomeClientMsg welcomeClient = new WelcomeClientMsg(maxKey,new ArrayList<>(coordinators));
     for (ActorRef client: clients) {
       client.tell(welcomeClient, ActorRef.noSender());
     }
 
     // Send Welcome message to all Coordinators to make known the Servers
-    WelcomeCoordMsg welcomeCoord = new WelcomeCoordMsg(servers);
+    WelcomeCoordMsg welcomeCoord = new WelcomeCoordMsg(new ArrayList<>(servers));
     for (ActorRef client: coordinators) {
       client.tell(welcomeCoord, ActorRef.noSender());
     }
     
     // Automated crash simulator
     Cancellable cancellable = system.scheduler().scheduleWithFixedDelay(
-            Duration.ofMillis(1000), // initial wait 
-            Duration.ofMillis(1000), // fixed delay
+            Duration.ofMillis(10000), // initial wait 
+            Duration.ofMillis(20000), // fixed delay
             new Runnable() {
               @Override
               public void run() {

@@ -140,6 +140,10 @@ public class Check{
           System.out.println(line);
         }
 
+        if(Arrays.stream(l).anyMatch("END"::equals) && Arrays.stream(l).anyMatch("ABORT"::equals)){
+          System.out.println(line);
+        }
+
         if(Arrays.stream(l).anyMatch("TIMEOUT"::equals)){
           System.out.println(line);
         }
@@ -184,7 +188,7 @@ public class Check{
     }
     
     results.entrySet().forEach(entry -> {
-      System.out.println(entry.getKey() + " " + entry.getValue());
+      System.out.println(entry.getKey() + " " + entry.getValue().values().stream().reduce(0, Integer::sum) + " " + entry.getValue());
     });
     System.out.println();
 

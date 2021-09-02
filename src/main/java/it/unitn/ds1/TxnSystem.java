@@ -128,9 +128,9 @@ public class TxnSystem {
       client.tell(welcomeCoord, ActorRef.noSender());
     }
     
-    // Automated crash simulator
+    // ------------------ Automated crash simulator ------------------
     Cancellable cancellable = system.scheduler().scheduleWithFixedDelay(
-            Duration.ofMillis(10000), // initial wait 
+            Duration.ofMillis(20000), // initial wait 
             Duration.ofMillis(20000), // fixed delay
             new Runnable() {
               @Override
@@ -153,7 +153,7 @@ public class TxnSystem {
             system.dispatcher()
     );
 
-    // Manual crash simulator
+    // ------------------ Manual crash simulator ------------------
     // inputContinue();
 
     // ActorRef serverToCrash = servers.get(0);
@@ -168,8 +168,7 @@ public class TxnSystem {
 
     // inputContinue();
 
-
-    // Automated termination
+    // ------------------ Automated termination ------------------
     system.scheduler().scheduleOnce(
       Duration.ofMillis(simDuration),
       new Runnable() {
@@ -181,7 +180,7 @@ public class TxnSystem {
       system.dispatcher()
     );
 
-    // Manual termination
+    // ------------------ Manual termination ------------------
     // inputTerminate(system, clients);
 
 

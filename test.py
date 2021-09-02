@@ -10,13 +10,16 @@ def parse_file(df,fname):
 
     seed_pattern = re.compile(r"Seed: (?P<seed>\d+)")
     actor_pattern = re.compile(r"Actor Info: clients:(?P<clients>\d+) coordinators:(?P<coordinators>\d+) servers:(?P<servers>\d+)")
-    init_txn_pattern = re.compile(r"Client Order \[(?P<txn>.+)\]")
+    init_txn_pattern = re.compile(r"CLIENT \d+ BEGIN")
+    na_txn_pattern = re.compile(r"CLIENT \d+ TIMEOUT")
     commit_pattern = re.compile(r"CLIENT \d+ COMMIT (?P<commit>\w+) \(\d+\/\d+\)")
     abort_pattern = re.compile(r"CLIENT \d+ END ABORT")
     sum_pattern = re.compile(r"Final sum = (?P<sum>\d+) (?P<result>\w+)") 
 
     new_row = {}
-    tot_txn = 0
+    init_txn = 0
+    na_txn = 0
+    finished_txn = 0
     abort = 0
     commit_ok = 0
     commit_fail = 0
@@ -39,13 +42,17 @@ def parse_file(df,fname):
 
             res = init_txn_pattern.match(line)
             if res:
-                txn = res.groupdict()["txn"].split(", ")
-                new_row["init_txn"] = len(txn)
+                init_txn += 1
+                continue
+
+            res = na_txn_pattern.match(line)
+            if res:
+                na_txn += 1
                 continue
 
             res = commit_pattern.match(line)
             if res:
-                tot_txn += 1
+                finished_txn += 1
                 commit = res.groupdict()["commit"]
                 if commit == "OK":
                     commit_ok += 1
@@ -62,9 +69,11 @@ def parse_file(df,fname):
                 new_row["result"] = res.groupdict()["result"]
                 continue
     
-    new_row["tot_txn"] = tot_txn
-    new_row["commit_ok"] = get_percentage(commit_ok,tot_txn)
-    new_row["commit_fail"] = get_percentage(commit_fail - abort,tot_txn)
+    new_row["init_txn"] = init_txn
+    new_row["na_txn"] = na_txn
+    new_row["finished_txn"] = finished_txn
+    new_row["commit_ok"] = get_percentage(commit_ok,finished_txn)
+    new_row["commit_fail"] = get_percentage(commit_fail - abort,finished_txn)
     new_row["abort"] = abort
 
     df = df.append(new_row,ignore_index=True)
@@ -72,21 +81,23 @@ def parse_file(df,fname):
 
 if __name__ == '__main__':
 
-    n_sim = 1
+    n_sim = 10
     
     df = pd.DataFrame(columns= \
-    ['seed', 'clients', 'coordinators', 'servers', 'init_txn', 'tot_txn', 'commit_ok', 'commit_fail', 'abort', 'sum', 'result'])
+    ['seed', 'clients', 'coordinators', 'servers', 'init_txn', 'na_txn', 'finished_txn', 'commit_ok', 'commit_fail', 'abort', 'sum', 'result'])
 
     for i in range(n_sim):
         print("starting sim",i+1,"...")
 
-        cmd = "gradle run > log.txt"
+        cmd = "gradle run > log"+str(i+1)+".txt"
         subprocess.check_output(cmd, shell=True)
 
-        cmd = "java Check log.txt > check.txt"
+        print("finished test",i+1,"...")
+
+        cmd = "java Check log"+str(i+1)+".txt > check"+str(i+1)+".txt"
         subprocess.check_output(cmd, shell=True)
 
-        df = parse_file(df,"check.txt")  
+        df = parse_file(df,"check"+str(i+1)+".txt")  
 
     print()
     print(df)

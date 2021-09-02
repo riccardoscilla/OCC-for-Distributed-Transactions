@@ -22,7 +22,7 @@ import it.unitn.ds1.TxnCoordinator.CrashCoordType;
 public class TxnSystem {
   // final static int N_CLIENTS = 3;
   // final static int N_COORDINATORS = 3;
-  // final static int N_SERVERS = 3;
+  // final static int N_SERVERS = 6;
   // final static int maxKey = N_SERVERS*10-1;
 
   static int N_CLIENTS;
@@ -30,13 +30,15 @@ public class TxnSystem {
   static int N_SERVERS;
   static int maxKey;
 
+  final static int processTime = 70;
+
   final static int maxDelay = 50;
   final static int minDelay = 10;
 
   static int maxCrash;
   static int minCrash;
 
-  final static int simDuration = 90*1000; // seconds*1000
+  final static int simDuration = 90*1000; // sec*1000
 
   static final String logMode = "Verbose";
   static int seed = 0; // set 0 to generate randomly
@@ -73,21 +75,21 @@ public class TxnSystem {
   public static void main(String[] args) {
     Random r = new Random();
 
+    // Set seed
+    if (seed == 0){
+      // int max = Math.max(N_CLIENTS,Math.max(N_COORDINATORS,N_SERVERS));
+      seed = r.nextInt(Integer.MAX_VALUE/100); 
+    }
+    r.setSeed(seed);
+
     // Set actor quantity
     N_CLIENTS = (int)(((r.nextDouble())*(10 - 2)) + 2);
     N_COORDINATORS = (int)(((r.nextDouble())*(10 - 2)) + 2);
-    N_SERVERS = (int)(((r.nextDouble())*(N_CLIENTS*6 - N_CLIENTS*4)) + N_CLIENTS*4);
+    N_SERVERS = (int)(((r.nextDouble())*(N_CLIENTS*10 - N_CLIENTS*8)) + N_CLIENTS*8);
     maxKey = N_SERVERS*10-1;
 
-    maxCrash = (int)(N_SERVERS*70*1.5);
-    minCrash = (int)(N_SERVERS*70*0.7);
-
-    // Set seed
-    if (seed == 0){
-      int max = Math.max(N_CLIENTS,Math.max(N_COORDINATORS,N_SERVERS));
-      seed = r.nextInt(Integer.MAX_VALUE/max); 
-    }
-    r.setSeed(seed);
+    maxCrash = (int)(N_SERVERS*processTime*1.5);
+    minCrash = (int)(N_SERVERS*processTime*0.7);
 
     System.out.println("Seed: " + seed);
     System.out.println("Actor Info: clients:"+N_CLIENTS+" coordinators:"+N_COORDINATORS+" servers:"+N_SERVERS);

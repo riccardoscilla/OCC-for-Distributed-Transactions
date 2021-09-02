@@ -136,14 +136,6 @@ public class TxnServer extends AbstractActor {
   
   // send messages with simulated network delays
   private void sendReal(Object msg, ActorRef sender, ActorRef receiver){
-    // getContext().system().scheduler().scheduleOnce(
-    //         Duration.create((int)((r.nextDouble())*(TxnSystem.maxDelay - TxnSystem.minDelay)) + TxnSystem.minDelay, TimeUnit.MILLISECONDS),
-    //         receiver,
-    //         msg, // message sent to myself
-    //         getContext().system().dispatcher(),
-    //         sender
-    // );
-
     try{
       Thread.sleep((int)((r.nextDouble())*(TxnSystem.maxDelay - TxnSystem.minDelay)) + TxnSystem.minDelay);
     }catch (InterruptedException e){
@@ -285,7 +277,7 @@ public class TxnServer extends AbstractActor {
         sendReal(new ParticipantsDecisionMsg(txn), getSelf(), i);
       }
     }
-    setTimeout(txn, TxnSystem.N_SERVERS*70); //TODO: good to loop or just once?
+    setTimeout(txn, TxnSystem.N_SERVERS*TxnSystem.processTime);
   }
 
   // set a decision timeout with delay t
@@ -365,7 +357,7 @@ public class TxnServer extends AbstractActor {
 
     if(canChange){ 
       printLog("\t\t" + msg.txn.name + " SERVER " + serverId + " Can Change", "Verbose");
-      setTimeout(msg.txn, TxnSystem.N_SERVERS*70); // start a timeout waiting for a decision
+      setTimeout(msg.txn, TxnSystem.N_SERVERS*TxnSystem.processTime); // start a timeout waiting for a decision
       txnParticipants.put(msg.txn, msg.participants); // save the set of participants to the transaction (for termination protocol)
     } 
     else{   // if the server send an abort vote it can immediatly abort (coordinator decision will be abort)

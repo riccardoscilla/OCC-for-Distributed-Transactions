@@ -135,12 +135,20 @@ public class Check{
       while((line = reader.readLine()) != null) {
         line = line.replace("\0", "");
         String[] l = line.split(" ");
+
+        if(Arrays.stream(l).anyMatch("BEGIN"::equals)){
+          System.out.println(line);
+        }
+
+        if(Arrays.stream(l).anyMatch("TIMEOUT"::equals)){
+          System.out.println(line);
+        }
   
         if(Arrays.stream(l).anyMatch("OK"::equals) || Arrays.stream(l).anyMatch("FAIL"::equals)
           && Arrays.stream(l).anyMatch("COMMIT"::equals)){
           System.out.println(line);
-          
         }
+        
       }
 
       reader.close();

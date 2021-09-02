@@ -161,8 +161,7 @@ public class TxnClient extends AbstractActor {
 
   // end the current TXN sending TxnEndMsg to the coordinator
   void endTxn() {
-    boolean doCommit = r.nextDouble() < COMMIT_PROBABILITY; //TODO: real code
-    // boolean doCommit = false;
+    boolean doCommit = r.nextDouble() < COMMIT_PROBABILITY;
     currentCoordinator.tell(new TxnEndMsg(clientId, doCommit), getSelf());
     firstValue = null;
     secondValue = null;
@@ -174,7 +173,7 @@ public class TxnClient extends AbstractActor {
   // READ two items (will move some amount from the value of the first to the second)
   void readTwo() {
 
-    // read two different keys \\TODO: real code
+    // read two different keys 
     firstKey = r.nextInt(maxKey + 1);
     int randKeyOffset = 1 + r.nextInt(maxKey - 1);
     secondKey = (firstKey + randKeyOffset) % (maxKey + 1);
@@ -218,6 +217,7 @@ public class TxnClient extends AbstractActor {
   }
 
   private void onTxnAcceptMsg(TxnAcceptMsg msg) {
+    if(!getSender().equals(currentCoordinator)){return;}
     System.out.println("CLIENT " + clientId + " Received txnAccepted");
     acceptedTxn = true;
     acceptTimeout.cancel();
@@ -225,6 +225,7 @@ public class TxnClient extends AbstractActor {
   }
 
   private void onTxnAcceptTimeoutMsg(TxnAcceptTimeoutMsg msg) throws InterruptedException {
+    System.out.println("CLIENT " + clientId + " TIMEOUT");
     if(!acceptedTxn) beginTxn();
   }
 
@@ -238,16 +239,14 @@ public class TxnClient extends AbstractActor {
     boolean opDone = (firstValue != null && secondValue != null);
 
     // do we only read or also write?
-    double writeRandom = r.nextDouble(); // TODO: real code
-    // double writeRandom = 0;
+    double writeRandom = r.nextDouble();
     boolean doWrite = writeRandom < WRITE_PROBABILITY;
     if(doWrite && opDone) writeTwo();
     
     // check if the transaction should end;
     // otherwise, read two again
     if(opDone) numOpDone++;
-    if(numOpDone >= numOpTotal) { // TODO: real code
-    // if(numOpDone >= 1) {
+    if(numOpDone >= numOpTotal) {
       endTxn();
     }
     else if(opDone) {
@@ -263,7 +262,7 @@ public class TxnClient extends AbstractActor {
     else {
       System.out.println("CLIENT " + clientId + " COMMIT FAIL ("+(numAttemptedTxn - numCommittedTxn)+"/"+numAttemptedTxn+")");
     }
-    beginTxn(); //TODO: real code
+    beginTxn();
 
   }
 

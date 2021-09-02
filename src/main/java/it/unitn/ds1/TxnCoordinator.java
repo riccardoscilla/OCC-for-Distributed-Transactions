@@ -28,12 +28,13 @@ public class TxnCoordinator extends AbstractActor {
   private final Integer coordinatorId;
   private final List<ActorRef> servers;
   private int globID;
-  private final Map<TxnId,Set<ActorRef>> OngoingTxn; // custom objects as key of Map
-  private final Map<TxnId,List<Boolean>> ServerDecisions;
-  private final Map<TxnId,Boolean> txnHistory;
+  private final Map<ActorRef,TxnId> txnBind;                        // binds the transaction with client
+  private final Map<TxnId,Set<ActorRef>> OngoingTxn;                // binds the transaction with all the servers contacted
+  private final Map<TxnId,List<Boolean>> ServerDecisions;           // store the commit votes of the servers
+  private final Map<TxnId,Boolean> txnHistory;                      // store the final commit decision
   private final Map<TxnId,Map<Integer,Cancellable>> readTimeout;    // contain a timeout for every transaction waiting for reads
-  private final Map<TxnId,Cancellable> voteTimeout;    // contain a timeout for every transaction waiting for server votes
-  private final Map<TxnId, String> txnState;           // follow the steps of a transaction (not decided, decided)
+  private final Map<TxnId,Cancellable> voteTimeout;                 // contain a timeout for every transaction waiting for server votes
+  private final Map<TxnId, String> txnState;                        // follow the steps of a transaction (not decided, decided)
 
   private final Random r;
 
@@ -51,6 +52,7 @@ public class TxnCoordinator extends AbstractActor {
     this.coordinatorId = coordinatorId;
     this.servers = new ArrayList<>();
     this.globID = 0;
+    this.txnBind = new HashMap<>(); 
     this.OngoingTxn = new HashMap<>(); 
     this.ServerDecisions = new HashMap<>();
     this.txnHistory = new HashMap<>();
@@ -156,11 +158,11 @@ public class TxnCoordinator extends AbstractActor {
       this.name = "TxnId@" + coordId + "." + id + "/" + clientId;
     }
 
-    public boolean matches(Object obj){
-      if(obj == null || obj.getClass() != this.getClass()) return false;
-      TxnId txn = (TxnId) obj;
-      return( txn.client.equals(this.client));
-    }
+    // public boolean matches(Object obj){
+    //   if(obj == null || obj.getClass() != this.getClass()) return false;
+    //   TxnId txn = (TxnId) obj;
+    //   return( txn.client.equals(this.client));
+    // }
 
     @Override
     public boolean equals(Object obj){
@@ -185,14 +187,6 @@ public class TxnCoordinator extends AbstractActor {
   /*-- Actor methods -------------------------------------------------------- */
 
   private void sendReal(Object msg, ActorRef sender, ActorRef receiver){
-    // getContext().system().scheduler().scheduleOnce(
-    //         Duration.create((int)((r.nextDouble())*(TxnSystem.maxDelay - TxnSystem.minDelay)) + TxnSystem.minDelay, TimeUnit.MILLISECONDS),
-    //         receiver,
-    //         msg, // message sent to myself
-    //         getContext().system().dispatcher(),
-    //         sender
-    // );
-
     try{
       Thread.sleep((int)((r.nextDouble())*(TxnSystem.maxDelay - TxnSystem.minDelay)) + TxnSystem.minDelay);
     }catch (InterruptedException e){
@@ -225,15 +219,17 @@ public class TxnCoordinator extends AbstractActor {
     return servers.get(key/10);
   }
 
-  private TxnId bindRequestOngoing(ActorRef sender){
-    TxnId candidateTxn = new TxnId(sender,getSelf(),0);
-    for(TxnId key : OngoingTxn.keySet()){
-      if(key.matches(candidateTxn)){
-        return key;
-      }
-    }
-    return null;
-  }
+  // private TxnId bindRequestOngoing(ActorRef sender){
+  //   // TxnId candidateTxn = new TxnId(sender,getSelf(),0);
+  //   // for(TxnId key : OngoingTxn.keySet()){
+  //   //   if(key.matches(candidateTxn)){
+  //   //     return key;
+  //   //   }
+  //   // }
+  //   // return null
+  
+  //   return txnBind.get(sender);
+  // }
 
   private String printOngoing(Set<ActorRef> s){
     String res = "";
@@ -269,15 +265,7 @@ public class TxnCoordinator extends AbstractActor {
             getContext().system().dispatcher(), getSelf()
     );
     readTimeout.putIfAbsent(txn, new HashMap<>());
-    /*if(readTimeout.get(txn).get(key) != null){
-      if(!readTimeout.get(txn).get(key).isCancelled()){
-        readTimeout.get(txn).get(key).cancel();
-      }
-    }*/
     readTimeout.get(txn).put(key,timeout);
-
-    // printLog("\t"+txn.name+" COORDI " + coordinatorId + " insert timeout " +server.path().name(), "Verbose");
-
   }
 
   //set a decision timeout with delay t for votes
@@ -294,17 +282,10 @@ public class TxnCoordinator extends AbstractActor {
   //cancel a certain timeout
   private void cancelReadTimeout(TxnId txn, ActorRef server, Integer key){
     if(readTimeout.get(txn).get(key) != null){
-      
-
       if(!readTimeout.get(txn).get(key).isCancelled()){
         readTimeout.get(txn).get(key).cancel();
-        // printLog("\t"+txn.name+" COORDI " + coordinatorId + " cancel timeout of " +server.path().name(), "Verbose");
       }
-
     }
-    // else{
-    //   printLog("\t"+txn.name+" COORDI " + coordinatorId +" "+server.path().name() +" Not present ", "Verbose");
-    // }
   }
 
   private void cancelVoteTimeout(TxnId txn){
@@ -333,13 +314,16 @@ public class TxnCoordinator extends AbstractActor {
     for(ActorRef server : msg.servers){
       servers.add(server);
     }
-    // this.servers = msg.servers; 
   }
 
   private void onTxnBeginMsg(TxnBeginMsg msg) {
+
+    if(txnBind.containsKey(getSender())){return;}
     
     printLog("\tCOORDI " + coordinatorId + " Received txnBegin from " + getSender().path().name(), "Verbose");
     TxnId txn = new TxnId(getSender(),getSelf(),globID);
+
+    txnBind.put(getSender(),txn);
     OngoingTxn.put(txn,new HashSet<>()); // add new transaction in Ongoing
     ServerDecisions.put(txn,new ArrayList<>()); // add new transaction in ServerDecisions
     txnState.put(txn,CrashCoordType.BeforeDecide.name());
@@ -355,13 +339,14 @@ public class TxnCoordinator extends AbstractActor {
    
     ActorRef server = getServerFromKey(msg.key);
     // bind the current request to the OngoingTxn
-    TxnId txn = bindRequestOngoing(getSender());
+    // TxnId txn = bindRequestOngoing(getSender());
+    TxnId txn = txnBind.get(getSender());
     if(txn == null){return;}
     
     printLog("\t" + txn.name + " COORDI " + coordinatorId + " Received Read from " + getSender().path().name() 
              + " - Ask to " + server.path().name(), "Verbose");
 
-    setReadTimeout(txn,server,msg.key,TxnSystem.N_SERVERS*70);
+    setReadTimeout(txn,server,msg.key,TxnSystem.N_SERVERS*TxnSystem.processTime);
     OngoingTxn.get(txn).add(server);
     sendReal(new FwdReadMsg(msg.key, txn), getSelf(), server); // forward the read to the right server
     
@@ -384,7 +369,8 @@ public class TxnCoordinator extends AbstractActor {
     ActorRef server = getServerFromKey(msg.key);
 
     // bind the current request to the OngoingTxn
-    TxnId txn = bindRequestOngoing(getSender());
+    // TxnId txn = bindRequestOngoing(getSender());
+    TxnId txn = txnBind.get(getSender());
 
     if(txn == null){return;}
 
@@ -399,7 +385,8 @@ public class TxnCoordinator extends AbstractActor {
   private void onTxnEndMsg(TxnEndMsg msg) { 
     
     // bind the current request to the OngoingTxn
-    TxnId txn = bindRequestOngoing(getSender()); 
+    // TxnId txn = bindRequestOngoing(getSender()); 
+    TxnId txn = txnBind.get(getSender());
 
     if(txn == null){return;}
   
@@ -412,7 +399,7 @@ public class TxnCoordinator extends AbstractActor {
     if(msg.commit){ // if received commit, do validation procedure
       printLog("\t" + txn.name + " COORDI "+ coordinatorId + " - Validation with " + printOngoing(OngoingTxn.get(txn)), "Verbose");
 
-      setVoteTimeout(txn, TxnSystem.N_SERVERS*70); // set a timeout waiting for votes
+      setVoteTimeout(txn, TxnSystem.N_SERVERS*TxnSystem.processTime); // set a timeout waiting for votes
       for(ActorRef server : OngoingTxn.get(txn)){
         sendReal(new CanCommitMsg(txn, participants), getSelf(), server); // ask to commit
       }
@@ -438,6 +425,7 @@ public class TxnCoordinator extends AbstractActor {
       sendReal(new TxnResultMsg(finalDecision), getSelf(), txn.client); // send final Decision 
 
       // remove transaction (do not expect a response back to servers)
+      txnBind.remove(txn.client);
       OngoingTxn.remove(txn);
       ServerDecisions.remove(txn);
       txnState.remove(txn);
@@ -477,6 +465,7 @@ public class TxnCoordinator extends AbstractActor {
       sendReal(new TxnResultMsg(finalDecision), getSelf(), msg.txn.client); // send final Decision
 
       // remove transaction
+      txnBind.remove(msg.txn.client);
       OngoingTxn.remove(msg.txn);
       ServerDecisions.remove(msg.txn);
       txnState.remove(msg.txn);
@@ -502,6 +491,7 @@ public class TxnCoordinator extends AbstractActor {
     sendReal(new TxnResultMsg(finalDecision), getSelf(), msg.txn.client); // send final Decision 
 
     // remove transaction
+    txnBind.remove(msg.txn.client);
     OngoingTxn.remove(msg.txn);
     ServerDecisions.remove(msg.txn);
     txnState.remove(msg.txn);
@@ -523,6 +513,7 @@ public class TxnCoordinator extends AbstractActor {
     sendReal(new TxnResultMsg(finalDecision), getSelf(), msg.txn.client); // send final Decision
 
     // remove transaction
+    txnBind.remove(msg.txn.client);
     OngoingTxn.remove(msg.txn);
     ServerDecisions.remove(msg.txn);
     txnState.remove(msg.txn);
@@ -571,6 +562,7 @@ public class TxnCoordinator extends AbstractActor {
       }
 
       // remove transaction
+      txnBind.remove(txn.client);
       OngoingTxn.remove(txn);
       ServerDecisions.remove(txn);
       txnState.remove(txn);

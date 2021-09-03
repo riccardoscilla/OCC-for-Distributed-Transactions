@@ -14,6 +14,9 @@ def parse_file(df,fname):
     na_txn_pattern = re.compile(r"CLIENT \d+ TIMEOUT")
     commit_pattern = re.compile(r"CLIENT \d+ COMMIT (?P<commit>\w+) \(\d+\/\d+\)")
     abort_pattern = re.compile(r"CLIENT \d+ END ABORT")
+    coordi_crash_pattern = re.compile(r"	COORDI \d+ Crashing")
+    server_crash_pattern = re.compile(r"		SERVER \d+ Crashing")
+
     sum_pattern = re.compile(r"Final sum = (?P<sum>\d+) (?P<result>\w+)") 
 
     new_row = {}
@@ -23,6 +26,8 @@ def parse_file(df,fname):
     abort = 0
     commit_ok = 0
     commit_fail = 0
+    coordi_crash = 0
+    server_crash = 0
 
     with open(fname,'r') as f:
         for line in f:
@@ -63,6 +68,14 @@ def parse_file(df,fname):
             if res:
                 abort += 1
 
+            res = coordi_crash_pattern.match(line)
+            if res:
+                coordi_crash += 1
+            
+            res = server_crash_pattern.match(line)
+            if res:
+                server_crash += 1
+
             res = sum_pattern.match(line)
             if res:
                 new_row["sum"] = res.groupdict()["sum"]
@@ -74,17 +87,22 @@ def parse_file(df,fname):
     new_row["finished_txn"] = finished_txn
     new_row["commit_ok"] = get_percentage(commit_ok,finished_txn)
     new_row["commit_fail"] = get_percentage(commit_fail - abort,finished_txn)
-    new_row["abort"] = abort
+    new_row["abort"] = get_percentage(abort,finished_txn)
+    new_row["coordi_crash"] = coordi_crash
+    new_row["server_crash"] = server_crash
 
     df = df.append(new_row,ignore_index=True)
     return df
 
 if __name__ == '__main__':
 
-    n_sim = 10
+    n_sim = 1
     
     df = pd.DataFrame(columns= \
-    ['seed', 'clients', 'coordinators', 'servers', 'init_txn', 'na_txn', 'finished_txn', 'commit_ok', 'commit_fail', 'abort', 'sum', 'result'])
+    ['seed', 'clients', 'coordinators', 'servers', 'init_txn', 'na_txn', 'finished_txn', \
+    'commit_ok', 'commit_fail', 'abort', \
+    "coordi_crash", "server_crash", \
+    'sum', 'result'])
 
     for i in range(n_sim):
         print("starting sim",i+1,"...")

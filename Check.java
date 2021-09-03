@@ -125,7 +125,7 @@ public class Check{
   }
 
   /*---------------------------------------------------------- */
-  public static void printOKFAIL(){
+  public static void printINFO(){
     String line;
     try {
       
@@ -152,6 +152,10 @@ public class Check{
           && Arrays.stream(l).anyMatch("COMMIT"::equals)){
           System.out.println(line);
         }
+
+        if(Arrays.stream(l).anyMatch("Crashing"::equals)){
+          System.out.println(line);
+        }
         
       }
 
@@ -173,22 +177,15 @@ public class Check{
     System.out.println("Client Order "+order);
     System.out.println();
 
-    // printKeyword("OK");
-    // printKeyword("FAIL");
-    // System.out.println();
-    
-    printOKFAIL();
+    printINFO();
     System.out.println();
-
-    // printKeyword("[CHECK]");
-    // System.out.println();
 
     for(String o : order){
       matchOrder(o);
     }
     
     results.entrySet().forEach(entry -> {
-      System.out.println(entry.getKey() + " " + entry.getValue().values().stream().reduce(0, Integer::sum) + " " + entry.getValue());
+      System.out.println(entry.getKey() + " " + entry.getValue());
     });
     System.out.println();
 

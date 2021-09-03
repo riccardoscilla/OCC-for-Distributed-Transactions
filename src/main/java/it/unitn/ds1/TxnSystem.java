@@ -40,9 +40,8 @@ public class TxnSystem {
 
   final static int simDuration = 90*1000; // sec*1000
 
-  static final String logMode = "Verbose";
+  static final String logMode = "Check";
   static int seed = 0; // set 0 to generate randomly
-  // 405556085
 
   static Cancellable serverCrash;
 
@@ -77,7 +76,6 @@ public class TxnSystem {
 
     // Set seed
     if (seed == 0){
-      // int max = Math.max(N_CLIENTS,Math.max(N_COORDINATORS,N_SERVERS));
       seed = r.nextInt(Integer.MAX_VALUE/100); 
     }
     r.setSeed(seed);
@@ -191,9 +189,9 @@ public class TxnSystem {
     for (ActorRef client: clients) {
       client.tell(new StopMsg(), ActorRef.noSender());
     }
-
+    System.out.println("CLIENTS STOPPED");
     system.scheduler().scheduleOnce(
-            Duration.ofMillis(2000),
+            Duration.ofMillis(10000),
             new Runnable() {
               @Override
               public void run() {

@@ -215,7 +215,6 @@ public class TxnCoordinator extends AbstractActor {
 
   // get Server that is in charged of the given key
   private ActorRef getServerFromKey(Integer key){
-    // printLog("\tCOORDI " + coordinatorId + " " + key + servers, "Check");
     return servers.get(key/10);
   }
 
@@ -521,14 +520,14 @@ public class TxnCoordinator extends AbstractActor {
 
   /* --------------------------------------------------------------------*/
   private void onCrashCoordMsg(CrashCoordMsg msg) throws InterruptedException {
-    printLog("\t" + "COORDI " + coordinatorId + " Received crash msg "+msg.nextCrash.name()+" "+msg.timeCrashed, "Check");
+    printLog("\t" + "COORDI " + coordinatorId + " Received crash msg "+msg.nextCrash.name()+" "+msg.timeCrashed, "Crash");
     nextCrash = msg.nextCrash;
     timeCrashed = msg.timeCrashed;
     // crash(msg.time);
   }
 
   private void onRecoveryMsg(RecoveryMsg msg) throws InterruptedException{
-    printLog("\t" + "COORDI " + coordinatorId + " Recovered after crash", "Check");
+    printLog("\t" + "COORDI " + coordinatorId + " Recovered after crash", "Crash");
     getContext().become(createReceive());   //restart to handle messages
     nextCrash = CrashCoordType.NONE;
 

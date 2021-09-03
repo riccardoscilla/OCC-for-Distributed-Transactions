@@ -371,7 +371,7 @@ public class TxnServer extends AbstractActor {
     txnState.put(msg.txn,CrashServerType.AfterVote.name());
     // check if server should crash (after sending vote)
     if(nextCrash.name().equals(txnState.get(msg.txn))) {
-      printLog("\t\t" + "SERVER " + serverId + " Crashing - " + nextCrash.name(), "Crash");
+      printLog("\t\t" + "SERVER " + serverId + " Crashing - " + nextCrash.name(), "Check");
       crash();
       return;
     }
@@ -444,7 +444,7 @@ public class TxnServer extends AbstractActor {
   }
 
   private void onRecoveryMsg(RecoveryMsg msg) throws InterruptedException{
-    printLog("\t\t" + "SERVER " + serverId + " Recovered after crash", "Check");
+    printLog("\t\t" + "SERVER " + serverId + " Recovered after crash", "Crash");
     getContext().become(createReceive());
     nextCrash = CrashServerType.NONE;
 

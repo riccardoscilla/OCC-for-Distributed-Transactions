@@ -1,0 +1,38 @@
+it/unitn/ds1/TxnServer.java
+ it.unitn.ds1.TxnServer
+ it.unitn.ds1.TxnServer$CrashServerType
+ it.unitn.ds1.TxnServer$FwdParticipantsDecisionMsg
+ it.unitn.ds1.TxnServer$FwdReadResultMsg
+ it.unitn.ds1.TxnServer$ParticipantsDecisionMsg
+ it.unitn.ds1.TxnServer$ServerDecisionMsg
+ it.unitn.ds1.TxnServer$TxnDecisionTimeoutMsg
+it/unitn/ds1/TxnClient.java
+ it.unitn.ds1.TxnClient
+ it.unitn.ds1.TxnClient$ReadMsg
+ it.unitn.ds1.TxnClient$ReadResultMsg
+ it.unitn.ds1.TxnClient$StopMsg
+ it.unitn.ds1.TxnClient$TxnAcceptMsg
+ it.unitn.ds1.TxnClient$TxnAcceptTimeoutMsg
+ it.unitn.ds1.TxnClient$TxnBeginMsg
+ it.unitn.ds1.TxnClient$TxnEndMsg
+ it.unitn.ds1.TxnClient$TxnResultMsg
+ it.unitn.ds1.TxnClient$WelcomeClientMsg
+ it.unitn.ds1.TxnClient$WriteMsg
+it/unitn/ds1/TxnCoordinator.java
+ it.unitn.ds1.TxnCoordinator
+ it.unitn.ds1.TxnCoordinator$CanCommitMsg
+ it.unitn.ds1.TxnCoordinator$CrashCoordType
+ it.unitn.ds1.TxnCoordinator$FinalDecisionMsg
+ it.unitn.ds1.TxnCoordinator$FwdReadMsg
+ it.unitn.ds1.TxnCoordinator$FwdWriteMsg
+ it.unitn.ds1.TxnCoordinator$TxnId
+ it.unitn.ds1.TxnCoordinator$TxnReadTimeoutMsg
+ it.unitn.ds1.TxnCoordinator$TxnVoteTimeoutMsg
+ it.unitn.ds1.TxnCoordinator$WelcomeCoordMsg
+it/unitn/ds1/TxnSystem.java
+ it.unitn.ds1.TxnSystem
+ it.unitn.ds1.TxnSystem$1
+ it.unitn.ds1.TxnSystem$2
+ it.unitn.ds1.TxnSystem$CrashCoordMsg
+ it.unitn.ds1.TxnSystem$CrashServerMsg
+ it.unitn.ds1.TxnSystem$RecoveryMsg

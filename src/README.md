@@ -1,0 +1,5 @@
+# Optimistic Concurrency Control for Distributed Transactions
+
+## Introduction
+
+The aim of this work is to implement an optimistic concurrency control method using Akka framework in Java.  OCC assumes that multiple transactions can frequently complete without interfering with each other. It is applied for distributed transactions, which means that a single transaction started by a client involves data stored in multiple servers. Transactions use data resources without acquiring lock, thus they do not block each other, leading to an higher throughput. Before committing, each transaction verify that no other transaction has modified the data he has read: if the check reveals conflict modification, the transaction aborts and the changes are discarded. In this report, the main implementation choices are described and discussed to evaluate the properties of the system. Crashes are also implemented and the protocol is designed with specific handling. Many tests are performed changing the number of nodes and random crashes to assess the correctness of the system.
